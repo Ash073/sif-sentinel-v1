@@ -124,6 +124,14 @@ export interface RiskDetail {
   version: string;
 }
 
+export interface ExplainabilityFactor {
+  name: string;
+  contribution: number;
+  source: string;
+  direction: string;
+  evidence?: string | null;
+}
+
 export interface AnalysisResponse {
   report_id: string | null;
   analysis_id: string | null;
@@ -145,6 +153,7 @@ export interface AnalysisResponse {
   model_version: string;
   explanation: string;
   risk: RiskDetail | null;
+  explainability_factors: ExplainabilityFactor[];
   safety_graph: Record<string, unknown> | null;
   causal_chains: Record<string, unknown>[] | null;
   reasoning_summary: string | null;

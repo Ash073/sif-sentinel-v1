@@ -238,6 +238,17 @@ class AnalysisService:
         result, report_id: str | None = None, analysis_id: UUID | None = None,
         analysis_db_obj: ReportAnalysis | None = None
     ) -> AnalysisResponse:
+        factors = list(getattr(result, "explainability_factors", None) or [])
+        if result.risk and isinstance(result.risk, dict) and result.risk.get("components"):
+            for comp in result.risk["components"]:
+                factors.append({
+                    "name": f"Risk Factor: {comp['name']}",
+                    "contribution": float(comp['score']),
+                    "source": "RISK_ENGINE",
+                    "direction": "INCREASES",
+                    "evidence": comp.get("reason")
+                })
+
         resp = AnalysisResponse(
             report_id=report_id,
             analysis_id=analysis_id,
@@ -259,6 +270,7 @@ class AnalysisService:
             model_version=result.model_version,
             explanation=result.explanation,
             risk=result.risk,
+            explainability_factors=factors,
             safety_graph=getattr(result, "safety_graph", None),
             causal_chains=getattr(result, "causal_chains", None),
             reasoning_summary=getattr(result, "reasoning_summary", None),

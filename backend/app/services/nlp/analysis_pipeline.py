@@ -39,6 +39,7 @@ class PipelineResult:
     safety_graph: dict | None = None
     causal_chains: list[dict] | None = None
     reasoning_summary: str | None = None
+    explainability_factors: list[dict] | None = None
 
 
 def analyze_text(text: str, precursor_priority: str | None = None) -> PipelineResult:
@@ -106,7 +107,8 @@ def analyze_text(text: str, precursor_priority: str | None = None) -> PipelineRe
         risk_data,
         safety_graph=safety_graph_dict,
         causal_chains=causal_chains_list,
-        reasoning_summary=safety_graph_obj.reasoning_summary
+        reasoning_summary=safety_graph_obj.reasoning_summary,
+        explainability_factors=prediction.explainability_factors
     )
 
 

@@ -46,6 +46,14 @@ class AnalyzeTextRequest(BaseModel):
         return validate_report_text(v)
 
 
+class ExplainabilityFactor(BaseModel):
+    name: str
+    contribution: float
+    source: str
+    direction: str
+    evidence: str | None = None
+
+
 class AnalysisResponse(BaseModel):
     report_id: str | None = None
     analysis_id: UUID | None = None
@@ -67,6 +75,7 @@ class AnalysisResponse(BaseModel):
     model_version: str
     explanation: str
     risk: RiskDetail | None = None
+    explainability_factors: list[ExplainabilityFactor] = Field(default_factory=list)
     
     # Phase 5B: Causal Safety Reasoning Metadata
     safety_graph: dict | None = None

@@ -24,6 +24,7 @@ import { AxiosError } from 'axios';
 import type { ApiErrorBody } from '@/types/api';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { cn } from '@/lib/utils';
+import { ExplainabilityChart } from '@/components/reports/explainability-chart';
 
 // ─── Evidence Section ─────────────────────────────────────────────
 
@@ -212,6 +213,11 @@ function AnalysisSection({ analysis }: { analysis: AnalysisResponse }) {
             ))}
           </div>
         </div>
+      )}
+
+      {/* Explainability Factors */}
+      {analysis.explainability_factors && analysis.explainability_factors.length > 0 && (
+        <ExplainabilityChart factors={analysis.explainability_factors} />
       )}
 
       {/* Evidence */}
