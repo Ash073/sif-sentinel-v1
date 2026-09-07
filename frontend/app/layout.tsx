@@ -13,6 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 import { AuthProvider } from "@/components/providers/AuthProvider";
+import { QueryProvider } from "@/components/providers/QueryProvider";
 import { Toaster } from "@/components/ui/toast";
 
 export const metadata: Metadata = {
@@ -31,7 +32,9 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
     >
       <body className="min-h-full flex flex-col">
-        <AuthProvider>{children}</AuthProvider>
+        <QueryProvider>
+          <AuthProvider>{children}</AuthProvider>
+        </QueryProvider>
         <Toaster />
       </body>
     </html>
