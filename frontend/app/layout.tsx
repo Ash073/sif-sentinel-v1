@@ -12,6 +12,9 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+import { AuthProvider } from "@/components/providers/AuthProvider";
+import { Toaster } from "@/components/ui/toast";
+
 export const metadata: Metadata = {
   title: "SIF Sentinel",
   description: "Premium Industrial Safety Intelligence",
@@ -27,7 +30,10 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <AuthProvider>{children}</AuthProvider>
+        <Toaster />
+      </body>
     </html>
   );
 }
