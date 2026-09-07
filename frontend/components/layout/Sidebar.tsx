@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard, FilePlus, History, CheckSquare, Activity,
-  Shield, ShieldCheck, LogOut, User
+  Shield, ShieldCheck, LogOut, User, ClipboardList, AlertTriangle, Cpu
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -15,9 +15,12 @@ export const NAVIGATION_ITEMS = [
   { name: 'Reports', href: '/reports', icon: History, roles: ['ADMIN', 'HSE_MANAGER', 'HSE_ANALYST', 'REVIEWER', 'VIEWER'] },
   { name: 'Submit Report', href: '/reports/new', icon: FilePlus, roles: ['ADMIN', 'HSE_MANAGER', 'HSE_ANALYST', 'REVIEWER'] },
   { name: 'Review Queue', href: '/reviews', icon: CheckSquare, roles: ['ADMIN', 'HSE_MANAGER', 'REVIEWER'] },
+  { name: 'Corrective Actions', href: '/corrective-actions', icon: ClipboardList, roles: ['ADMIN', 'HSE_MANAGER', 'HSE_ANALYST', 'REVIEWER', 'VIEWER'] },
   { name: 'Precursors', href: '/precursors', icon: Activity, roles: ['ADMIN', 'HSE_MANAGER', 'HSE_ANALYST', 'REVIEWER', 'VIEWER'] },
   { name: 'Risk Intelligence', href: '/risk', icon: Shield, roles: ['ADMIN', 'HSE_MANAGER', 'HSE_ANALYST', 'REVIEWER', 'VIEWER'] },
   { name: 'Interventions', href: '/interventions', icon: ShieldCheck, roles: ['ADMIN', 'HSE_MANAGER', 'HSE_ANALYST', 'REVIEWER', 'VIEWER'] },
+  { name: 'LSR Analytics', href: '/rules', icon: AlertTriangle, roles: ['ADMIN', 'HSE_MANAGER', 'HSE_ANALYST', 'REVIEWER', 'VIEWER'] },
+  { name: 'ML Models', href: '/models', icon: Cpu, roles: ['ADMIN', 'HSE_MANAGER', 'HSE_ANALYST'] },
 ];
 
 interface SidebarProps {
