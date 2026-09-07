@@ -1,1 +1,0 @@
-export { getApiBaseUrl } from "./api";
