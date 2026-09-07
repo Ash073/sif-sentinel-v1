@@ -57,40 +57,44 @@ export default function CorrectiveActionDetailPage() {
     staleTime: 60 * 1000,
   });
 
-  const makeMutation = (fn: (notes?: string) => Promise<unknown>, label: string) =>
-    useMutation({
-      mutationFn: () => fn(decisionNotes),
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['corrective-actions'] });
-        toast.add({ title: `${label} recorded`, type: 'success' });
-        setDecisionNotes('');
-      },
-      onError: () => toast.add({ title: `Failed: ${label}`, type: 'error' }),
-    });
-
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const submitMut = useMutation({
     mutationFn: () => correctiveActionsApi.submit(id),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['corrective-actions'] }); toast.add({ title: 'Submitted for approval', type: 'success' }); },
     onError: () => toast.add({ title: 'Submit failed', type: 'error' }),
   });
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const approveMut = makeMutation((notes) => correctiveActionsApi.approve(id, { notes }), 'Approval');
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const rejectMut = makeMutation((notes) => correctiveActionsApi.reject(id, { reason: notes }), 'Rejection');
-  // eslint-disable-next-line react-hooks/rules-of-hooks
+
+  const approveMut = useMutation({
+    mutationFn: () => correctiveActionsApi.approve(id, { notes: decisionNotes }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['corrective-actions'] });
+      toast.add({ title: 'Approval recorded', type: 'success' });
+      setDecisionNotes('');
+    },
+    onError: () => toast.add({ title: 'Failed: Approval', type: 'error' }),
+  });
+
+  const rejectMut = useMutation({
+    mutationFn: () => correctiveActionsApi.reject(id, { reason: decisionNotes }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['corrective-actions'] });
+      toast.add({ title: 'Rejection recorded', type: 'success' });
+      setDecisionNotes('');
+    },
+    onError: () => toast.add({ title: 'Failed: Rejection', type: 'error' }),
+  });
+
   const startMut = useMutation({
     mutationFn: () => correctiveActionsApi.start(id),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['corrective-actions'] }); toast.add({ title: 'Action started', type: 'success' }); },
     onError: () => toast.add({ title: 'Start failed', type: 'error' }),
   });
-  // eslint-disable-next-line react-hooks/rules-of-hooks
+
   const requestVerifyMut = useMutation({
     mutationFn: () => correctiveActionsApi.requestVerification(id),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['corrective-actions'] }); toast.add({ title: 'Verification requested', type: 'success' }); },
     onError: () => toast.add({ title: 'Request failed', type: 'error' }),
   });
-  // eslint-disable-next-line react-hooks/rules-of-hooks
+
   const verifyMut = useMutation({
     mutationFn: () => correctiveActionsApi.verify(id, { verification_notes: verificationNotes, effective: true }),
     onSuccess: () => {
@@ -100,8 +104,16 @@ export default function CorrectiveActionDetailPage() {
     },
     onError: () => toast.add({ title: 'Verification failed', type: 'error' }),
   });
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const closeMut = makeMutation((notes) => correctiveActionsApi.close(id, { notes }), 'Closure');
+
+  const closeMut = useMutation({
+    mutationFn: () => correctiveActionsApi.close(id, { notes: decisionNotes }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['corrective-actions'] });
+      toast.add({ title: 'Closure recorded', type: 'success' });
+      setDecisionNotes('');
+    },
+    onError: () => toast.add({ title: 'Failed: Closure', type: 'error' }),
+  });
 
   if (actionQ.isLoading) return (
     <div className="space-y-4">
@@ -171,17 +183,23 @@ export default function CorrectiveActionDetailPage() {
                 <h2 className="font-semibold text-sm">Audit Trail</h2>
               </div>
               <div className="divide-y divide-border/50">
-                {auditQ.data.map((entry, i) => (
-                  <div key={i} className="px-5 py-3 text-sm">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="font-medium text-foreground">{String((entry as Record<string, unknown>).action ?? '—')}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {(entry as Record<string, unknown>).timestamp ? (() => { try { return format(new Date(String((entry as Record<string, unknown>).timestamp)), 'dd MMM HH:mm'); } catch { return String((entry as Record<string, unknown>).timestamp); } })() : '—'}
-                      </span>
+                {auditQ.data.map((entry, i) => {
+                  const e = entry as Record<string, unknown>;
+                  const action = String(e.action ?? '—');
+                  const notes = e.notes != null ? String(e.notes) : null;
+                  const ts = e.timestamp != null
+                    ? (() => { try { return format(new Date(String(e.timestamp)), 'dd MMM HH:mm'); } catch { return String(e.timestamp); } })()
+                    : '—';
+                  return (
+                    <div key={i} className="px-5 py-3 text-sm">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-medium text-foreground">{action}</span>
+                        <span className="text-xs text-muted-foreground">{ts}</span>
+                      </div>
+                      {notes && <p className="text-xs text-muted-foreground mt-0.5">{notes}</p>}
                     </div>
-                    {(entry as Record<string, unknown>).notes && <p className="text-xs text-muted-foreground mt-0.5">{String((entry as Record<string, unknown>).notes)}</p>}
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}

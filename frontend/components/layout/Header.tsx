@@ -57,11 +57,6 @@ export function Header({ onToggleSidebar }: HeaderProps) {
               <DropdownMenuItem className="cursor-default">
                 <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Role: {user.role}</span>
               </DropdownMenuItem>
-              {user.site_id && (
-                <DropdownMenuItem className="cursor-default">
-                  <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Site: {user.site_id}</span>
-                </DropdownMenuItem>
-              )}
               <DropdownMenuSeparator className="bg-border/50" />
               <DropdownMenuItem className="cursor-pointer">
                 <Settings className="mr-2 h-4 w-4" />

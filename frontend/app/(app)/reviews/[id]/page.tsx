@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/select';
 import { toast } from '@/components/ui/toast';
 import { useAuth } from '@/components/providers/AuthProvider';
-import { ReviewDecisionBadge, SIFBadge, BarrierStatusBadge } from '@/components/ui/status-badges';
+import { ReviewDecisionBadge, SIFLevelBadge, BarrierStatusBadge } from '@/components/ui/status-badges';
 import { ArrowLeft, CheckSquare, AlertTriangle, Shield } from 'lucide-react';
 import type { ReviewDecision, SIFLevel, BarrierStatus } from '@/types/api';
 import { AxiosError } from 'axios';
@@ -152,7 +152,7 @@ export default function ReviewDetailPage() {
                 <h2 className="font-semibold text-sm">Reviewer Corrections</h2>
               </div>
               <div className="px-5 py-4 space-y-2">
-                {review.corrected_sif_level && <div className="flex gap-2 text-sm"><span className="text-muted-foreground">SIF Level:</span><SIFBadge level={review.corrected_sif_level} /></div>}
+                {review.corrected_sif_level && <div className="flex gap-2 text-sm"><span className="text-muted-foreground">SIF Level:</span><SIFLevelBadge level={review.corrected_sif_level} /></div>}
                 {review.corrected_activity && <div className="flex gap-2 text-sm"><span className="text-muted-foreground">Activity:</span><span className="font-medium">{review.corrected_activity}</span></div>}
                 {review.corrected_hazard && <div className="flex gap-2 text-sm"><span className="text-muted-foreground">Hazard:</span><span className="font-medium">{review.corrected_hazard}</span></div>}
                 {review.corrected_barrier && <div className="flex gap-2 text-sm"><span className="text-muted-foreground">Barrier:</span><span className="font-medium">{review.corrected_barrier}</span></div>}
