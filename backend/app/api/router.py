@@ -6,6 +6,7 @@ from app.api.routes import (
     corrective_actions,
     dashboard,
     health,
+    imports,
     interventions,
     models,
     precursors,
@@ -27,9 +28,9 @@ api_router.include_router(users.router)
 api_router.include_router(sites.router)
 api_router.include_router(reports.router)
 api_router.include_router(models.router)
+api_router.include_router(imports.router)
 api_router.include_router(precursors.router)
 api_router.include_router(risk.router)
 api_router.include_router(dashboard.router)
 api_router.include_router(reviews.router)
 api_router.include_router(rules.router)
-

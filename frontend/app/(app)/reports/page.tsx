@@ -8,6 +8,7 @@ import { analysisApi } from '@/lib/api/analysis';
 import { sitesApi } from '@/lib/api/sites';
 import { ErrorState, TableSkeleton, EmptyState } from '@/components/ui/states';
 import { ReportStatusBadge } from '@/components/ui/status-badges';
+import { DatasetUploadDialog } from '@/components/reports/dataset-upload-dialog';
 import { Button } from '@/components/ui/button';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
@@ -95,6 +96,7 @@ export default function ReportsPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <DatasetUploadDialog />
           <Button
             variant="outline"
             className="h-8 gap-2 text-sm font-medium"
