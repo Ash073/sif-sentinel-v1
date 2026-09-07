@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Upload, FileType, CheckCircle2, AlertCircle } from 'lucide-react';
 
@@ -14,11 +14,23 @@ import {
 } from '@/components/ui/dialog';
 import { importsApi } from '@/lib/api/imports';
 import { toast } from '@/components/ui/toast';
+import { useAuth } from '@/components/providers/AuthProvider';
+import { queryKeys } from '@/lib/query-keys';
 
 export function DatasetUploadDialog() {
   const [open, setOpen] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const [progress, setProgress] = useState<{ progress: number; status: string } | null>(null);
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (!open) {
+      setProgress(null);
+      setFile(null);
+      mutation.reset();
+    }
+  }, [open]);
 
   const mutation = useMutation({
     mutationFn: (f: File) => importsApi.uploadCsv(f),
@@ -28,11 +40,8 @@ export function DatasetUploadDialog() {
         description: data.message,
         type: 'success',
       });
-      // Invalidate reports and dashboard queries since new data is processing
-      queryClient.invalidateQueries({ queryKey: ['reports'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
-      setOpen(false);
-      setFile(null);
+      // Start progress tracking via WS. Do not close dialog immediately.
+      setProgress({ progress: 0, status: 'Starting background processing...' });
     },
     onError: (error: Error) => {
       toast.add({
@@ -42,6 +51,36 @@ export function DatasetUploadDialog() {
       });
     },
   });
+
+  useEffect(() => {
+    if (!mutation.isSuccess || !user) return;
+
+    // Use a hardcoded fallback or environment variable for the websocket URL
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+    const wsUrl = apiUrl.replace('http', 'ws') + `/ws/etl-progress/${user.id}`;
+    
+    const ws = new WebSocket(wsUrl);
+    
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        setProgress(data);
+        if (data.progress === 100) {
+          queryClient.invalidateQueries({ queryKey: queryKeys.reports.all });
+          queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all });
+          toast.add({ title: 'Processing Complete', description: 'Data is now available.', type: 'success' });
+          ws.close();
+          setTimeout(() => setOpen(false), 2000);
+        }
+      } catch (e) {
+        console.error('Failed to parse WS message', e);
+      }
+    };
+    
+    return () => {
+      ws.close();
+    };
+  }, [mutation.isSuccess, user, queryClient]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -86,7 +125,7 @@ export function DatasetUploadDialog() {
               accept=".csv,text/csv"
               className="hidden"
               onChange={handleFileChange}
-              disabled={mutation.isPending}
+              disabled={mutation.isPending || mutation.isSuccess}
             />
             <label
               htmlFor="csv-upload"
@@ -111,14 +150,22 @@ export function DatasetUploadDialog() {
           {mutation.isPending && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground animate-pulse">
               <Upload className="h-4 w-4 animate-bounce" />
-              Uploading and initiating ETL pipeline...
+              Uploading dataset to server...
             </div>
           )}
           
-          {mutation.isSuccess && (
-            <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
-              <CheckCircle2 className="h-4 w-4" />
-              Upload successful. Processing in background.
+          {progress && (
+            <div className="space-y-2">
+              <div className="flex justify-between text-xs font-medium">
+                <span>{progress.status}</span>
+                <span>{progress.progress}%</span>
+              </div>
+              <div className="w-full bg-secondary rounded-full h-2">
+                <div 
+                  className="bg-primary h-2 rounded-full transition-all duration-300" 
+                  style={{ width: `${progress.progress}%` }} 
+                />
+              </div>
             </div>
           )}
           
@@ -131,10 +178,10 @@ export function DatasetUploadDialog() {
         </div>
         
         <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)} disabled={mutation.isPending}>
-            Cancel
+          <Button variant="outline" onClick={() => setOpen(false)} disabled={mutation.isPending || (progress != null && progress.progress < 100)}>
+            Close
           </Button>
-          <Button onClick={handleUpload} disabled={!file || mutation.isPending}>
+          <Button onClick={handleUpload} disabled={!file || mutation.isPending || mutation.isSuccess}>
             {mutation.isPending ? 'Uploading...' : 'Upload & Process'}
           </Button>
         </DialogFooter>

@@ -49,3 +49,11 @@ async def hazard_distribution(db: DBSession, _: User = Depends(require_roles(*_r
 @router.get("/barrier-failures", response_model=list[BarrierFailurePoint], summary="Daily barrier-failure signals")
 async def barrier_failures(db: DBSession, _: User = Depends(require_roles(*_read_roles)), window: str = Query("30d", pattern="^(7d|30d|90d|1y)$")) -> list[BarrierFailurePoint]:
     return await AnalyticsService(db).barrier_failures(window)
+
+
+from fastapi import Response
+
+@router.get("/export/csv", summary="Export dashboard metrics as CSV")
+async def export_csv(db: DBSession, _: User = Depends(require_roles(*_read_roles))):
+    csv_data = await AnalyticsService(db).export_csv()
+    return Response(content=csv_data, media_type="text/csv", headers={"Content-Disposition": "attachment; filename=dashboard_export.csv"})

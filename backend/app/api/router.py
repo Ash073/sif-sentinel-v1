@@ -16,6 +16,7 @@ from app.api.routes import (
     rules,
     sites,
     users,
+    ws,
 )
 
 api_router = APIRouter(prefix="/api/v1")
@@ -34,3 +35,4 @@ api_router.include_router(risk.router)
 api_router.include_router(dashboard.router)
 api_router.include_router(reviews.router)
 api_router.include_router(rules.router)
+api_router.include_router(ws.router)

@@ -57,3 +57,27 @@ class AnalyticsService:
         day = func.date(Report.reported_at).label("day") if dialect == "sqlite" else cast(Report.reported_at, Date).label("day")
         statement = select(day, func.count(Report.id).label("failed")).select_from(Report).join(ReportAnalysis, ReportAnalysis.report_id == Report.id).join(latest, (latest.c.report_id == ReportAnalysis.report_id) & (latest.c.latest_created == ReportAnalysis.created_at)).where(Report.reported_at >= datetime.now(UTC) - timedelta(days=days), ReportAnalysis.barrier_failure.is_not(None)).group_by(day).order_by(day)
         return [BarrierFailurePoint(date=str(row.day), failed_count=int(row.failed)) for row in (await self.db.execute(statement)).all()]
+
+    async def export_csv(self) -> str:
+        import io
+        import csv
+        summary = await self.summary()
+        output = io.StringIO()
+        writer = csv.writer(output)
+        writer.writerow(["Metric", "Value"])
+        writer.writerow(["Total Reports", summary.total_reports])
+        writer.writerow(["Total SIF Reports", summary.total_sif_reports])
+        writer.writerow(["High Risk Reports", summary.high_risk_reports])
+        writer.writerow(["Review Required", summary.review_required])
+        writer.writerow(["Active Precursors", summary.active_precursors])
+        writer.writerow(["Sites Monitored", summary.sites_monitored])
+        writer.writerow(["SIF Rate", summary.sif_rate])
+        writer.writerow(["High Risk Rate", summary.high_risk_rate])
+        
+        writer.writerow([])
+        writer.writerow(["Site", "Total Reports", "SIF Count", "SIF Density"])
+        sites = await self.site_comparison()
+        for site in sites:
+            writer.writerow([site.name, site.count, site.sif_count, site.sif_density])
+            
+        return output.getvalue()

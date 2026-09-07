@@ -58,6 +58,10 @@ class Settings(BaseSettings):
     llm_max_calls_per_analysis: int = 1
     llm_max_output_tokens: int = 1024
 
+    # Celery settings
+    celery_broker_url: str = "redis://localhost:6379/0"
+    celery_result_backend: str = "redis://localhost:6379/0"
+
     # Report text validation — minimum is 10 chars to allow short but meaningful
     # safety observations (e.g. "Slip near valve"). Maximum is 20 000 chars to
     # prevent oversized payloads from reaching the tokeniser/classifier.

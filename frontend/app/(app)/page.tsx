@@ -6,11 +6,12 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
 import {
-  FileText, ShieldAlert, AlertTriangle, Clock, Activity, Building2, TrendingUp
+  FileText, ShieldAlert, AlertTriangle, Clock, Activity, Building2, TrendingUp, Download
 } from 'lucide-react';
 import { dashboardApi } from '@/lib/api/dashboard';
 import { ErrorState, CardSkeleton, Skeleton } from '@/components/ui/states';
 import { format } from 'date-fns';
+import { Button } from '@/components/ui/button';
 
 // ─── Types for the custom tooltip ────────────────────────────────
 
@@ -132,9 +133,32 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8">
       {/* Page Header */}
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">Safety Intelligence Dashboard</h1>
-        <p className="text-sm text-muted-foreground mt-1">Organization-wide safety signal overview — data from backend analytics</p>
+      <div className="flex justify-between items-start">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Safety Intelligence Dashboard</h1>
+          <p className="text-sm text-muted-foreground mt-1">Organization-wide safety signal overview — data from backend analytics</p>
+        </div>
+        <Button 
+          variant="outline" 
+          className="gap-2"
+          onClick={async () => {
+            try {
+              const blob = await dashboardApi.exportCsv();
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = 'dashboard_export.csv';
+              document.body.appendChild(a);
+              a.click();
+              a.remove();
+              window.URL.revokeObjectURL(url);
+            } catch (error) {
+              console.error(error);
+            }
+          }}
+        >
+          <Download className="h-4 w-4" /> Export CSV
+        </Button>
       </div>
 
       {summaryQ.isError && (

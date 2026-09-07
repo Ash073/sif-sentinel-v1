@@ -27,4 +27,7 @@ export const dashboardApi = {
 
   getBarrierFailures: (window: '7d' | '30d' | '90d' | '1y' = '30d'): Promise<BarrierFailurePoint[]> =>
     apiClient.get('/dashboard/barrier-failures', { params: { window } }).then((r) => r.data),
+
+  exportCsv: (): Promise<Blob> =>
+    apiClient.get('/dashboard/export/csv', { responseType: 'blob' }).then((r) => r.data),
 };

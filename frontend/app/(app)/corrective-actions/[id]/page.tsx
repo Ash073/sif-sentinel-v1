@@ -18,6 +18,7 @@ import { useAuth } from '@/components/providers/AuthProvider';
 import { ArrowLeft, ClipboardList, CheckCircle, XCircle, Play, RotateCcw, Lock, XOctagon, Edit3 } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { queryKeys } from '@/lib/query-keys';
 
 const STATUS_COLORS: Record<string, string> = {
   DRAFT: 'bg-gray-100 text-gray-700',
@@ -70,14 +71,14 @@ export default function CorrectiveActionDetailPage() {
 
   const submitMut = useMutation({
     mutationFn: () => correctiveActionsApi.submit(id),
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['corrective-actions'] }); toast.add({ title: 'Submitted for approval', type: 'success' }); },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: queryKeys.correctiveActions.all }); toast.add({ title: 'Submitted for approval', type: 'success' }); },
     onError: () => toast.add({ title: 'Submit failed', type: 'error' }),
   });
 
   const approveMut = useMutation({
     mutationFn: () => correctiveActionsApi.approve(id, { notes: decisionNotes }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['corrective-actions'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.correctiveActions.all });
       toast.add({ title: 'Approval recorded', type: 'success' });
       setDecisionNotes('');
     },
@@ -87,7 +88,7 @@ export default function CorrectiveActionDetailPage() {
   const rejectMut = useMutation({
     mutationFn: () => correctiveActionsApi.reject(id, { reason: decisionNotes }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['corrective-actions'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.correctiveActions.all });
       toast.add({ title: 'Rejection recorded', type: 'success' });
       setDecisionNotes('');
     },
@@ -96,20 +97,20 @@ export default function CorrectiveActionDetailPage() {
 
   const startMut = useMutation({
     mutationFn: () => correctiveActionsApi.start(id),
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['corrective-actions'] }); toast.add({ title: 'Action started', type: 'success' }); },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: queryKeys.correctiveActions.all }); toast.add({ title: 'Action started', type: 'success' }); },
     onError: () => toast.add({ title: 'Start failed', type: 'error' }),
   });
 
   const requestVerifyMut = useMutation({
     mutationFn: () => correctiveActionsApi.requestVerification(id),
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['corrective-actions'] }); toast.add({ title: 'Verification requested', type: 'success' }); },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: queryKeys.correctiveActions.all }); toast.add({ title: 'Verification requested', type: 'success' }); },
     onError: () => toast.add({ title: 'Request failed', type: 'error' }),
   });
 
   const verifyMut = useMutation({
     mutationFn: () => correctiveActionsApi.verify(id, { verification_notes: verificationNotes, effective: true }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['corrective-actions'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.correctiveActions.all });
       toast.add({ title: 'Action verified', type: 'success' });
       setVerificationNotes('');
     },
@@ -119,7 +120,7 @@ export default function CorrectiveActionDetailPage() {
   const closeMut = useMutation({
     mutationFn: () => correctiveActionsApi.close(id, { notes: decisionNotes }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['corrective-actions'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.correctiveActions.all });
       toast.add({ title: 'Closure recorded', type: 'success' });
       setDecisionNotes('');
     },
@@ -129,7 +130,7 @@ export default function CorrectiveActionDetailPage() {
   const cancelMut = useMutation({
     mutationFn: () => correctiveActionsApi.cancel(id, { reason: cancelReason }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['corrective-actions'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.correctiveActions.all });
       toast.add({ title: 'Action cancelled', type: 'success' });
       setCancelDialogOpen(false);
       setCancelReason('');
@@ -146,7 +147,7 @@ export default function CorrectiveActionDetailPage() {
       modification_reason: modifyForm.modification_reason,
     }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['corrective-actions'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.correctiveActions.all });
       toast.add({ title: 'Action modified', type: 'success' });
       setModifyDialogOpen(false);
     },
