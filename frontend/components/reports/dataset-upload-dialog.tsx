@@ -24,14 +24,6 @@ export function DatasetUploadDialog() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
-  useEffect(() => {
-    if (!open) {
-      setProgress(null);
-      setFile(null);
-      mutation.reset();
-    }
-  }, [open]);
-
   const mutation = useMutation({
     mutationFn: (f: File) => importsApi.uploadCsv(f),
     onSuccess: (data) => {

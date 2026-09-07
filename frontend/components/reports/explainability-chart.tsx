@@ -108,7 +108,7 @@ export function ExplainabilityChart({ factors }: ExplainabilityChartProps) {
           <CardHeader className="pb-2">
             <CardTitle className="text-lg">Predictive Model Factors</CardTitle>
             <CardDescription>
-              Linguistic features contributing to the model's SIF classification probability.
+              Linguistic features contributing to the model&apos;s SIF classification probability.
             </CardDescription>
           </CardHeader>
           <CardContent>
