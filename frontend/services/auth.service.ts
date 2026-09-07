@@ -2,12 +2,13 @@ import { apiClient } from '@/lib/api-client';
 import { User } from '@/types/auth';
 
 export const authService = {
-  async login(email: string, password: string):Promise<{ access_token: string }> {
-    const { data } = await apiClient.post('/auth/login', {
+  /** Login — backend uses JSON body with email and password */
+  login: async (email: string, password: string): Promise<{ access_token: string }> => {
+    const response = await apiClient.post<{ access_token: string }>('/auth/login', {
       email,
-      password,
+      password
     });
-    return data;
+    return response.data;
   },
 
   async register(full_name: string, email: string, password: string):Promise<{ id: string }> {
