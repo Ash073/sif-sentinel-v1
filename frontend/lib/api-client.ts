@@ -30,8 +30,10 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401) {
       if (typeof window !== 'undefined') {
         localStorage.removeItem('sif_token');
-        // eslint-disable-next-line @next/next/no-location-assign-relative-destination
-        window.location.href = '/login';
+        if (window.location.pathname !== '/login') {
+          // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+          window.location.href = '/login';
+        }
       }
     }
     return Promise.reject(error);

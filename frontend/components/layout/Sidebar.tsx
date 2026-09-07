@@ -32,8 +32,8 @@ export function Sidebar({ isCollapsed, onCloseMobile }: SidebarProps) {
     <div className="flex h-full flex-col gap-4 py-4">
       <div className="px-4 flex items-center h-10">
         <div className={cn("flex items-center gap-2", isCollapsed && "justify-center w-full")}>
-          <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center shrink-0">
-            <Activity className="w-5 h-5 text-primary-foreground" />
+          <div className="w-8 h-8 rounded-md bg-primary/10 border border-primary/20 shadow-[0_0_10px_rgba(202,60,0,0.1)] flex items-center justify-center shrink-0">
+            <Activity className="w-5 h-5 text-primary" />
           </div>
           {!isCollapsed && (
             <span className="font-semibold text-lg tracking-tight truncate">SIF Sentinel</span>
@@ -50,9 +50,9 @@ export function Sidebar({ isCollapsed, onCloseMobile }: SidebarProps) {
                 <Button
                   variant={isActive ? "secondary" : "ghost"}
                   className={cn(
-                    "w-full justify-start gap-3",
+                    "w-full justify-start gap-3 transition-colors",
                     isCollapsed ? "px-0 justify-center" : "px-3",
-                    isActive ? "bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary" : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                    isActive ? "bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20" : "text-muted-foreground hover:text-foreground hover:bg-accent border border-transparent"
                   )}
                   title={isCollapsed ? item.name : undefined}
                 >
