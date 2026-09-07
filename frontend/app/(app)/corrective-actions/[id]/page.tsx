@@ -8,10 +8,14 @@ import { correctiveActionsApi } from '@/lib/api/corrective-actions';
 import { ErrorState, Skeleton } from '@/components/ui/states';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+} from '@/components/ui/dialog';
 import { toast } from '@/components/ui/toast';
 import { useAuth } from '@/components/providers/AuthProvider';
-import { ArrowLeft, ClipboardList, CheckCircle, XCircle, Play, RotateCcw, Lock } from 'lucide-react';
+import { ArrowLeft, ClipboardList, CheckCircle, XCircle, Play, RotateCcw, Lock, XOctagon, Edit3 } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
@@ -43,6 +47,13 @@ export default function CorrectiveActionDetailPage() {
 
   const [decisionNotes, setDecisionNotes] = useState('');
   const [verificationNotes, setVerificationNotes] = useState('');
+  const [cancelReason, setCancelReason] = useState('');
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  
+  const [modifyDialogOpen, setModifyDialogOpen] = useState(false);
+  const [modifyForm, setModifyForm] = useState({
+    title: '', description: '', assigned_to: '', due_date: '', modification_reason: ''
+  });
 
   const actionQ = useQuery({
     queryKey: ['corrective-actions', id],
@@ -115,6 +126,33 @@ export default function CorrectiveActionDetailPage() {
     onError: () => toast.add({ title: 'Failed: Closure', type: 'error' }),
   });
 
+  const cancelMut = useMutation({
+    mutationFn: () => correctiveActionsApi.cancel(id, { reason: cancelReason }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['corrective-actions'] });
+      toast.add({ title: 'Action cancelled', type: 'success' });
+      setCancelDialogOpen(false);
+      setCancelReason('');
+    },
+    onError: () => toast.add({ title: 'Failed to cancel', type: 'error' }),
+  });
+
+  const modifyMut = useMutation({
+    mutationFn: () => correctiveActionsApi.modify(id, {
+      title: modifyForm.title || undefined,
+      description: modifyForm.description || undefined,
+      assigned_to: modifyForm.assigned_to || undefined,
+      due_date: modifyForm.due_date || undefined,
+      modification_reason: modifyForm.modification_reason,
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['corrective-actions'] });
+      toast.add({ title: 'Action modified', type: 'success' });
+      setModifyDialogOpen(false);
+    },
+    onError: () => toast.add({ title: 'Failed to modify', type: 'error' }),
+  });
+
   if (actionQ.isLoading) return (
     <div className="space-y-4">
       <Skeleton className="h-8 w-48" />
@@ -135,6 +173,9 @@ export default function CorrectiveActionDetailPage() {
   const canRequestVerify = action.status === 'IN_PROGRESS' && isAnalyst;
   const canVerify = action.status === 'PENDING_VERIFICATION' && isAdmin;
   const canClose = action.status === 'VERIFIED' && isAdmin;
+  
+  const canCancel = isAnalyst && !['CLOSED', 'CANCELLED', 'VERIFIED'].includes(action.status);
+  const canModify = isAdmin && !['CLOSED', 'CANCELLED'].includes(action.status);
 
   return (
     <div className="space-y-6 max-w-4xl">
@@ -281,13 +322,113 @@ export default function CorrectiveActionDetailPage() {
                 </Button>
               )}
 
-              {!canSubmit && !canApprove && !canStart && !canRequestVerify && !canVerify && !canClose && (
+              {(canCancel || canModify) && <div className="border-t border-border my-2 pt-2" />}
+
+              {canModify && (
+                <Button 
+                  className="w-full gap-2" 
+                  variant="outline" 
+                  onClick={() => {
+                    setModifyForm({
+                      title: action.title,
+                      description: action.description,
+                      assigned_to: action.assigned_to || '',
+                      due_date: action.due_date || '',
+                      modification_reason: ''
+                    });
+                    setModifyDialogOpen(true);
+                  }}
+                >
+                  <Edit3 className="h-4 w-4" /> Modify Action
+                </Button>
+              )}
+
+              {canCancel && (
+                <Button className="w-full gap-2" variant="destructive" onClick={() => setCancelDialogOpen(true)}>
+                  <XOctagon className="h-4 w-4" /> Cancel Action
+                </Button>
+              )}
+
+              {!canSubmit && !canApprove && !canStart && !canRequestVerify && !canVerify && !canClose && !canCancel && !canModify && (
                 <p className="text-xs text-muted-foreground text-center py-2">No actions available at this stage.</p>
               )}
             </div>
           </div>
         </div>
       </div>
+
+      <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Cancel Action</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to cancel this action? This will stop all tracking.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2 py-2">
+            <Label htmlFor="cancel_reason">Cancellation Reason *</Label>
+            <Textarea
+              id="cancel_reason"
+              value={cancelReason}
+              onChange={(e) => setCancelReason(e.target.value)}
+              placeholder="Why is this action being cancelled?"
+              rows={3}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCancelDialogOpen(false)}>Keep Action</Button>
+            <Button variant="destructive" onClick={() => cancelMut.mutate()} disabled={cancelMut.isPending || cancelReason.trim().length < 3}>
+              {cancelMut.isPending ? 'Cancelling...' : 'Confirm Cancellation'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={modifyDialogOpen} onOpenChange={setModifyDialogOpen}>
+        <DialogContent className="max-w-xl">
+          <DialogHeader>
+            <DialogTitle>Modify Action</DialogTitle>
+            <DialogDescription>
+              Update the details of this corrective action.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label>Title</Label>
+              <Input value={modifyForm.title} onChange={(e) => setModifyForm({ ...modifyForm, title: e.target.value })} />
+            </div>
+            <div className="space-y-2">
+              <Label>Description</Label>
+              <Textarea value={modifyForm.description} onChange={(e) => setModifyForm({ ...modifyForm, description: e.target.value })} rows={3} />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Assigned To</Label>
+                <Input value={modifyForm.assigned_to} onChange={(e) => setModifyForm({ ...modifyForm, assigned_to: e.target.value })} />
+              </div>
+              <div className="space-y-2">
+                <Label>Due Date</Label>
+                <Input type="date" value={modifyForm.due_date} onChange={(e) => setModifyForm({ ...modifyForm, due_date: e.target.value })} />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Reason for Modification *</Label>
+              <Textarea
+                value={modifyForm.modification_reason}
+                onChange={(e) => setModifyForm({ ...modifyForm, modification_reason: e.target.value })}
+                placeholder="Why are these changes being made?"
+                rows={2}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setModifyDialogOpen(false)}>Cancel</Button>
+            <Button onClick={() => modifyMut.mutate()} disabled={modifyMut.isPending || modifyForm.modification_reason.trim().length < 3}>
+              {modifyMut.isPending ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

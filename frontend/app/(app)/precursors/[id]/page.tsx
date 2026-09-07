@@ -6,7 +6,7 @@ import { precursorsApi } from '@/lib/api/precursors';
 import { ErrorState, Skeleton } from '@/components/ui/states';
 import { PriorityBadge, RiskLevelBadge } from '@/components/ui/status-badges';
 import Link from 'next/link';
-import { ArrowLeft, Activity, AlertTriangle, TrendingUp, Building2, Users, FileText } from 'lucide-react';
+import { ArrowLeft, Activity, AlertTriangle, TrendingUp, Building2, Users, FileText, Share2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
@@ -16,6 +16,12 @@ export default function PrecursorDetailPage() {
   const detailQ = useQuery({
     queryKey: ['precursors', id],
     queryFn: () => precursorsApi.get(id),
+    enabled: !!id,
+  });
+
+  const graphQ = useQuery({
+    queryKey: ['precursors', id, 'graph'],
+    queryFn: () => precursorsApi.getGraph(id),
     enabled: !!id,
   });
 
@@ -144,6 +150,57 @@ export default function PrecursorDetailPage() {
             {p.departments.length === 0 && <span className="text-sm text-muted-foreground">No department data</span>}
           </div>
         </div>
+      </div>
+
+      {/* Graph Representation */}
+      <div className="glass-card p-6">
+        <h2 className="font-semibold text-foreground flex items-center gap-2 mb-4">
+          <Share2 className="h-4 w-4 text-primary" />
+          Relationship Graph
+        </h2>
+        
+        {graphQ.isLoading && <div className="p-4 text-sm text-muted-foreground">Loading graph...</div>}
+        {graphQ.isError && <div className="p-4 text-sm text-destructive">Failed to load graph</div>}
+        
+        {graphQ.data && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-muted/20 border border-border/50 rounded-lg p-4">
+                <h3 className="text-sm font-medium mb-2 flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-blue-500"></div> Nodes ({graphQ.data.nodes.length})</h3>
+                <div className="flex flex-wrap gap-2">
+                  {graphQ.data.nodes.map(n => (
+                    <div key={n.id} className="text-xs px-2 py-1 bg-background border border-border rounded shadow-sm">
+                      <span className="font-semibold text-muted-foreground mr-1 capitalize">{n.type.toLowerCase()}:</span>
+                      {n.label}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="bg-muted/20 border border-border/50 rounded-lg p-4">
+                <h3 className="text-sm font-medium mb-2 flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-orange-500"></div> Edges ({graphQ.data.edges.length})</h3>
+                <div className="space-y-1 max-h-32 overflow-y-auto pr-2">
+                  {graphQ.data.edges.map((e, i) => {
+                    const sourceNode = graphQ.data.nodes.find(n => n.id === e.source);
+                    const targetNode = graphQ.data.nodes.find(n => n.id === e.target);
+                    return (
+                      <div key={i} className="text-xs flex items-center gap-1.5 text-muted-foreground">
+                        <span className="font-medium text-foreground truncate max-w-[100px]">{sourceNode?.label || e.source}</span>
+                        <span className="shrink-0 text-orange-500/80">→</span>
+                        <span className="italic">{e.label}</span>
+                        <span className="shrink-0 text-orange-500/80">→</span>
+                        <span className="font-medium text-foreground truncate max-w-[100px]">{targetNode?.label || e.target}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+            
+            <div className="text-xs text-muted-foreground bg-muted/30 p-3 rounded border border-border">
+              Visual graph rendering requires a library like React Flow. This is a text representation of the precursor&apos;s connection to activities, hazards, barriers, and sites.
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Representative Reports */}

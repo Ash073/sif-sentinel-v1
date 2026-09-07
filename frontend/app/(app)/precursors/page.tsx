@@ -1,20 +1,35 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { precursorsApi } from '@/lib/api/precursors';
 import { ErrorState, EmptyState, Skeleton } from '@/components/ui/states';
+import { useAuth } from '@/components/providers/AuthProvider';
+import { toast } from '@/components/ui/toast';
 import { PriorityBadge, RiskLevelBadge } from '@/components/ui/status-badges';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Activity, TrendingUp, Search, ArrowRight, AlertTriangle } from 'lucide-react';
+import { Activity, TrendingUp, Search, ArrowRight, AlertTriangle, RefreshCw } from 'lucide-react';
 import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 export default function PrecursorsPage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+  
   const [search, setSearch] = useState('');
   const [priority, setPriority] = useState('');
+
+  const rebuildMut = useMutation({
+    mutationFn: () => precursorsApi.rebuild(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['precursors'] });
+      toast.add({ title: 'Rebuild initiated', description: 'Precursor patterns are being re-analyzed.', type: 'success' });
+    },
+    onError: () => toast.add({ title: 'Rebuild failed', type: 'error' }),
+  });
 
   const precursorsQ = useQuery({
     queryKey: ['precursors', 'list'],
@@ -32,14 +47,27 @@ export default function PrecursorsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
-          <Activity className="h-6 w-6 text-primary" />
-          Precursor Intelligence
-        </h1>
-        <p className="text-sm text-muted-foreground mt-0.5">
-          Recurring hazard patterns ranked by risk score — leading indicators of Serious Injury and Fatality events
-        </p>
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
+            <Activity className="h-6 w-6 text-primary" />
+            Precursor Intelligence
+          </h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Recurring hazard patterns ranked by risk score — leading indicators of Serious Injury and Fatality events
+          </p>
+        </div>
+        {user && ['ADMIN', 'HSE_ANALYST'].includes(user.role) && (
+          <Button 
+            onClick={() => rebuildMut.mutate()} 
+            disabled={rebuildMut.isPending}
+            variant="outline"
+            className="gap-2"
+          >
+            <RefreshCw className={cn("h-4 w-4", rebuildMut.isPending && "animate-spin")} />
+            {rebuildMut.isPending ? 'Rebuilding...' : 'Rebuild Patterns'}
+          </Button>
+        )}
       </div>
 
       {/* Filters */}

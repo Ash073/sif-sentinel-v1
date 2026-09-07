@@ -2,7 +2,6 @@ import { apiClient } from '@/lib/api-client';
 import type {
   CorrectiveActionRead,
   CorrectiveActionCreate,
-  CorrectiveActionListResponse,
   CorrectiveActionDecisionRequest,
   CorrectiveActionModifyRequest,
   CorrectiveActionVerifyRequest,
@@ -16,7 +15,7 @@ export interface CorrectiveActionListParams {
 }
 
 export const correctiveActionsApi = {
-  list: (params: CorrectiveActionListParams = {}): Promise<CorrectiveActionListResponse> =>
+  list: (params: CorrectiveActionListParams = {}): Promise<CorrectiveActionRead[]> =>
     apiClient.get('/corrective-actions', { params }).then((r) => r.data),
 
   get: (actionId: string): Promise<CorrectiveActionRead> =>
@@ -31,10 +30,10 @@ export const correctiveActionsApi = {
   approve: (actionId: string, payload: CorrectiveActionDecisionRequest = {}): Promise<CorrectiveActionRead> =>
     apiClient.post(`/corrective-actions/${actionId}/approve`, payload).then((r) => r.data),
 
-  reject: (actionId: string, payload: CorrectiveActionDecisionRequest = {}): Promise<CorrectiveActionRead> =>
+  reject: (actionId: string, payload: CorrectiveActionDecisionRequest): Promise<CorrectiveActionRead> =>
     apiClient.post(`/corrective-actions/${actionId}/reject`, payload).then((r) => r.data),
 
-  cancel: (actionId: string, payload: CorrectiveActionDecisionRequest = {}): Promise<CorrectiveActionRead> =>
+  cancel: (actionId: string, payload: CorrectiveActionDecisionRequest): Promise<CorrectiveActionRead> =>
     apiClient.post(`/corrective-actions/${actionId}/cancel`, payload).then((r) => r.data),
 
   modify: (actionId: string, payload: CorrectiveActionModifyRequest): Promise<CorrectiveActionRead> =>

@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/select';
 import { toast } from '@/components/ui/toast';
 import { useAuth } from '@/components/providers/AuthProvider';
-import { ClipboardList, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ClipboardList, Plus } from 'lucide-react';
 import type { CorrectiveActionRead, CorrectiveActionStatus } from '@/types/api';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -51,7 +51,7 @@ function ActionRow({ action }: { action: CorrectiveActionRead }) {
   });
 
   const rejectMutation = useMutation({
-    mutationFn: () => correctiveActionsApi.reject(action.id),
+    mutationFn: () => correctiveActionsApi.reject(action.id, { reason: 'Rejected from list view' }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['corrective-actions'] });
       toast.add({ title: 'Action rejected', type: 'success' });
@@ -93,21 +93,17 @@ function ActionRow({ action }: { action: CorrectiveActionRead }) {
 }
 
 export default function CorrectiveActionsPage() {
-  const [page, setPage] = useState(1);
+  const { user } = useAuth();
   const [statusFilter, setStatusFilter] = useState<CorrectiveActionStatus | 'ALL'>('ALL');
 
   const actionsQ = useQuery({
-    queryKey: ['corrective-actions', 'list', { page, statusFilter }],
+    queryKey: ['corrective-actions', 'list', { statusFilter }],
     queryFn: () => correctiveActionsApi.list({
-      page,
-      page_size: 20,
       status: statusFilter === 'ALL' ? undefined : statusFilter,
     }),
     placeholderData: (prev) => prev,
     staleTime: 60 * 1000,
   });
-
-  const totalPages = actionsQ.data ? Math.ceil(actionsQ.data.total / 20) : 1;
 
   return (
     <div className="space-y-6">
@@ -115,14 +111,23 @@ export default function CorrectiveActionsPage() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Corrective Actions</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            {actionsQ.data ? `${actionsQ.data.total} total actions` : 'Loading...'}
+            {actionsQ.data ? `${actionsQ.data.length} total actions` : 'Loading...'}
           </p>
         </div>
+        {user && ['ADMIN', 'HSE_MANAGER', 'HSE_ANALYST'].includes(user.role) && (
+          <Link
+            href="/corrective-actions/new"
+            className="inline-flex items-center gap-2 h-8 px-3 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/80 transition-colors"
+          >
+            <Plus className="h-4 w-4" />
+            New Action
+          </Link>
+        )}
       </div>
 
       <div className="border border-border rounded-xl p-4 bg-card flex items-center gap-3 flex-wrap">
         <span className="text-sm font-medium text-muted-foreground">Status:</span>
-        <Select value={statusFilter} onValueChange={(v) => { setStatusFilter((v ?? 'ALL') as typeof statusFilter); setPage(1); }}>
+        <Select value={statusFilter} onValueChange={(v) => { setStatusFilter((v ?? 'ALL') as typeof statusFilter); }}>
           <SelectTrigger className="w-[200px]" aria-label="Filter by status">
             <SelectValue />
           </SelectTrigger>
@@ -138,14 +143,14 @@ export default function CorrectiveActionsPage() {
       <div className="border border-border rounded-xl overflow-hidden bg-card">
         {actionsQ.isLoading && <div className="p-6"><TableSkeleton rows={5} cols={6} /></div>}
         {actionsQ.isError && <ErrorState title="Could not load corrective actions" onRetry={actionsQ.refetch} />}
-        {actionsQ.data && actionsQ.data.items.length === 0 && (
+        {actionsQ.data && actionsQ.data.length === 0 && (
           <EmptyState
             title="No corrective actions"
             description="No corrective actions match the current filter."
             icon={<ClipboardList className="h-7 w-7" />}
           />
         )}
-        {actionsQ.data && actionsQ.data.items.length > 0 && (
+        {actionsQ.data && actionsQ.data.length > 0 && (
           <div className="overflow-x-auto">
             <table className="w-full text-sm" aria-label="Corrective actions list">
               <thead>
@@ -159,7 +164,7 @@ export default function CorrectiveActionsPage() {
                 </tr>
               </thead>
               <tbody>
-                {actionsQ.data.items.map((action) => (
+                {actionsQ.data.map((action) => (
                   <ActionRow key={action.id} action={action} />
                 ))}
               </tbody>
@@ -168,19 +173,7 @@ export default function CorrectiveActionsPage() {
         )}
       </div>
 
-      {actionsQ.data && actionsQ.data.total > 20 && (
-        <div className="flex items-center justify-between text-sm text-muted-foreground">
-          <span>Page {page} of {totalPages}</span>
-          <div className="flex gap-2">
-            <Button variant="outline" size="icon" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} aria-label="Previous page">
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" size="icon" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} aria-label="Next page">
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      )}
+
     </div>
   );
 }
