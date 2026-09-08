@@ -19,4 +19,20 @@ Please refer to [docs/architecture/REPOSITORY_STRUCTURE.md](docs/architecture/RE
 - `scripts/` - Automation and utilities
 
 ## Local Development
-For backend setup, testing, and execution, see [backend/README.md](backend/README.md).
+
+### Frontend
+To run the frontend development server:
+```bash
+cd frontend
+pnpm install
+pnpm dev
+```
+
+### Backend
+To run the FastAPI backend:
+```bash
+cd backend
+uv sync
+uv run uvicorn app.main:app --reload
+```
+For more backend setup, testing, and execution details, see [backend/README.md](backend/README.md).

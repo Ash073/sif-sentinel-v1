@@ -1,14 +1,15 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, Query
 
 from app.api.deps import DBSession, require_roles
-from app.core.constants import UserRole
+from app.core.constants import UserRole, InterventionReviewStatus
 from app.models.user import User
 from app.schemas.intervention import (
     InterventionRead,
     InterventionReviewRequest,
     InterventionSummary,
+    InterventionPage,
 )
 from app.services.intervention_service import InterventionService
 
@@ -17,14 +18,21 @@ _read_roles = (UserRole.ADMIN, UserRole.HSE_MANAGER, UserRole.HSE_ANALYST, UserR
 _review_roles = (UserRole.ADMIN, UserRole.HSE_MANAGER, UserRole.REVIEWER)
 
 
-@router.get("", response_model=list[InterventionRead], summary="List advisory intervention recommendations")
+@router.get("", response_model=InterventionPage, summary="List advisory intervention recommendations")
 async def list_interventions(
     db: DBSession,
     _: User = Depends(require_roles(*_read_roles)),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
     report_id: str | None = None,
     priority: str | None = None,
-) -> list[InterventionRead]:
-    return await InterventionService(db).list(report_human_id=report_id, priority=priority)
+    status: InterventionReviewStatus | None = None,
+    category: str | None = None,
+) -> InterventionPage:
+    items, total = await InterventionService(db).list(
+        page=page, page_size=page_size, report_human_id=report_id, priority=priority, status=status, category=category
+    )
+    return InterventionPage(items=items, total=total, page=page, page_size=page_size)
 
 
 @router.get("/summary", response_model=InterventionSummary, summary="Summarize intervention recommendation queue")

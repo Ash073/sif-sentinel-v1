@@ -21,3 +21,7 @@ class UserRead(ORMModel):
     is_active: bool
     created_at: datetime
     updated_at: datetime
+
+
+class UserRoleUpdate(ORMModel):
+    role: UserRole

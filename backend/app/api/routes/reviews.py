@@ -10,6 +10,7 @@ from app.schemas.review import (
     ReviewDecisionRequest,
     ReviewQueueItem,
     ReviewStatusFilter,
+    ReviewPage,
 )
 from app.services.review_service import ReviewService
 
@@ -17,22 +18,22 @@ router = APIRouter(prefix="/reviews", tags=["Human reviews"])
 _roles = (UserRole.ADMIN, UserRole.HSE_MANAGER, UserRole.REVIEWER)
 
 
-@router.get("", response_model=list[ReviewQueueItem], summary="List reviews with optional status filter")
+@router.get("", response_model=ReviewPage, summary="List reviews with optional status filter")
 async def queue(
     db: DBSession,
     _: User = Depends(require_roles(*_roles)),
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
     status: ReviewStatusFilter = Query(ReviewStatusFilter.PENDING, description="Filter by review status"),
-) -> list[ReviewQueueItem]:
+) -> ReviewPage:
     """List reviews filtered by status.
 
     - **PENDING** (default): reviews awaiting human decision
     - **REVIEWED**: completed reviews (APPROVE / REJECT / MODIFY)
     - **ALL**: no filter, returns everything
     """
-    items, _ = await ReviewService(db).list(page, page_size, status)
-    return items
+    items, total = await ReviewService(db).list(page, page_size, status)
+    return ReviewPage(items=items, total=total, page=page, page_size=page_size)
 
 
 @router.get("/{review_id}", response_model=ReviewQueueItem, summary="Get a single review by ID")

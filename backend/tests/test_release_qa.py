@@ -63,7 +63,7 @@ def test_report_to_intervention_review_to_audit_flow(client, admin_headers):
         "/api/v1/interventions", headers=admin_headers, params={"report_id": report_id}
     )
     assert interventions.status_code == 200
-    recommendation = interventions.json()[0]
+    recommendation = interventions.json()["items"][0]
     reviewed = client.post(
         f"/api/v1/interventions/{recommendation['id']}/review",
         headers=admin_headers,

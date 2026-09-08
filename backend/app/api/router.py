@@ -2,6 +2,7 @@ from fastapi import APIRouter
 
 from app.api.routes import (
     analysis,
+    audit_logs,
     auth,
     corrective_actions,
     dashboard,
@@ -24,6 +25,7 @@ api_router.include_router(health.router)
 api_router.include_router(interventions.router)
 api_router.include_router(corrective_actions.router)
 api_router.include_router(analysis.router)
+api_router.include_router(audit_logs.router)
 api_router.include_router(auth.router)
 api_router.include_router(users.router)
 api_router.include_router(sites.router)

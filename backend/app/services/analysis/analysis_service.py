@@ -33,6 +33,64 @@ class AnalysisService:
             raise AppError("MODEL_UNAVAILABLE", "Safety classifier is unavailable", 503) from exc
         return self._response(result)
 
+    async def get_analysis(self, report_id: str) -> AnalysisResponse:
+        if self.db is None:
+            raise AppError("NO_DB_SESSION", "Database session is required", 500)
+            
+        report = await self.db.scalar(select(Report).where(Report.report_id == report_id))
+        if not report:
+            raise NotFoundError("report")
+            
+        analysis = await self.db.scalar(select(ReportAnalysis).where(ReportAnalysis.report_id == report.id))
+        if not analysis:
+            raise NotFoundError("analysis")
+            
+        prediction = await self.db.scalar(select(ModelPrediction).where(ModelPrediction.report_id == report.id))
+        
+        prediction_json = prediction.prediction_json if prediction else {}
+        evidence_terms = prediction_json.get("evidence_terms", []) if isinstance(prediction_json, dict) else []
+        overall_confidence = prediction_json.get("overall_confidence", 0.0) if isinstance(prediction_json, dict) else 0.0
+        
+        risk = None
+        if analysis.risk_score is not None:
+            risk = {
+                "score": analysis.risk_score,
+                "priority": analysis.risk_priority or "LOW",
+                "components": analysis.risk_components or [],
+                "version": analysis.risk_version or "v1"
+            }
+            
+        return AnalysisResponse(
+            report_id=report.report_id,
+            analysis_id=analysis.id,
+            sif_potential=analysis.sif_potential,
+            sif_level=analysis.sif_level,
+            model_probability=analysis.model_probability,
+            activity=analysis.activity,
+            hazard=analysis.hazard,
+            barrier=analysis.barrier,
+            barrier_status=analysis.barrier_status,
+            barrier_failure=analysis.barrier_failure,
+            life_saving_rule=analysis.life_saving_rule,
+            rule_confidence=analysis.rule_confidence,
+            evidence_span=analysis.evidence_span,
+            evidence_sentences=[],
+            evidence_terms=evidence_terms,
+            overall_confidence=overall_confidence,
+            review_required=(analysis.analysis_status == "REVIEW_REQUIRED"),
+            model_version=analysis.model_version,
+            explanation=analysis.explanation or "",
+            risk=risk,
+            explainability_factors=[],
+            reviewer_summary=analysis.reviewer_summary,
+            llm_attempted=analysis.llm_attempted,
+            llm_used=analysis.llm_used,
+            llm_provider=analysis.llm_provider,
+            llm_model_used=analysis.llm_model_used,
+            llm_timestamp=analysis.llm_timestamp,
+            llm_error_code=analysis.llm_error_code,
+        )
+
     async def analyze_report(
         self, human_id: str, actor_id: UUID, ip_address: str | None
     ) -> AnalysisResponse:

@@ -14,7 +14,7 @@ export function Breadcrumbs() {
   
   // Find matching navigation item for the root if possible
   const rootItem = NAVIGATION_ITEMS.find(item => 
-    pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href))
+    item.href && (pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href)))
   );
 
   return (
@@ -23,7 +23,7 @@ export function Breadcrumbs() {
         <span className="font-medium text-foreground">Dashboard</span>
       ) : (
         <div className="flex items-center gap-1.5 capitalize">
-          {rootItem && (
+          {rootItem && rootItem.href && (
             <>
               <Link href={rootItem.href} className="hover:text-foreground transition-colors">
                 {rootItem.name}
@@ -31,7 +31,7 @@ export function Breadcrumbs() {
             </>
           )}
           
-          {paths.length > (rootItem?.href.split('/').length || 1) && (
+          {paths.length > (rootItem?.href?.split('/').length || 1) && (
             <>
               <ChevronRight className="h-4 w-4" />
               <span className="font-medium text-foreground truncate max-w-[200px]">

@@ -37,8 +37,8 @@ def test_review_queue_modify_feedback_and_authorization(client, admin_headers):
     assert client.post(f"/api/v1/reports/{report['report_id']}/analyze", headers=admin_headers).status_code == 200
     assert client.get("/api/v1/reviews", headers=admin_headers).status_code == 200
     queue = client.get("/api/v1/reviews", headers=reviewer_headers)
-    assert queue.status_code == 200 and queue.json()
-    review_id = queue.json()[-1]["id"]
+    assert queue.status_code == 200 and queue.json()["items"]
+    review_id = queue.json()["items"][-1]["id"]
     decision = client.post(f"/api/v1/reviews/{review_id}/decision", headers=reviewer_headers, json={"decision": "MODIFY", "corrected_sif_level": "LOW", "corrected_barrier_failure": "not followed", "reviewer_comment": "Verified by reviewer"})
     assert decision.status_code == 200
     assert decision.json()["decision"] == "MODIFY"

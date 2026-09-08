@@ -165,14 +165,22 @@ class InterventionService:
         await self.db.flush()
         return recommendation
 
-    async def list(self, report_human_id: str | None = None, priority: str | None = None) -> list[InterventionRead]:
+    async def list(self, page: int = 1, page_size: int = 20, report_human_id: str | None = None, priority: str | None = None, status: InterventionReviewStatus | None = None, category: str | None = None) -> tuple[list[InterventionRead], int]:
         query = select(InterventionRecommendation)
         if report_human_id:
             query = query.join(Report).where(Report.report_id == report_human_id)
         if priority:
             query = query.where(InterventionRecommendation.priority == priority.upper())
-        rows = (await self.db.scalars(query.order_by(InterventionRecommendation.created_at.desc(), InterventionRecommendation.id))).all()
-        return [InterventionRead.model_validate(row) for row in rows]
+        if status:
+            query = query.where(InterventionRecommendation.review_status == status)
+        if category:
+            query = query.where(InterventionRecommendation.category == category)
+
+        total = await self.db.scalar(select(func.count()).select_from(query.subquery())) or 0
+        
+        offset = (page - 1) * page_size
+        rows = (await self.db.scalars(query.order_by(InterventionRecommendation.created_at.desc(), InterventionRecommendation.id).offset(offset).limit(page_size))).all()
+        return [InterventionRead.model_validate(row) for row in rows], total
 
     async def get(self, recommendation_id: UUID) -> InterventionRecommendation:
         item = await self.db.get(InterventionRecommendation, recommendation_id)

@@ -92,3 +92,10 @@ class DecisionResponse(BaseModel):
     reviewer_id: UUID
     reviewed_at: datetime
     message: str
+
+class ReviewPage(BaseModel):
+    items: list[ReviewQueueItem]
+    total: int
+    page: int
+    page_size: int
+

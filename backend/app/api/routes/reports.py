@@ -32,6 +32,20 @@ async def analyze_report(
         report_id, user.id, request.client.host if request.client else None
     )
 
+@router.get(
+    "/{report_id}/analysis",
+    response_model=AnalysisResponse,
+    summary="Get the historical analysis for a report",
+)
+async def get_report_analysis(
+    report_id: str,
+    db: DBSession,
+    _: User = Depends(
+        require_roles(UserRole.ADMIN, UserRole.HSE_MANAGER, UserRole.HSE_ANALYST, UserRole.REVIEWER, UserRole.VIEWER)
+    ),
+) -> AnalysisResponse:
+    return await AnalysisService(db).get_analysis(report_id)
+
 @router.post("", response_model=ReportRead, status_code=status.HTTP_201_CREATED, summary="Create an unsafe-act or near-miss report")
 async def create_report(payload: ReportCreate, request: Request, db: DBSession, user: User = Depends(require_roles(UserRole.ADMIN, UserRole.HSE_MANAGER, UserRole.HSE_ANALYST, UserRole.REVIEWER))) -> ReportRead:
     return await ReportService(db).create(payload, user.id, request.client.host if request.client else None)

@@ -47,3 +47,10 @@ class InterventionSummary(BaseModel):
     critical: int
     pending: int
     by_category: dict[str, int]
+
+class InterventionPage(BaseModel):
+    items: list[InterventionRead]
+    total: int
+    page: int
+    page_size: int
+

@@ -1,40 +1,69 @@
 'use client';
 
+import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  LayoutDashboard, FilePlus, History, CheckSquare, Activity,
-  Shield, ShieldCheck, LogOut, User, ClipboardList, AlertTriangle, Cpu
+  LayoutDashboard, Activity, ShieldCheck, 
+  LogOut, FileText, CheckSquare, ChevronRight
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
 import { useAuth } from '@/components/providers/AuthProvider';
+import { useState, useRef, useEffect } from 'react';
 
 export const NAVIGATION_ITEMS = [
-  { name: 'Dashboard', href: '/', icon: LayoutDashboard, roles: ['ADMIN', 'HSE_MANAGER', 'HSE_ANALYST', 'REVIEWER', 'VIEWER'] },
-  { name: 'Reports', href: '/reports', icon: History, roles: ['ADMIN', 'HSE_MANAGER', 'HSE_ANALYST', 'REVIEWER', 'VIEWER'] },
-  { name: 'Submit Report', href: '/reports/new', icon: FilePlus, roles: ['ADMIN', 'HSE_MANAGER', 'HSE_ANALYST', 'REVIEWER'] },
-  { name: 'Review Queue', href: '/reviews', icon: CheckSquare, roles: ['ADMIN', 'HSE_MANAGER', 'REVIEWER'] },
-  { name: 'Corrective Actions', href: '/corrective-actions', icon: ClipboardList, roles: ['ADMIN', 'HSE_MANAGER', 'HSE_ANALYST', 'REVIEWER', 'VIEWER'] },
-  { name: 'Precursors', href: '/precursors', icon: Activity, roles: ['ADMIN', 'HSE_MANAGER', 'HSE_ANALYST', 'REVIEWER', 'VIEWER'] },
-  { name: 'Risk Intelligence', href: '/risk', icon: Shield, roles: ['ADMIN', 'HSE_MANAGER', 'HSE_ANALYST', 'REVIEWER', 'VIEWER'] },
-  { name: 'Interventions', href: '/interventions', icon: ShieldCheck, roles: ['ADMIN', 'HSE_MANAGER', 'HSE_ANALYST', 'REVIEWER', 'VIEWER'] },
-  { name: 'LSR Analytics', href: '/rules', icon: AlertTriangle, roles: ['ADMIN', 'HSE_MANAGER', 'HSE_ANALYST', 'REVIEWER', 'VIEWER'] },
-  { name: 'ML Models', href: '/models', icon: Cpu, roles: ['ADMIN', 'HSE_MANAGER', 'HSE_ANALYST'] },
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, roles: ['ADMIN', 'HSE_MANAGER', 'HSE_ANALYST', 'REVIEWER', 'VIEWER'] },
+  { name: 'Reports', href: '/reports', icon: FileText, roles: ['ADMIN', 'HSE_MANAGER', 'HSE_ANALYST', 'REVIEWER', 'VIEWER'] },
+  { name: 'Human Reviews', href: '/reviews', icon: CheckSquare, roles: ['ADMIN', 'HSE_MANAGER', 'HSE_ANALYST', 'REVIEWER', 'VIEWER'] },
+  { 
+    name: 'Intelligence', 
+    icon: Activity, 
+    roles: ['ADMIN', 'HSE_MANAGER', 'HSE_ANALYST', 'REVIEWER', 'VIEWER'],
+    children: [
+      { name: 'Risk Intelligence', href: '/risk' },
+      { name: 'Precursors', href: '/precursors' },
+      { name: 'ML Models', href: '/models' }
+    ]
+  },
+  { 
+    name: 'Operations', 
+    icon: ShieldCheck, 
+    roles: ['ADMIN', 'HSE_MANAGER', 'HSE_ANALYST', 'REVIEWER', 'VIEWER'],
+    children: [
+      { name: 'Interventions', href: '/interventions' },
+      { name: 'Corrective Actions', href: '/corrective-actions' },
+      { name: 'Life-Saving Rules', href: '/rules' }
+    ]
+  },
 ];
 
-interface SidebarProps {
-  isCollapsed: boolean;
-  onCloseMobile?: () => void;
-}
-
-export function Sidebar({ isCollapsed, onCloseMobile }: SidebarProps) {
+export function Sidebar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setOpenMenu(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const isRouteActive = (href: string) => {
-    if (href === '/') return pathname === '/';
+    if (href === '/dashboard') return pathname === '/dashboard';
     return pathname === href || pathname.startsWith(href + '/');
+  };
+
+  const isParentActive = (item: any) => {
+    if (item.href && isRouteActive(item.href)) return true;
+    if (item.children) {
+      return item.children.some((child: any) => isRouteActive(child.href));
+    }
+    return false;
   };
 
   const visibleItems = NAVIGATION_ITEMS.filter(
@@ -42,79 +71,87 @@ export function Sidebar({ isCollapsed, onCloseMobile }: SidebarProps) {
   );
 
   return (
-    <div className="flex h-full flex-col gap-1 py-4">
-      {/* Logo */}
-      <div className="px-4 flex items-center h-10 mb-2">
-        <div className={cn('flex items-center gap-2', isCollapsed && 'justify-center w-full')}>
-          <div className="w-8 h-8 rounded-md bg-primary/10 border border-primary/20 shadow-[0_0_10px_rgba(226,92,34,0.15)] flex items-center justify-center shrink-0">
-            <Shield className="w-5 h-5 text-primary" />
-          </div>
-          {!isCollapsed && (
-            <div>
-              <span className="font-bold text-base tracking-tight text-foreground">SIF Sentinel</span>
-              <p className="text-[10px] text-muted-foreground leading-none mt-0.5">Safety Intelligence</p>
-            </div>
-          )}
-        </div>
-      </div>
+    <div className="flex h-full flex-col bg-transparent items-center py-6">
 
-      {/* Navigation */}
-      <div className="px-3 flex-1 overflow-y-auto">
-        <nav className="flex flex-col gap-0.5">
-          {visibleItems.map((item) => {
-            const isActive = isRouteActive(item.href);
+
+      {/* Navigation Rail */}
+      <div className="flex-1 overflow-y-auto w-full flex flex-col items-center gap-3 mt-4" ref={menuRef}>
+        {visibleItems.map((item) => {
+          const isActive = isParentActive(item);
+          
+          if (item.children) {
+            const isOpen = openMenu === item.name;
             return (
-              <Link
-                key={item.name}
-                href={item.href}
-                onClick={onCloseMobile}
-                className={cn(
-                  'w-full inline-flex items-center gap-3 h-9 rounded-lg text-sm font-medium transition-all border',
-                  isCollapsed ? 'px-0 justify-center' : 'px-3',
-                  isActive
-                    ? 'bg-primary/10 text-primary border-primary/20 hover:bg-primary/15'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50 border-transparent'
+              <div key={item.name} className="relative">
+                <button
+                  title={item.name}
+                  onClick={() => setOpenMenu(isOpen ? null : item.name)}
+                  className={cn(
+                    'w-10 h-10 rounded-full flex items-center justify-center transition-all group focus:outline-none',
+                    isActive || isOpen
+                      ? 'bg-primary text-primary-foreground shadow-md'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                  )}
+                >
+                  <item.icon className="w-5 h-5 transition-transform group-hover:scale-110" strokeWidth={isActive ? 2.5 : 2} />
+                </button>
+
+                {isOpen && (
+                  <div className="absolute left-full top-0 ml-4 w-48 bg-card border border-border shadow-xl rounded-xl z-50 overflow-hidden animate-in slide-in-from-left-2 duration-100">
+                    <div className="px-3 py-2 border-b border-border">
+                      <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{item.name}</span>
+                    </div>
+                    <div className="p-1">
+                      {item.children.map((child) => {
+                        const isChildActive = isRouteActive(child.href);
+                        return (
+                          <Link 
+                            key={child.name} 
+                            href={child.href} 
+                            onClick={() => setOpenMenu(null)}
+                            className={cn(
+                              "w-full flex items-center gap-2 px-3 py-2 rounded-md text-[13px] transition-colors", 
+                              isChildActive ? "text-primary font-medium bg-primary/10" : "text-foreground hover:bg-muted/50"
+                            )}
+                          >
+                            {child.name}
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </div>
                 )}
-                title={isCollapsed ? item.name : undefined}
-              >
-                <item.icon className="h-4 w-4 shrink-0" />
-                {!isCollapsed && <span className="truncate">{item.name}</span>}
-                {!isCollapsed && isActive && (
-                  <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />
-                )}
-              </Link>
+              </div>
             );
-          })}
-        </nav>
+          }
+
+          return (
+            <Link
+              key={item.name}
+              href={item.href!}
+              title={item.name}
+              className={cn(
+                'w-10 h-10 rounded-full flex items-center justify-center transition-all group relative',
+                isActive
+                  ? 'bg-primary text-primary-foreground shadow-md'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+              )}
+            >
+              <item.icon className="w-5 h-5 transition-transform group-hover:scale-110" strokeWidth={isActive ? 2.5 : 2} />
+            </Link>
+          );
+        })}
       </div>
 
-      {/* User Footer */}
-      <div className={cn('px-3 pt-3 border-t border-border/50', isCollapsed && 'flex justify-center')}>
-        {!isCollapsed && user && (
-          <div className="mb-2 px-3 py-2 rounded-lg bg-muted/30 border border-border/50">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
-                <User className="h-3.5 w-3.5 text-primary" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs font-medium text-foreground truncate">{user.full_name}</p>
-                <p className="text-[10px] text-muted-foreground truncate">{user.role}</p>
-              </div>
-            </div>
-          </div>
-        )}
-        <Button
-          variant="ghost"
+      {/* Bottom Actions */}
+      <div className="pt-6 flex flex-col items-center gap-3 w-full">
+        <button
           onClick={logout}
-          className={cn(
-            'w-full gap-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors h-9',
-            isCollapsed ? 'px-0 justify-center' : 'px-3 justify-start'
-          )}
-          title={isCollapsed ? 'Sign Out' : undefined}
+          title="Sign Out"
+          className="w-10 h-10 rounded-full flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all group"
         >
-          <LogOut className="h-4 w-4 shrink-0" />
-          {!isCollapsed && <span className="text-sm">Sign Out</span>}
-        </Button>
+          <LogOut className="w-5 h-5 transition-transform group-hover:scale-110" />
+        </button>
       </div>
     </div>
   );

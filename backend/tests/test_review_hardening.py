@@ -74,7 +74,7 @@ def _analyze(client, admin_headers, report_id: str) -> dict:
 def _pending_reviews(client, reviewer_headers) -> list[dict]:
     r = client.get("/api/v1/reviews?status=PENDING", headers=reviewer_headers)
     assert r.status_code == 200, r.text
-    return r.json()
+    return r.json()["items"]
 
 
 def _make_pending_review(client, admin_headers, reviewer_headers) -> str:
@@ -138,19 +138,19 @@ class TestReviewStatusFilter:
     def test_pending_filter_default(self, client, admin_headers):
         r = client.get("/api/v1/reviews", headers=admin_headers)
         assert r.status_code == 200
-        for item in r.json():
+        for item in r.json()['items']:
             assert item["decision"] == "PENDING"
 
     def test_explicit_pending_filter(self, client, admin_headers):
         r = client.get("/api/v1/reviews?status=PENDING", headers=admin_headers)
         assert r.status_code == 200
-        for item in r.json():
+        for item in r.json()['items']:
             assert item["decision"] == "PENDING"
 
     def test_reviewed_filter(self, client, admin_headers, reviewer_headers):
         r = client.get("/api/v1/reviews?status=REVIEWED", headers=admin_headers)
         assert r.status_code == 200
-        for item in r.json():
+        for item in r.json()['items']:
             assert item["decision"] != "PENDING"
 
     def test_all_filter(self, client, admin_headers):
@@ -165,7 +165,7 @@ class TestReviewStatusFilter:
         """PENDING items must expose reviewer_id=None to distinguish from decided reviews."""
         r = client.get("/api/v1/reviews?status=PENDING", headers=admin_headers)
         assert r.status_code == 200
-        for item in r.json():
+        for item in r.json()['items']:
             assert item["reviewer_id"] is None
             assert item["reviewed_at"] is None
 
@@ -304,7 +304,7 @@ class TestRejectWorkflow:
             json={"decision": "REJECT"},
         )
         reviewed = client.get("/api/v1/reviews?status=REVIEWED", headers=admin_headers)
-        ids = [item["id"] for item in reviewed.json()]
+        ids = [item["id"] for item in reviewed.json()['items']]
         assert review_id in ids
 
 
@@ -600,9 +600,9 @@ class TestIntegrationFlow:
         # 3. Get pending queue
         pending = client.get("/api/v1/reviews?status=PENDING", headers=reviewer_headers)
         assert pending.status_code == 200
-        assert pending.json()
+        assert pending.json()['items']
 
-        review_id = next(r["id"] for r in pending.json() if r["report_id"] == report["report_id"])
+        review_id = next(r["id"] for r in pending.json()['items'] if r["report_id"] == report["report_id"])
 
         # 4. Approve
         decision = client.post(
