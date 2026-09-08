@@ -184,6 +184,13 @@ export interface ReviewQueueItem {
   overall_confidence: number | null;
   explanation: string | null;
   reviewer_comment: string | null;
+  original_sif_level: SIFLevel | null;
+  original_activity: string | null;
+  original_hazard: string | null;
+  original_barrier: string | null;
+  original_barrier_status: BarrierStatus | null;
+  original_barrier_failure: string | null;
+  original_life_saving_rule: string | null;
   corrected_sif_level: SIFLevel | null;
   corrected_activity: string | null;
   corrected_hazard: string | null;
@@ -519,4 +526,86 @@ export interface ApiErrorBody {
     details: Record<string, unknown> | unknown[];
   };
   request_id: string | null;
+}
+
+// ============================================================
+// Precursors
+// ============================================================
+
+export interface PrecursorRead {
+  id: string;
+  activity: string;
+  hazard: string;
+}
+
+export interface PrecursorSummary extends PrecursorRead {
+  category: string;
+  barrier: string;
+  failure_type: string;
+  occurrence_count: number;
+  sif_count: number;
+  sif_density: number;
+  recent_count: number;
+  site_count: number;
+  department_count: number;
+  trend: string;
+  risk_score: number;
+  priority: string;
+  first_seen: string | null;
+  last_seen: string | null;
+  why_it_matters: string;
+}
+
+export interface RepresentativeReport {
+  report_id: string;
+  reported_at: string;
+  site_name: string;
+  department: string;
+  sif_level: string | null;
+}
+
+export interface PrecursorDetail extends PrecursorSummary {
+  sites: string[];
+  departments: string[];
+  representative_reports: RepresentativeReport[];
+}
+
+export interface GraphNode {
+  id: string;
+  label: string;
+  type: string;
+  statistics: Record<string, number | string>;
+}
+
+export interface GraphEdge {
+  source: string;
+  target: string;
+  label: string;
+}
+
+export interface PrecursorGraph {
+  nodes: GraphNode[];
+  edges: GraphEdge[];
+}
+
+// ============================================================
+// Copilot
+// ============================================================
+
+export interface CopilotQueryRequest {
+  query: string;
+  site_id?: string;
+}
+
+export interface CopilotCitation {
+  id: string;
+  type: string;
+  title: string;
+  relevance_score: number;
+}
+
+export interface CopilotResponse {
+  answer: string;
+  citations: CopilotCitation[];
+  sif_context_used: boolean;
 }

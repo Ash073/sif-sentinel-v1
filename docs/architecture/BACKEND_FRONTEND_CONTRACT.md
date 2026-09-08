@@ -154,6 +154,7 @@ The following is the live OpenAPI inventory. All paths below are relative to
 |---|---|
 | Authentication | `POST /auth/register`, `POST /auth/login`, `GET /auth/me`, `GET /users/me` |
 | Deterministic analysis assistance | `POST /analyze`, `/analyze/counterfactual`, `/analyze/narrative`, `/analyze/interventions` |
+| AI Copilot | `POST /copilot/ask` (Returns RAG-based answers with `citations` and `sif_context_used` boolean) |
 | Corrective-action governance | `GET/POST /corrective-actions`, `/export`, `/{action_id}`, `/{action_id}/audit`, and state transitions `/start`, `/submit`, `/approve`, `/reject`, `/modify`, `/request-verification`, `/verify`, `/close`, `/cancel` |
 | Health | `GET /health`, `/health/status`, `/health/ready` |
 | Sites | `POST /sites`, `GET /sites`, `GET /sites/{site_id}`, `PATCH /sites/{site_id}` |

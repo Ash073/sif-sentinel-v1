@@ -11,6 +11,23 @@ import { toast } from '@/components/ui/toast';
 import { AxiosError } from 'axios';
 import { cn } from '@/lib/utils';
 import { authService } from '@/services/auth.service';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+
+const loginSchema = z.object({
+  email: z.string().email('Invalid email format'),
+  password: z.string().min(1, 'Password is required'),
+});
+
+const registerSchema = z.object({
+  name: z.string().min(1, 'Designation is required'),
+  email: z.string().email('Invalid email format'),
+  password: z.string().min(12, 'Password must be at least 12 characters for compliance'),
+});
+
+type LoginData = z.infer<typeof loginSchema>;
+type RegisterData = z.infer<typeof registerSchema>;
 
 function AuthContent() {
   const router = useRouter();
@@ -19,24 +36,29 @@ function AuthContent() {
 
   const [isSignUp, setIsSignUp] = useState(searchParams?.get('mode') === 'signup');
   
-  // Sign In State
-  const [loginEmail, setLoginEmail] = useState('');
-  const [loginPassword, setLoginPassword] = useState('');
   const [showLoginPassword, setShowLoginPassword] = useState(false);
-  const [isLoggingIn, setIsLoggingIn] = useState(false);
-
-  // Sign Up State
-  const [registerName, setRegisterName] = useState('');
-  const [registerEmail, setRegisterEmail] = useState('');
-  const [registerPassword, setRegisterPassword] = useState('');
   const [showRegisterPassword, setShowRegisterPassword] = useState(false);
-  const [isRegistering, setIsRegistering] = useState(false);
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoggingIn(true);
+  const {
+    register: registerLogin,
+    handleSubmit: handleLoginSubmit,
+    formState: { errors: loginErrors, isSubmitting: isLoggingIn },
+  } = useForm<LoginData>({
+    resolver: zodResolver(loginSchema),
+  });
+
+  const {
+    register: registerSignUp,
+    handleSubmit: handleRegisterSubmit,
+    reset: resetRegister,
+    formState: { errors: registerErrors, isSubmitting: isRegistering },
+  } = useForm<RegisterData>({
+    resolver: zodResolver(registerSchema),
+  });
+
+  const onLogin = async (data: LoginData) => {
     try {
-      const response = await authService.login(loginEmail, loginPassword);
+      const response = await authService.login(data.email, data.password);
       login(response.access_token);
       toast.add({
         title: "Authentication Confirmed",
@@ -52,32 +74,18 @@ function AuthContent() {
         description: errorMessage,
         type: "error",
       });
-    } finally {
-      setIsLoggingIn(false);
     }
   };
 
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (registerPassword.length < 12) {
-      toast.add({
-        title: "Security Requirement",
-        description: "Password must be at least 12 characters for compliance.",
-        type: "warning",
-      });
-      return;
-    }
-
-    setIsRegistering(true);
+  const onRegister = async (data: RegisterData) => {
     try {
-      await authService.register(registerName, registerEmail, registerPassword);
+      await authService.register(data.name, data.email, data.password);
       toast.add({
         title: "Clearance Granted",
         description: "Identity verified. Please sign in to initialize session.",
         type: "success",
       });
-      // Clear register form and slide to login
-      setRegisterPassword('');
+      resetRegister();
       setIsSignUp(false);
     } catch (error: unknown) {
       const axiosError = error as AxiosError<{ error?: { message: string }, detail?: string }>;
@@ -87,8 +95,6 @@ function AuthContent() {
         description: errorMessage,
         type: "error",
       });
-    } finally {
-      setIsRegistering(false);
     }
   };
 
@@ -115,7 +121,7 @@ function AuthContent() {
             isSignUp ? "translate-x-full opacity-100 z-50 pointer-events-auto" : "translate-x-[90%] opacity-0 z-10 pointer-events-none scale-95"
           )}
         >
-          <form onSubmit={handleRegister} className="flex flex-col items-center w-full h-full justify-center">
+          <form onSubmit={handleRegisterSubmit(onRegister)} className="flex flex-col items-center w-full h-full justify-center">
             <h1 className="text-3xl font-display font-medium mb-2 tracking-tight text-slate-900">Initialize Identity</h1>
             <p className="text-slate-500 mb-8 font-light text-center">Secure clearance for SIF Sentinel.</p>
             
@@ -124,33 +130,29 @@ function AuthContent() {
                 <Input
                   type="text"
                   placeholder="Designation (Username)"
-                  value={registerName}
-                  onChange={(e) => setRegisterName(e.target.value)}
-                  required
+                  {...registerSignUp('name')}
                   disabled={isRegistering}
-                  className="bg-slate-50 border border-slate-200 rounded-lg h-12 px-4 text-slate-900 placeholder:text-slate-400 focus-visible:ring-1 focus-visible:ring-blue-900 focus-visible:border-blue-900 transition-all group-hover:border-slate-300 shadow-sm"
+                  className={`bg-slate-50 border ${registerErrors.name ? 'border-red-500' : 'border-slate-200'} rounded-lg h-12 px-4 text-slate-900 placeholder:text-slate-400 focus-visible:ring-1 focus-visible:ring-blue-900 focus-visible:border-blue-900 transition-all group-hover:border-slate-300 shadow-sm`}
                 />
+                {registerErrors.name && <p className="text-[11px] text-red-500 mt-1 absolute -bottom-4 left-0">{registerErrors.name.message}</p>}
               </div>
               <div className="relative group">
                 <Input
                   type="email"
                   placeholder="Official Email"
-                  value={registerEmail}
-                  onChange={(e) => setRegisterEmail(e.target.value)}
-                  required
+                  {...registerSignUp('email')}
                   disabled={isRegistering}
-                  className="bg-slate-50 border border-slate-200 rounded-lg h-12 px-4 text-slate-900 placeholder:text-slate-400 focus-visible:ring-1 focus-visible:ring-blue-900 focus-visible:border-blue-900 transition-all group-hover:border-slate-300 shadow-sm"
+                  className={`bg-slate-50 border ${registerErrors.email ? 'border-red-500' : 'border-slate-200'} rounded-lg h-12 px-4 text-slate-900 placeholder:text-slate-400 focus-visible:ring-1 focus-visible:ring-blue-900 focus-visible:border-blue-900 transition-all group-hover:border-slate-300 shadow-sm`}
                 />
+                {registerErrors.email && <p className="text-[11px] text-red-500 mt-1 absolute -bottom-4 left-0">{registerErrors.email.message}</p>}
               </div>
               <div className="relative group w-full">
                 <Input
                   type={showRegisterPassword ? "text" : "password"}
                   placeholder="Encryption Key (Password)"
-                  value={registerPassword}
-                  onChange={(e) => setRegisterPassword(e.target.value)}
-                  required
+                  {...registerSignUp('password')}
                   disabled={isRegistering}
-                  className="bg-slate-50 border border-slate-200 rounded-lg h-12 px-4 pr-12 text-slate-900 placeholder:text-slate-400 focus-visible:ring-1 focus-visible:ring-blue-900 focus-visible:border-blue-900 transition-all group-hover:border-slate-300 shadow-sm"
+                  className={`bg-slate-50 border ${registerErrors.password ? 'border-red-500' : 'border-slate-200'} rounded-lg h-12 px-4 pr-12 text-slate-900 placeholder:text-slate-400 focus-visible:ring-1 focus-visible:ring-blue-900 focus-visible:border-blue-900 transition-all group-hover:border-slate-300 shadow-sm`}
                 />
                 <button
                   type="button"
@@ -159,12 +161,13 @@ function AuthContent() {
                 >
                   {showRegisterPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
                 </button>
+                {registerErrors.password && <p className="text-[11px] text-red-500 mt-1 absolute -bottom-4 left-0">{registerErrors.password.message}</p>}
               </div>
 
               <Button 
                 type="submit" 
                 className="w-full h-12 rounded-lg bg-blue-900 text-white hover:bg-blue-800 font-medium mt-4 shadow-md transition-all uppercase tracking-widest text-[13px]"
-                disabled={isRegistering || !registerName || !registerEmail || !registerPassword}
+                disabled={isRegistering}
               >
                 {isRegistering ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Request Access'}
               </Button>
@@ -179,7 +182,7 @@ function AuthContent() {
             isSignUp ? "-translate-x-[10%] opacity-0 z-10 pointer-events-none scale-95" : "translate-x-0 opacity-100 z-50 pointer-events-auto"
           )}
         >
-          <form onSubmit={handleLogin} className="flex flex-col items-center w-full h-full justify-center">
+          <form onSubmit={handleLoginSubmit(onLogin)} className="flex flex-col items-center w-full h-full justify-center">
             <h1 className="text-3xl font-display font-medium mb-2 tracking-tight text-slate-900">Secure Gateway</h1>
             <p className="text-slate-500 mb-8 font-light text-center">Enter credentials to authenticate session.</p>
             
@@ -188,22 +191,19 @@ function AuthContent() {
                 <Input
                   type="email"
                   placeholder="Official Email"
-                  value={loginEmail}
-                  onChange={(e) => setLoginEmail(e.target.value)}
-                  required
+                  {...registerLogin('email')}
                   disabled={isLoggingIn}
-                  className="bg-slate-50 border border-slate-200 rounded-lg h-12 px-4 text-slate-900 placeholder:text-slate-400 focus-visible:ring-1 focus-visible:ring-blue-900 focus-visible:border-blue-900 transition-all group-hover:border-slate-300 shadow-sm"
+                  className={`bg-slate-50 border ${loginErrors.email ? 'border-red-500' : 'border-slate-200'} rounded-lg h-12 px-4 text-slate-900 placeholder:text-slate-400 focus-visible:ring-1 focus-visible:ring-blue-900 focus-visible:border-blue-900 transition-all group-hover:border-slate-300 shadow-sm`}
                 />
+                {loginErrors.email && <p className="text-[11px] text-red-500 mt-1 absolute -bottom-4 left-0">{loginErrors.email.message}</p>}
               </div>
               <div className="relative group w-full">
                 <Input
                   type={showLoginPassword ? "text" : "password"}
                   placeholder="Encryption Key (Password)"
-                  value={loginPassword}
-                  onChange={(e) => setLoginPassword(e.target.value)}
-                  required
+                  {...registerLogin('password')}
                   disabled={isLoggingIn}
-                  className="bg-slate-50 border border-slate-200 rounded-lg h-12 px-4 pr-12 text-slate-900 placeholder:text-slate-400 focus-visible:ring-1 focus-visible:ring-blue-900 focus-visible:border-blue-900 transition-all group-hover:border-slate-300 shadow-sm"
+                  className={`bg-slate-50 border ${loginErrors.password ? 'border-red-500' : 'border-slate-200'} rounded-lg h-12 px-4 pr-12 text-slate-900 placeholder:text-slate-400 focus-visible:ring-1 focus-visible:ring-blue-900 focus-visible:border-blue-900 transition-all group-hover:border-slate-300 shadow-sm`}
                 />
                 <button
                   type="button"
@@ -212,16 +212,17 @@ function AuthContent() {
                 >
                   {showLoginPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
                 </button>
+                {loginErrors.password && <p className="text-[11px] text-red-500 mt-1 absolute -bottom-4 left-0">{loginErrors.password.message}</p>}
               </div>
 
               <div className="flex justify-end w-full">
-                <button type="button" className="text-xs text-slate-500 hover:text-blue-900 transition-colors">Emergency Reset?</button>
+                <button type="button" className="text-xs text-slate-500 hover:text-blue-900 transition-colors mt-2">Emergency Reset?</button>
               </div>
 
               <Button 
                 type="submit" 
-                className="w-full h-12 rounded-lg bg-blue-900 hover:bg-blue-800 text-white font-medium mt-2 shadow-md transition-all uppercase tracking-widest text-[13px]"
-                disabled={isLoggingIn || !loginEmail || !loginPassword}
+                className="w-full h-12 rounded-lg bg-blue-900 hover:bg-blue-800 text-white font-medium shadow-md transition-all uppercase tracking-widest text-[13px]"
+                disabled={isLoggingIn}
               >
                 {isLoggingIn ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Authenticate'}
               </Button>

@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard, Activity, ShieldCheck, 
-  LogOut, FileText, CheckSquare, ChevronRight
+  LogOut, FileText, CheckSquare, ChevronRight,
+  Brain, Settings
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/components/providers/AuthProvider';
@@ -14,7 +15,8 @@ import { useState, useRef, useEffect } from 'react';
 export const NAVIGATION_ITEMS = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, roles: ['ADMIN', 'HSE_MANAGER', 'HSE_ANALYST', 'REVIEWER', 'VIEWER'] },
   { name: 'Reports', href: '/reports', icon: FileText, roles: ['ADMIN', 'HSE_MANAGER', 'HSE_ANALYST', 'REVIEWER', 'VIEWER'] },
-  { name: 'Human Reviews', href: '/reviews', icon: CheckSquare, roles: ['ADMIN', 'HSE_MANAGER', 'HSE_ANALYST', 'REVIEWER', 'VIEWER'] },
+  { name: 'Human Reviews', href: '/reviews', icon: CheckSquare, roles: ['ADMIN', 'REVIEWER'] },
+  { name: 'AI Copilot', href: '/copilot', icon: Brain, roles: ['ADMIN', 'HSE_MANAGER', 'HSE_ANALYST', 'REVIEWER', 'VIEWER'] },
   { 
     name: 'Intelligence', 
     icon: Activity, 
@@ -35,6 +37,7 @@ export const NAVIGATION_ITEMS = [
       { name: 'Life-Saving Rules', href: '/rules' }
     ]
   },
+  { name: 'Admin', href: '/admin', icon: Settings, roles: ['ADMIN'] },
 ];
 
 export function Sidebar() {

@@ -69,6 +69,14 @@ class ReviewQueueItem(BaseModel):
     overall_confidence: float | None
     explanation: str | None
     reviewer_comment: str | None
+    # Original AI analysis fields
+    original_sif_level: SIFLevel | None = None
+    original_activity: str | None = None
+    original_hazard: str | None = None
+    original_barrier: str | None = None
+    original_barrier_status: BarrierStatus | None = None
+    original_barrier_failure: str | None = None
+    original_life_saving_rule: str | None = None
     # Corrected fields — populated when decision == MODIFY
     corrected_sif_level: SIFLevel | None = None
     corrected_activity: str | None = None

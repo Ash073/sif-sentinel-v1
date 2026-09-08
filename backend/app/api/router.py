@@ -4,6 +4,7 @@ from app.api.routes import (
     analysis,
     audit_logs,
     auth,
+    copilot,
     corrective_actions,
     dashboard,
     health,
@@ -35,6 +36,7 @@ api_router.include_router(imports.router)
 api_router.include_router(precursors.router)
 api_router.include_router(risk.router)
 api_router.include_router(dashboard.router)
+api_router.include_router(copilot.router)
 api_router.include_router(reviews.router)
 api_router.include_router(rules.router)
 api_router.include_router(ws.router)
