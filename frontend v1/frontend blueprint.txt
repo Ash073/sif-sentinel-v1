@@ -1,0 +1,168 @@
+SIF SENTINEL — FRONTEND MASTER BLUEPRINT
+1. Product Understanding
+The Problem: Organizations collect thousands of unstructured safety observations (near-misses, unsafe acts). Critical signals indicating a Serious Injury or Fatality (SIF) precursor are often buried in text. The Solution: SIF Sentinel is an enterprise Health, Safety, and Environment (HSE) intelligence platform. It uses NLP and ML to instantly structure text, detect SIF potential, map Life-Saving Rules (LSRs), calculate risk, and recommend corrective actions. The Outcome: A safety team can move from reactive report reading to proactive intervention, ensuring that every high-risk precursor is caught, reviewed by a human, and mitigated before a fatality occurs.
+
+Data Lifecycle: Raw Text → SIF Classifier (ML) → Entity Extractor (NLP) → Precursor Detection (Rules) → Risk Engine (Math) → Human Review (Workflow) → Intervention (Recommendation) → Corrective Action (Execution) → Verification → Closure.
+
+2. End-to-End User Workflow
+Visitor Opens Website → Lands on the public marketing page explaining SIF intelligence.
+Authentication → User clicks "Login", enters credentials via /auth/login.
+Role Detection → Frontend decodes JWT / calls /auth/me to determine the user's role.
+Dashboard Redirect → Based on role, user is routed to the authenticated application shell (/dashboard).
+Daily Workflow → An HSE Analyst submits a new report (/reports/new). The frontend polls/waits for the NLP analysis to complete. The report is flagged as high-risk (REVIEW_REQUIRED).
+Human-in-the-Loop → A Reviewer opens the review queue, modifies/approves the AI's findings (/reviews/[id]), and generates an Intervention.
+Execution → An HSE Manager converts the Intervention into a Corrective Action, assigns it, and tracks it to CLOSED.
+Final Outcome → The dashboard reflects a mitigated risk, and the precursor engine learns from the verified data.
+3. Landing Page
+The landing page must communicate enterprise trust and operational safety.
+
+Navigation: Logo left, "Capabilities", "Security", "Login" CTA right.
+Hero Section: Headline: "Stop the Next Fatality Before It Happens."
+Visualization: An abstract, slow-moving node-link diagram (built with CSS/SVG or very lightweight Canvas) showing unstructured text turning into structured data nodes (Activity → Hazard → Barrier → Risk). Do not use heavy Three.js here; standard Framer Motion SVGs perform better for enterprise SaaS.
+Features: SIF Intelligence, Human-in-the-Loop Review, Corrective Action Tracking.
+Animations: Use Framer Motion for scroll-triggered fade-ups and stagger-children effects on feature cards.
+4. Authentication Experience
+Built entirely on the existing /auth/* endpoints.
+
+Login (/login): Email/password form. POST /auth/login. Stores access_token in memory/secure cookies.
+Current User: GET /auth/me to fetch role and permissions.
+Protected Routes: Next.js middleware or a top-level <ProtectedRoute> wrapper checks for token presence.
+Backend Responses:
+401 Unauthorized: Clear token, redirect to /login?session_expired=true.
+403 Forbidden: Render a <ForbiddenState /> component explaining role restrictions.
+422 Unprocessable Entity: Highlight form validation errors.
+429 Too Many Requests: Show a "Please wait a moment" toast (backend has strict rate-limiting).
+5. Roles & Authorization
+Frontend routing and UI rendering must strictly respect the backend UserRole enum.
+
+Role	Dashboard	Reports	Reviews	Interventions	Corrective Actions	Models	Admin
+ADMIN	Full	Full	Full	Full	Full	Full	Full
+HSE_MANAGER	Full	Create/Edit/Delete	Approve/Reject	Create	Manage	View	None
+HSE_ANALYST	View	Create/Edit	None	Create	Propose	View	None
+REVIEWER	View	View	Approve/Reject	None	View	None	None
+VIEWER	View	View	None	None	View	None	None
+If a VIEWER navigates to /reports/new, the frontend must immediately redirect to /dashboard or show a 403 Forbidden screen.
+
+6. Application Shell
+Layout: Fixed left sidebar (icon rail collapsible to text), fixed top header. Main content area scrolls independently.
+Visual Language: "Enterprise Serious." Clean white/gray backgrounds, high-contrast typography (Inter or Roboto). Use subtle red/orange exclusively for critical SIF risks. Do not use glassmorphism on data-heavy tables; keep it flat and legible.
+Top Header: Breadcrumbs (left), Global search (if implemented), Notification Bell, Profile Dropdown (Logout).
+7. Route Map
+/ - Landing Page
+/login - Authentication
+/dashboard - Role-specific metrics
+/reports - Paginated DataTable of reports
+/reports/new - Submission form
+/reports/[id] - Report detail & NLP results
+/reviews - Queue of reports awaiting human review
+/reviews/[id] - Human-in-the-loop correction UI
+/interventions - Generated AI recommendations
+/corrective-actions - Action tracking pipeline
+/corrective-actions/[id] - Action lifecycle management
+/precursors - Precursor signal aggregation
+/risk - Risk engine metrics
+/models - View active ML model versions
+/profile - User settings
+8. Dashboard
+Powered entirely by /dashboard/* endpoints.
+
+KPI Cards (Top): Total Reports, SIF Rate, High Risk Reports, Active Precursors (from /dashboard/summary).
+SIF Trend (Line Chart): X-axis: Date, Y-axis: SIF Count & Total Reports. Source: /dashboard/sif-trend.
+LSR Distribution (Donut Chart): Shows which Life-Saving Rules are violated most. Source: /dashboard/lsr-distribution.
+Activity/Hazard Heatmap or Bar: Source: /dashboard/activity-distribution and /hazard-distribution.
+Barrier Failures (Area Chart): Source: /dashboard/barrier-failures.
+Library: Use Recharts. It handles responsive containers and tooltips perfectly for enterprise dashboards.
+9. Report Creation
+Page: /reports/new
+Form: Select report_type (Unsafe Act, Near Miss, etc.), site_id, date, and the unstructured report_text.
+Validation: Frontend enforces min_length=10, max_length=20000.
+Mutation: POST /reports.
+Flow: On success, redirect immediately to /reports/[id]. The frontend must then automatically trigger POST /reports/[id]/analyze to start the ML pipeline, displaying an <AnalysisProgress /> overlay until the response returns.
+10. Report Detail Page
+Page: /reports/[id]
+Layout: Two-column. Left: Original narrative and metadata. Right: AI Intelligence.
+AI Section:
+SIF Badge: High, Medium, Low (color-coded).
+Entities: Chips showing Activity, Hazard, and Barrier.
+Barrier Status: A clear visual indicator (e.g., green check for EFFECTIVE, red cross for FAILED, gray for UNKNOWN).
+Explainability: A breakdown of the predictive terms that caused the SIF classification.
+Risk Gauge: A half-circle gauge chart showing the 1-100 risk score from the risk engine.
+Counterfactuals: A tab allowing the user to simulate "What if the barrier had not failed?" (POST /analyze/counterfactual).
+11. Analysis Experience
+When POST /reports/[id]/analyze is running:
+
+Show a deterministic skeleton loader overlaying the AI section.
+If the request succeeds: Render the AnalysisResponse schema data.
+If the request fails (503 MODEL_UNAVAILABLE): Show a clear Error State ("Safety classifier is currently offline") with a "Retry Analysis" button. Do not fake data.
+12. Review Workflow
+Page: /reviews (List) and /reviews/[id] (Detail).
+Purpose: The human-in-the-loop checkpoint.
+UI: The reviewer sees the AI's classification side-by-side with editable dropdowns.
+Action: If the AI is wrong, the reviewer modifies the Activity/Hazard/SIF Level and types a rationale.
+Mutation: POST /reviews/{id}/decision with APPROVE, REJECT, or MODIFY.
+Redirect: Return to /reviews queue.
+13. Interventions & Corrective Actions
+Interventions (/interventions): Displays deterministic AI recommendations. Users click "Convert to Corrective Action".
+Corrective Actions (/corrective-actions): A Kanban-style board or Data Table grouped by CorrectiveActionStatus (DRAFT → SUBMITTED → APPROVED → IN_PROGRESS → VERIFIED → CLOSED).
+Detail (/corrective-actions/[id]): Shows the timeline of the action. Only HSE_MANAGERS can approve or close.
+14. WebSockets & Real-Time
+Current Backend Implementation: The backend only supports WebSockets for ETL data ingestion progress via /ws/etl-progress/{user_id}.
+Frontend Usage: Do NOT attempt to use WebSockets for live report analysis updates. Report analysis is synchronous. Use the WebSocket only on a dedicated "Data Import" settings page, displaying a progress bar that fills to 100% based on Redis pub/sub events.
+15. API & Mutation Map (Source of Truth)
+Frontend Action	HTTP	Endpoint	React Query State Strategy
+Login	POST	/auth/login	Set token context, redirect.
+Get User	GET	/auth/me	Cache infinitely until logout.
+Load Dashboard	GET	/dashboard/summary	Stale time: 5 minutes.
+Create Report	POST	/reports	Invalidate reports list.
+Analyze Report	POST	/reports/{id}/analyze	Update local report_analysis cache.
+Get Report	GET	/reports/{id}	Stale time: 0 (always fetch fresh).
+Submit Review	POST	/reviews/{id}/decision	Invalidate reviews_queue.
+Load Actions	GET	/corrective-actions	Paginated query.
+16. Frontend Data Architecture
+Framework: Next.js (App Router recommended, but Pages router works).
+State Management: TanStack Query (React Query) is mandatory. It perfectly maps to this backend's REST architecture, handling caching, loading states, and pagination without Redux boilerplate.
+Forms: React Hook Form + Zod (validating against the Pydantic schemas in the backend).
+Global State: React Context only for the authenticated User session and UI Sidebar toggles.
+17. Component System Inventory
+<AppShell>: Main authenticated layout wrapper.
+<RoleGate>: Wrapper component that checks user roles against an allowedRoles array.
+<SifBadge level={sif_level}>: Renders colored pills (Red=High, Yellow=Medium, Gray=Non-SIF).
+<RiskGauge score={risk_score}>: Recharts radial bar chart for 1-100 risk.
+<BarrierStatusIcon status={barrier_status}>: Standardized icons for EFFECTIVE/FAILED.
+<DataTable columns={} data={}>: Reusable table with server-side pagination props.
+<ReviewDecisionModal>: Reusable dialog for the human-in-the-loop workflow.
+18. Animations
+Transitions: Page changes should be instant. No heavy routing animations.
+Micro-interactions: Buttons should have subtle hover darkening. Modals should fade in (opacity: 0 -> 1 over 150ms).
+Empty States: Animate a subtle SVG illustration when a queue (like Reviews) is empty.
+19. Responsive Design
+Desktop (1024px+): Full sidebar, multi-column report layouts.
+Tablet (768px - 1023px): Collapsed icon-only sidebar.
+Mobile (< 768px): Bottom navigation bar or hamburger menu. Data tables convert to stacked card lists. Report detail pages collapse into a single vertical scroll.
+20. Error / Loading / Empty / Success States
+Loading: Use Skeleton loaders (animate-pulse) mirroring the exact shape of the incoming data. Do not use generic spinners for full pages.
+Empty: If /reports has 0 items, show a prominent "No reports found. Create the first report." CTA.
+Success: Use non-blocking Toast notifications (e.g., "Review submitted successfully") rather than interrupting modal dialogs.
+Errors: Map backend HTTP codes to friendly messages. e.g., 422 -> "Please check the highlighted form fields."
+21. Security
+Token Handling: Store the JWT in memory or an HttpOnly cookie. Do NOT store it in localStorage if XSS is a concern.
+XSS Protection: The backend report_text can contain arbitrary strings. React escapes {text} by default. Never use dangerouslySetInnerHTML when rendering report text.
+22. Implementation Phases
+Phase 1: Foundation. Next.js setup, Tailwind CSS, API client (Axios), TanStack Query setup.
+Phase 2: Auth & App Shell. /login, Token handling, <RoleGate>, Sidebar, Layouts.
+Phase 3: Reporting Core. /reports list and /reports/new.
+Phase 4: AI Integration. /reports/[id] view, triggering /analyze, and displaying the ML results cleanly.
+Phase 5: Human-in-the-Loop. /reviews queue and decision API integration.
+Phase 6: Workflows. /corrective-actions lifecycle management.
+Phase 7: Dashboard. Recharts integration and /dashboard/* data fetching.
+Phase 8: Polish. Loading skeletons, error boundaries, mobile responsiveness.
+23. 100/100 Acceptance Criteria
+The frontend is considered "Production Ready" when:
+
+ Auth: A user can log in, and their role strictly dictates UI visibility.
+ Data: Every chart on /dashboard is populated exclusively by backend endpoints.
+ Workflow: A user can submit a report, see the AI analysis loading state, view the results, and a Reviewer can approve/reject it.
+ Actions: Corrective Actions can be moved through their entire status lifecycle.
+ UX: Every API call has a Loading skeleton, an Error boundary, and an Empty state.
+ Performance: TanStack Query is caching data to prevent redundant API calls on tab switching.
+ Responsive: The platform is fully usable on a mobile device.
