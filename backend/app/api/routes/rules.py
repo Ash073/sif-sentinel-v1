@@ -29,14 +29,14 @@ from app.schemas.rule import LifeSavingRuleCreate, LifeSavingRuleUpdate
 from app.schemas.common import Message
 
 @router.post("", response_model=LifeSavingRuleRead, status_code=status.HTTP_201_CREATED, summary="Create a Life-Saving Rule")
-async def create_rule(payload: LifeSavingRuleCreate, db: DBSession, _: User = Depends(require_roles(UserRole.ADMIN))) -> LifeSavingRuleRead:
-    return await RulesService(db).create(payload)
+async def create_rule(payload: LifeSavingRuleCreate, db: DBSession, user: User = Depends(require_roles(UserRole.ADMIN))) -> LifeSavingRuleRead:
+    return await RulesService(db, user).create(payload)
 
 @router.patch("/{rule_id}", response_model=LifeSavingRuleRead, summary="Update a Life-Saving Rule")
-async def update_rule(rule_id: str, payload: LifeSavingRuleUpdate, db: DBSession, _: User = Depends(require_roles(UserRole.ADMIN))) -> LifeSavingRuleRead:
-    return await RulesService(db).update(rule_id, payload)
+async def update_rule(rule_id: str, payload: LifeSavingRuleUpdate, db: DBSession, user: User = Depends(require_roles(UserRole.ADMIN))) -> LifeSavingRuleRead:
+    return await RulesService(db, user).update(rule_id, payload)
 
 @router.delete("/{rule_id}", response_model=Message, summary="Delete a Life-Saving Rule")
-async def delete_rule(rule_id: str, db: DBSession, _: User = Depends(require_roles(UserRole.ADMIN))) -> Message:
-    await RulesService(db).delete(rule_id)
+async def delete_rule(rule_id: str, db: DBSession, user: User = Depends(require_roles(UserRole.ADMIN))) -> Message:
+    await RulesService(db, user).delete(rule_id)
     return Message(message="Life-Saving Rule deleted successfully")

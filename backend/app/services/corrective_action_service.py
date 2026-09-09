@@ -34,8 +34,9 @@ logger = structlog.get_logger(__name__)
 class CorrectiveActionService:
     """Manages persistent corrective actions with state-machine governance and auditability."""
 
-    def __init__(self, db: AsyncSession) -> None:
+    def __init__(self, db: AsyncSession, current_user: "User" = None) -> None:
         self.db = db
+        self.current_user = current_user
 
     async def create_action(
         self,
@@ -44,6 +45,14 @@ class CorrectiveActionService:
         ip: str | None = None,
     ) -> CorrectiveAction:
         """Creates a new corrective action in DRAFT state."""
+        from app.core.constants import UserRole
+        from app.models.report import Report
+        
+        if self.current_user and self.current_user.role != UserRole.ADMIN and self.current_user.site_id:
+            report = await self.db.get(Report, payload.report_id)
+            if report and report.site_id != self.current_user.site_id:
+                raise AppError("FORBIDDEN", "You can only create actions for reports in your site", 403)
+
         action = CorrectiveAction(
             report_id=payload.report_id,
             intervention_recommendation_id=payload.intervention_recommendation_id,
@@ -86,6 +95,14 @@ class CorrectiveActionService:
         action = await self.db.get(CorrectiveAction, action_id)
         if not action:
             raise NotFoundError("corrective action")
+            
+        from app.core.constants import UserRole
+        if self.current_user and self.current_user.role != UserRole.ADMIN and self.current_user.site_id:
+            from app.models.report import Report
+            report = await self.db.get(Report, action.report_id)
+            if report and report.site_id != self.current_user.site_id:
+                raise AppError("FORBIDDEN", "You do not have access to this site's data", 403)
+                
         return action
 
     async def list_actions(
@@ -98,6 +115,11 @@ class CorrectiveActionService:
         page_size: int = 50,
     ) -> tuple[list[CorrectiveAction], int]:
         query = select(CorrectiveAction)
+        from app.core.constants import UserRole
+        if self.current_user and self.current_user.role != UserRole.ADMIN and self.current_user.site_id:
+            from app.models.report import Report
+            query = query.join(Report, Report.id == CorrectiveAction.report_id).where(Report.site_id == self.current_user.site_id)
+
         if report_id:
             query = query.where(CorrectiveAction.report_id == report_id)
         if status:
@@ -423,6 +445,9 @@ class CorrectiveActionService:
 
     async def get_audit_trail(self, action_id: UUID) -> list[dict[str, Any]]:
         """Returns the complete immutable audit history for this corrective action."""
+        # Check authorization
+        await self.get(action_id)
+        
         query = (
             select(AuditLog)
             .where(
@@ -451,6 +476,11 @@ class CorrectiveActionService:
             .where(CorrectiveAction.status.in_(["APPROVED", "IN_PROGRESS", "VERIFICATION_REQUIRED", "VERIFIED", "CLOSED"]))
             .order_by(CorrectiveAction.created_at.desc())
         )
+        from app.core.constants import UserRole
+        if self.current_user and self.current_user.role != UserRole.ADMIN and self.current_user.site_id:
+            from app.models.report import Report
+            query = query.join(Report, Report.id == CorrectiveAction.report_id).where(Report.site_id == self.current_user.site_id)
+            
         rows = (await self.db.scalars(query)).all()
         return [
             CorrectiveActionExportItem(
@@ -481,4 +511,12 @@ class CorrectiveActionService:
         )
         if not action:
             raise NotFoundError("corrective action")
+            
+        from app.core.constants import UserRole
+        if self.current_user and self.current_user.role != UserRole.ADMIN and self.current_user.site_id:
+            from app.models.report import Report
+            report = await self.db.get(Report, action.report_id)
+            if report and report.site_id != self.current_user.site_id:
+                raise AppError("FORBIDDEN", "You do not have access to this site's data", 403)
+                
         return action

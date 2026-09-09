@@ -3,7 +3,7 @@ from uuid import UUID, uuid4
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.constants import ReportStatus, ReportType, SourceType
+from app.core.constants import ReportStatus, ReportType, SourceType, UserRole
 from app.core.exceptions import AppError, NotFoundError
 from app.models.report import Report
 from app.repositories.report_repository import ReportRepository
@@ -22,6 +22,11 @@ class ReportService:
         from app.models.site import Site
         if not await self.db.get(Site, payload.site_id):
             raise AppError("SITE_NOT_FOUND", "Site not found", 404)
+            
+        if self.current_user and self.current_user.role != UserRole.ADMIN and self.current_user.site_id:
+            if payload.site_id != self.current_user.site_id:
+                raise AppError("FORBIDDEN", "You can only create reports for your assigned site", 403)
+                
         human_id = payload.report_id or self._new_human_id()
         if await self.repo.get_by_human_id(human_id):
             raise AppError("REPORT_ID_EXISTS", "Report identifier already exists", 409)
@@ -40,7 +45,7 @@ class ReportService:
         if not report:
             raise NotFoundError("report")
             
-        if self.current_user and self.current_user.role != "ADMIN" and self.current_user.site_id:
+        if self.current_user and self.current_user.role != UserRole.ADMIN and self.current_user.site_id:
             if report.site_id != self.current_user.site_id:
                 raise AppError("FORBIDDEN", "You do not have access to reports for this site", 403)
                 
@@ -65,7 +70,7 @@ class ReportService:
         access the repository directly.
         """
         # IDOR Protection: Scoped list
-        if self.current_user and self.current_user.role != "ADMIN" and self.current_user.site_id:
+        if self.current_user and self.current_user.role != UserRole.ADMIN and self.current_user.site_id:
             site_id = self.current_user.site_id
 
         return await self.repo.list(
@@ -98,18 +103,31 @@ class ReportService:
 
     async def delete(self, human_id: str, user_id: UUID, ip_address: str | None) -> None:
         report = await self.get(human_id)
+        report.is_deleted = True
         await record_audit(self.db, user_id=user_id, action="REPORT_DELETED", entity_type="report", entity_id=report.id,
                            details={"report_id": report.report_id}, ip_address=ip_address)
-        await self.db.delete(report)
         await self.db.commit()
 
     async def close(self, human_id: str, user_id: UUID, ip_address: str | None) -> Report:
         report = await self.get(human_id)
-        if report.status in (ReportStatus.CLOSED, ReportStatus.FAILED):
-            raise AppError("REPORT_ALREADY_CLOSED", "Report is already closed or failed", 409)
+        if report.status not in (ReportStatus.ANALYZED, ReportStatus.REVIEW_REQUIRED):
+            raise AppError("INVALID_TRANSITION", f"Cannot close report from status: {report.status}", 409)
             
         report.status = ReportStatus.CLOSED
         await record_audit(self.db, user_id=user_id, action="REPORT_CLOSED", entity_type="report", entity_id=report.id,
+                           details={"report_id": report.report_id}, ip_address=ip_address)
+        await self.db.commit()
+        await self.db.refresh(report)
+        return report
+
+    async def reset(self, human_id: str, user_id: UUID, ip_address: str | None) -> Report:
+        """Reset a report back to NEW state to allow re-analysis (Admin/HSE Manager only)."""
+        report = await self.get(human_id)
+        if report.status in (ReportStatus.NEW, ReportStatus.CLOSED):
+            raise AppError("INVALID_TRANSITION", f"Cannot reset report from status: {report.status}", 409)
+            
+        report.status = ReportStatus.NEW
+        await record_audit(self.db, user_id=user_id, action="REPORT_RESET", entity_type="report", entity_id=report.id,
                            details={"report_id": report.report_id}, ip_address=ip_address)
         await self.db.commit()
         await self.db.refresh(report)

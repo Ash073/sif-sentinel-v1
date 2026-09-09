@@ -171,7 +171,7 @@ class TestAnalyzeDirectValidation:
     def test_nlp_not_called_for_invalid_input(self, client, admin_headers):
         """Invalid input must be rejected before the NLP pipeline is reached."""
         with patch(
-            "app.services.analysis.analysis_service.analyze_text"
+            "app.services.nlp.analysis_pipeline.AnalysisPipeline.analyze_text"
         ) as mock_nlp:
             r = client.post(
                 "/api/v1/analyze",
@@ -184,7 +184,7 @@ class TestAnalyzeDirectValidation:
     def test_nlp_not_called_for_oversized_input(self, client, admin_headers):
         """Oversized text must be rejected before the NLP pipeline is reached."""
         with patch(
-            "app.services.analysis.analysis_service.analyze_text"
+            "app.services.nlp.analysis_pipeline.AnalysisPipeline.analyze_text"
         ) as mock_nlp:
             r = client.post(
                 "/api/v1/analyze",

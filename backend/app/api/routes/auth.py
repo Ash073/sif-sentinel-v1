@@ -58,12 +58,14 @@ async def refresh(user: CurrentUser) -> TokenResponse:
     return TokenResponse(access_token=create_access_token(user.id), user=user)
 
 @router.post("/reset-password", response_model=Message, summary="Request password reset")
-async def reset_password(payload: PasswordResetRequest) -> Message:
+@limiter.limit("5/minute")
+async def reset_password(request: Request, payload: PasswordResetRequest) -> Message:
     print(f"MOCK: Password reset link for {payload.email} sent. Click https://example.com/reset?token=mock_token")
     return Message(message="If that email is registered, a reset link has been sent.")
 
 @router.post("/change-password", response_model=Message, summary="Change password")
-async def change_password(payload: ChangePasswordRequest, user: CurrentUser, db: DBSession) -> Message:
+@limiter.limit("10/minute")
+async def change_password(request: Request, payload: ChangePasswordRequest, user: CurrentUser, db: DBSession) -> Message:
     await AuthService(db).change_password(user, payload.current_password, payload.new_password)
     return Message(message="Password changed successfully")
 

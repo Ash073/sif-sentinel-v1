@@ -13,12 +13,12 @@ class ReportRepository:
         self.db = db
 
     async def get_by_human_id(self, report_id: str) -> Report | None:
-        return await self.db.scalar(select(Report).where(Report.report_id == report_id))
+        return await self.db.scalar(select(Report).where(Report.report_id == report_id, Report.is_deleted == False))
 
     async def list(self, *, page: int, page_size: int, site_id: UUID | None, report_type: ReportType | None,
                    status: ReportStatus | None, source_type: SourceType | None, date_from: datetime | None,
                    date_to: datetime | None, search: str | None) -> tuple[list[Report], int]:
-        filters = []
+        filters = [Report.is_deleted == False]
         for field, value in ((Report.site_id, site_id), (Report.report_type, report_type), (Report.status, status), (Report.source_type, source_type)):
             if value is not None:
                 filters.append(field == value)

@@ -42,74 +42,87 @@ class PipelineResult:
     explainability_factors: list[dict] | None = None
 
 
-def analyze_text(text: str, precursor_priority: str | None = None) -> PipelineResult:
-    document = preprocess_text(text)
-    prediction = classify_sif(document.normalized_text)
+from app.core.interfaces import MLAdapterProtocol, NLPAdapterProtocol
+
+class AnalysisPipeline:
+    def __init__(self, ml_provider: MLAdapterProtocol | None = None, nlp_provider: NLPAdapterProtocol | None = None):
+        self.ml_provider = ml_provider
+        self.nlp_provider = nlp_provider
+
+    def analyze_text(self, text: str, precursor_priority: str | None = None) -> PipelineResult:
+        document = preprocess_text(text)
+        if self.ml_provider:
+            prediction = self.ml_provider.predict(document.normalized_text)
+        else:
+            prediction = classify_sif(document.normalized_text)
+        
+        structured_evidence = get_structured_evidence(document)
+        if self.nlp_provider:
+            entities = self.nlp_provider.extract_entities(document.normalized_text)
+        else:
+            entities = extract_entities(document)
     
-    structured_evidence = get_structured_evidence(document)
-    entities = extract_entities(document)
-    
-    # Phase 5B Causal Safety Reasoning
-    safety_graph_obj = SafetyCausalReasoningEngine.evaluate_causal_safety(
-        document=document,
-        structured_evidence=structured_evidence,
-        model_probability=prediction.probability,
-    )
-    safety_graph_dict = safety_graph_obj.to_dict()
-    causal_chains_list = [c.to_dict() for c in safety_graph_obj.causal_chains]
-    
-    rule = map_to_life_saving_rule(
-        entities.activity, 
-        entities.hazard, 
-        entities.barrier, 
-        entities.barrier_failure, 
-        document.normalized_text, 
-        structured_evidence
-    )
-    
-    evidence = extract_evidence(document, entities)
-    confidence = overall_confidence(
-        max(prediction.probability, 1 - prediction.probability),
-        entities.confidence,
-        rule.confidence,
-        evidence.confidence
-    )
-    ambiguous = 0.42 <= prediction.probability <= 0.58
-    
-    # If a barrier is explicitly 'unknown', force review
-    has_unknown_barrier = any(ctrl.verification_status == "unknown" for ctrl in structured_evidence.get_by_type(EvidenceType.CONTROL))
-    
-    high_risk_without_rule = prediction.sif_level in (SIFLevel.HIGH, SIFLevel.MEDIUM) and not rule.rule
-    review_required = confidence < get_settings().analysis_review_threshold or ambiguous or not evidence.evidence_span or high_risk_without_rule or has_unknown_barrier
-    
-    level = SIFLevel.REVIEW if review_required and prediction.sif_level in (SIFLevel.NON_SIF, SIFLevel.LOW, SIFLevel.REVIEW) else prediction.sif_level
-    
-    precursor_candidates = generate_precursor_candidates(structured_evidence)
-    
-    risk_data = calculate_risk(
-        sif_level=level,
-        sif_potential=prediction.sif_potential,
-        barrier_status=entities.barrier_status,
-        has_lsr=bool(rule.rule),
-        precursor_priority=precursor_priority
-    )
-    
-    return PipelineResult(
-        prediction.sif_potential, level, prediction.probability, 
-        entities.activity, entities.hazard, entities.barrier, 
-        entities.barrier_status.value, entities.barrier_failure, 
-        rule.rule, rule.confidence, evidence.evidence_span, 
-        evidence.evidence_sentences, evidence.evidence_terms, 
-        confidence, review_required, prediction.model_name, 
-        prediction.model_version, 
-        _explain(prediction.sif_level, structured_evidence, rule.rule, evidence.evidence_span, prediction.predictive_terms, review_required, has_unknown_barrier, safety_graph_obj.reasoning_summary),
-        precursor_candidates,
-        risk_data,
-        safety_graph=safety_graph_dict,
-        causal_chains=causal_chains_list,
-        reasoning_summary=safety_graph_obj.reasoning_summary,
-        explainability_factors=prediction.explainability_factors
-    )
+        # Phase 5B Causal Safety Reasoning
+        safety_graph_obj = SafetyCausalReasoningEngine.evaluate_causal_safety(
+            document=document,
+            structured_evidence=structured_evidence,
+            model_probability=prediction.probability,
+        )
+        safety_graph_dict = safety_graph_obj.to_dict()
+        causal_chains_list = [c.to_dict() for c in safety_graph_obj.causal_chains]
+        
+        rule = map_to_life_saving_rule(
+            entities.activity, 
+            entities.hazard, 
+            entities.barrier, 
+            entities.barrier_failure, 
+            document.normalized_text, 
+            structured_evidence
+        )
+        
+        evidence = extract_evidence(document, entities)
+        confidence = overall_confidence(
+            max(prediction.probability, 1 - prediction.probability),
+            entities.confidence,
+            rule.confidence,
+            evidence.confidence
+        )
+        ambiguous = 0.42 <= prediction.probability <= 0.58
+        
+        # If a barrier is explicitly 'unknown', force review
+        has_unknown_barrier = any(ctrl.verification_status == "unknown" for ctrl in structured_evidence.get_by_type(EvidenceType.CONTROL))
+        
+        high_risk_without_rule = prediction.sif_level in (SIFLevel.HIGH, SIFLevel.MEDIUM) and not rule.rule
+        review_required = confidence < get_settings().analysis_review_threshold or ambiguous or not evidence.evidence_span or high_risk_without_rule or has_unknown_barrier
+        
+        level = SIFLevel.REVIEW if review_required and prediction.sif_level in (SIFLevel.NON_SIF, SIFLevel.LOW, SIFLevel.REVIEW) else prediction.sif_level
+        
+        precursor_candidates = generate_precursor_candidates(structured_evidence)
+        
+        risk_data = calculate_risk(
+            sif_level=level,
+            sif_potential=prediction.sif_potential,
+            barrier_status=entities.barrier_status,
+            has_lsr=bool(rule.rule),
+            precursor_priority=precursor_priority
+        )
+        
+        return PipelineResult(
+            prediction.sif_potential, level, prediction.probability, 
+            entities.activity, entities.hazard, entities.barrier, 
+            entities.barrier_status.value, entities.barrier_failure, 
+            rule.rule, rule.confidence, evidence.evidence_span, 
+            evidence.evidence_sentences, evidence.evidence_terms, 
+            confidence, review_required, prediction.model_name, 
+            prediction.model_version, 
+            _explain(prediction.sif_level, structured_evidence, rule.rule, evidence.evidence_span, prediction.predictive_terms, review_required, has_unknown_barrier, safety_graph_obj.reasoning_summary),
+            precursor_candidates,
+            risk_data,
+            safety_graph=safety_graph_dict,
+            causal_chains=causal_chains_list,
+            reasoning_summary=safety_graph_obj.reasoning_summary,
+            explainability_factors=prediction.explainability_factors
+        )
 
 
 def _explain(level: SIFLevel, structured: StructuredEvidence, rule: str | None, evidence: str | None, predictive_terms: list[str], review_required: bool, has_unknown_barrier: bool, reasoning_summary: str | None = None) -> str:
@@ -157,3 +170,7 @@ def _explain(level: SIFLevel, structured: StructuredEvidence, rule: str | None, 
         parts.append(f"Causal reasoning: {reasoning_summary}")
 
     return " ".join(parts)
+
+def analyze_text(text: str, precursor_priority: str | None = None) -> PipelineResult:
+    """Backward compatibility wrapper for the analysis pipeline."""
+    return AnalysisPipeline().analyze_text(text, precursor_priority)

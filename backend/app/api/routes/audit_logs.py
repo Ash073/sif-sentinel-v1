@@ -1,12 +1,13 @@
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy import func, select
+from pydantic import UUID4
 
 from app.api.deps import DBSession, require_roles
 from app.core.constants import UserRole
 from app.models.audit_log import AuditLog
 from app.models.user import User
 from app.schemas.audit import AuditLogPage, AuditLogRead
-from uuid import UUID
+
 
 router = APIRouter(prefix="/audit-logs", tags=["Audit"])
 
@@ -17,10 +18,10 @@ async def list_audit_logs(
     _: User = Depends(require_roles(UserRole.ADMIN)),
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
-    entity_id: UUID | None = None,
-    user_id: UUID | None = None,
-    action: str | None = None,
-    entity_type: str | None = None,
+    entity_id: UUID4 | None = Query(default=None),
+    user_id: UUID4 | None = Query(default=None),
+    action: str | None = Query(default=None),
+    entity_type: str | None = Query(default=None),
 ) -> AuditLogPage:
     offset = (page - 1) * page_size
     

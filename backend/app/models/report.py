@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import DateTime, Enum, ForeignKey, Index, String, Text
+from sqlalchemy import DateTime, Enum, ForeignKey, Index, String, Text, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import Uuid
 
@@ -23,6 +23,7 @@ class Report(UUIDTimestampMixin, Base):
     reported_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, index=True)
     source_type: Mapped[SourceType] = mapped_column(Enum(SourceType, native_enum=False), nullable=False, index=True)
     status: Mapped[ReportStatus] = mapped_column(Enum(ReportStatus, native_enum=False), default=ReportStatus.NEW, nullable=False, index=True)
+    is_deleted: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, index=True)
     created_by: Mapped[uuid.UUID] = mapped_column(Uuid, ForeignKey("users.id"), nullable=False, index=True)
     site = relationship("Site", back_populates="reports")
     creator = relationship("User", back_populates="reports")

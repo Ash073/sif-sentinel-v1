@@ -17,7 +17,7 @@ from app.schemas.analysis import AnalysisResponse
 from app.services.audit_service import record_audit
 from app.services.intervention_service import InterventionService
 from app.services.llm.assistance_service import LLMAssistanceService
-from app.services.nlp.analysis_pipeline import analyze_text
+# removed import
 from app.services.precursor_engine.precursor_service import PrecursorService
 from app.services.risk_engine.calculator import calculate_risk
 
@@ -28,8 +28,8 @@ class AnalysisService:
     def __init__(self, db: AsyncSession | None, pipeline: AnalysisPipelineProtocol | None = None) -> None:
         self.db = db
         if pipeline is None:
-            from app.services.nlp import analysis_pipeline
-            self.pipeline = analysis_pipeline
+            from app.services.nlp.analysis_pipeline import AnalysisPipeline
+            self.pipeline = AnalysisPipeline()
         else:
             self.pipeline = pipeline
 

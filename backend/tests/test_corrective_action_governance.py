@@ -260,13 +260,13 @@ async def test_list_actions_with_status_filter(admin_headers, sample_action_payl
         # List DRAFT
         draft_list = await ac.get("/api/v1/corrective-actions?status=DRAFT", headers=admin_headers)
         assert draft_list.status_code == 200
-        draft_ids = [a["id"] for a in draft_list.json()]
+        draft_ids = [a["id"] for a in draft_list.json()["items"]]
         assert action_id in draft_ids
 
         # List APPROVED (should not contain draft action)
         app_list = await ac.get("/api/v1/corrective-actions?status=APPROVED", headers=admin_headers)
         assert app_list.status_code == 200
-        app_ids = [a["id"] for a in app_list.json()]
+        app_ids = [a["id"] for a in app_list.json()["items"]]
         assert action_id not in app_ids
 
 

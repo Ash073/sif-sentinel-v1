@@ -49,7 +49,7 @@ async def create_corrective_action(
     db: DBSession,
     user: User = Depends(require_roles(*_analyst_and_above)),
 ) -> CorrectiveActionRead:
-    action = await CorrectiveActionService(db).create_action(
+    action = await CorrectiveActionService(db, user).create_action(
         payload=payload,
         creator_id=user.id,
         ip=request.client.host if request.client else None,
@@ -62,7 +62,7 @@ async def export_corrective_actions(
     db: DBSession,
     _: User = Depends(require_roles(*_all_roles)),
 ) -> list[CorrectiveActionExportItem]:
-    return await CorrectiveActionService(db).export_approved_actions()
+    return await CorrectiveActionService(db, _).export_approved_actions()
 
 
 @router.get("", response_model=CorrectiveActionPage, summary="List corrective actions with filtering")
@@ -76,7 +76,7 @@ async def list_corrective_actions(
     page: int = 1,
     page_size: int = 50,
 ) -> CorrectiveActionPage:
-    actions, total = await CorrectiveActionService(db).list_actions(
+    actions, total = await CorrectiveActionService(db, _).list_actions(
         report_id=report_id,
         status=status,
         priority=priority,
@@ -98,7 +98,7 @@ async def get_corrective_action(
     db: DBSession,
     _: User = Depends(require_roles(*_all_roles)),
 ) -> CorrectiveActionRead:
-    action = await CorrectiveActionService(db).get(action_id)
+    action = await CorrectiveActionService(db, _).get(action_id)
     return CorrectiveActionRead.model_validate(action)
 
 
@@ -109,7 +109,7 @@ async def submit_corrective_action(
     db: DBSession,
     user: User = Depends(require_roles(*_analyst_and_above)),
 ) -> CorrectiveActionRead:
-    action = await CorrectiveActionService(db).submit(
+    action = await CorrectiveActionService(db, user).submit(
         action_id=action_id,
         actor_id=user.id,
         ip=request.client.host if request.client else None,
@@ -125,7 +125,7 @@ async def approve_corrective_action(
     db: DBSession = None,
     user: User = Depends(require_roles(*_reviewer_and_above)),
 ) -> CorrectiveActionRead:
-    action = await CorrectiveActionService(db).approve(
+    action = await CorrectiveActionService(db, user).approve(
         action_id=action_id,
         actor_id=user.id,
         payload=payload,
@@ -142,7 +142,7 @@ async def reject_corrective_action(
     db: DBSession,
     user: User = Depends(require_roles(*_reviewer_and_above)),
 ) -> CorrectiveActionRead:
-    action = await CorrectiveActionService(db).reject(
+    action = await CorrectiveActionService(db, user).reject(
         action_id=action_id,
         actor_id=user.id,
         payload=payload,
@@ -159,7 +159,7 @@ async def cancel_corrective_action(
     db: DBSession,
     user: User = Depends(require_roles(*_analyst_and_above)),
 ) -> CorrectiveActionRead:
-    action = await CorrectiveActionService(db).cancel(
+    action = await CorrectiveActionService(db, user).cancel(
         action_id=action_id,
         actor_id=user.id,
         payload=payload,
@@ -176,7 +176,7 @@ async def modify_corrective_action(
     db: DBSession,
     user: User = Depends(require_roles(*_reviewer_and_above)),
 ) -> CorrectiveActionRead:
-    action = await CorrectiveActionService(db).modify(
+    action = await CorrectiveActionService(db, user).modify(
         action_id=action_id,
         actor_id=user.id,
         payload=payload,
@@ -192,7 +192,7 @@ async def start_corrective_action(
     db: DBSession,
     user: User = Depends(require_roles(*_analyst_and_above)),
 ) -> CorrectiveActionRead:
-    action = await CorrectiveActionService(db).start_action(
+    action = await CorrectiveActionService(db, user).start_action(
         action_id=action_id,
         actor_id=user.id,
         ip=request.client.host if request.client else None,
@@ -207,7 +207,7 @@ async def request_action_verification(
     db: DBSession,
     user: User = Depends(require_roles(*_analyst_and_above)),
 ) -> CorrectiveActionRead:
-    action = await CorrectiveActionService(db).request_verification(
+    action = await CorrectiveActionService(db, user).request_verification(
         action_id=action_id,
         actor_id=user.id,
         ip=request.client.host if request.client else None,
@@ -223,7 +223,7 @@ async def verify_corrective_action(
     db: DBSession,
     user: User = Depends(require_roles(*_reviewer_and_above)),
 ) -> CorrectiveActionRead:
-    action = await CorrectiveActionService(db).verify(
+    action = await CorrectiveActionService(db, user).verify(
         action_id=action_id,
         actor_id=user.id,
         payload=payload,
@@ -240,7 +240,7 @@ async def close_corrective_action(
     db: DBSession = None,
     user: User = Depends(require_roles(*_manager_and_above)),
 ) -> CorrectiveActionRead:
-    action = await CorrectiveActionService(db).close(
+    action = await CorrectiveActionService(db, user).close(
         action_id=action_id,
         actor_id=user.id,
         payload=payload,
@@ -255,4 +255,4 @@ async def get_action_audit_trail(
     db: DBSession,
     _: User = Depends(require_roles(*_all_roles)),
 ) -> list[dict]:
-    return await CorrectiveActionService(db).get_audit_trail(action_id)
+    return await CorrectiveActionService(db, _).get_audit_trail(action_id)

@@ -31,7 +31,8 @@ async def analyze_text_endpoint(request: Request, payload: AnalyzeTextRequest, _
 
 
 @router.post("/analyze/counterfactual", response_model=CounterfactualResponse, summary="Simulate counterfactual safety barrier restoration")
-async def analyze_counterfactual_endpoint(payload: CounterfactualRequest, _: User = Depends(require_roles(UserRole.ADMIN, UserRole.HSE_MANAGER, UserRole.HSE_ANALYST, UserRole.REVIEWER))) -> CounterfactualResponse:
+@limiter.limit("20/minute")
+async def analyze_counterfactual_endpoint(request: Request, payload: CounterfactualRequest, _: User = Depends(require_roles(UserRole.ADMIN, UserRole.HSE_MANAGER, UserRole.HSE_ANALYST, UserRole.REVIEWER))) -> CounterfactualResponse:
     graph = payload.safety_graph
     risk_score = payload.risk_score
 
@@ -70,7 +71,9 @@ async def analyze_counterfactual_endpoint(payload: CounterfactualRequest, _: Use
 
 
 @router.post("/analyze/narrative", response_model=NarrativeResponse, summary="Generate explainable AI narrative translation")
+@limiter.limit("20/minute")
 async def analyze_narrative_endpoint(
+    request: Request,
     payload: NarrativeRequest,
     _: User = Depends(require_roles(UserRole.ADMIN, UserRole.HSE_MANAGER, UserRole.HSE_ANALYST, UserRole.REVIEWER)),
 ) -> NarrativeResponse:
@@ -103,7 +106,9 @@ async def analyze_narrative_endpoint(
 
 
 @router.post("/analyze/interventions", response_model=InterventionAnalysisResponse, summary="Generate deterministic hierarchy of controls & prevention plan")
+@limiter.limit("20/minute")
 async def analyze_interventions_endpoint(
+    request: Request,
     payload: InterventionAnalysisRequest,
     _: User = Depends(require_roles(UserRole.ADMIN, UserRole.HSE_MANAGER, UserRole.HSE_ANALYST, UserRole.REVIEWER, UserRole.VIEWER)),
 ) -> InterventionAnalysisResponse:

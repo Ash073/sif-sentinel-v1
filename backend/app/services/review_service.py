@@ -36,7 +36,7 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.constants import ReportStatus, ReviewDecision
+from app.core.constants import ReportStatus, ReviewDecision, UserRole
 from app.core.exceptions import AppError, NotFoundError
 from app.models.report import Report
 from app.models.report_analysis import ReportAnalysis
@@ -103,8 +103,9 @@ def _joined_query():
 # ---------------------------------------------------------------------------
 
 class ReviewService:
-    def __init__(self, db: AsyncSession) -> None:
+    def __init__(self, db: AsyncSession, current_user: "User" = None) -> None:
         self.db = db
+        self.current_user = current_user
 
     async def list(
         self,
@@ -134,8 +135,14 @@ class ReviewService:
 
         base = base.order_by(Review.created_at)
 
+        if self.current_user and self.current_user.role != UserRole.ADMIN and self.current_user.site_id:
+            base = base.where(Report.site_id == self.current_user.site_id)
+
         # Count query mirrors the same filter
         count_q = select(func.count()).select_from(Review)
+        if self.current_user and self.current_user.role != UserRole.ADMIN and self.current_user.site_id:
+            count_q = count_q.join(Report, Report.id == Review.report_id).where(Report.site_id == self.current_user.site_id)
+
         if status_filter == ReviewStatusFilter.PENDING:
             count_q = count_q.where(Review.decision == ReviewDecision.PENDING)
         elif status_filter == ReviewStatusFilter.REVIEWED:
@@ -164,6 +171,9 @@ class ReviewService:
         if not row:
             raise NotFoundError("review")
         review, report, analysis = row
+        if self.current_user and self.current_user.role != UserRole.ADMIN and self.current_user.site_id:
+            if report.site_id != self.current_user.site_id:
+                raise AppError("FORBIDDEN", "You do not have access to this site's data", 403)
         pending = review.decision == ReviewDecision.PENDING
         return _to_queue_item(review, report, analysis, pending)
 
@@ -195,6 +205,12 @@ class ReviewService:
                 f"Review has already been decided: {review.decision.value}",
                 409,
             )
+
+        # --- Access control ---
+        report = await self.db.get(Report, review.report_id)
+        if self.current_user and self.current_user.role != UserRole.ADMIN and self.current_user.site_id:
+            if report and report.site_id != self.current_user.site_id:
+                raise AppError("FORBIDDEN", "You do not have access to this site's data", 403)
 
         # --- Reject attempt to submit PENDING as a decision ---
         if payload.decision == ReviewDecision.PENDING:
@@ -242,7 +258,6 @@ class ReviewService:
             setattr(review, field, value)
 
         # --- Transition Report.status ---
-        report = await self.db.get(Report, review.report_id)
         if report and report.status == ReportStatus.REVIEW_REQUIRED:
             report.status = ReportStatus.REVIEWED
 

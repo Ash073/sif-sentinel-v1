@@ -21,7 +21,7 @@ _roles = (UserRole.ADMIN, UserRole.HSE_MANAGER, UserRole.REVIEWER)
 @router.get("", response_model=ReviewPage, summary="List reviews with optional status filter")
 async def queue(
     db: DBSession,
-    _: User = Depends(require_roles(*_roles)),
+    user: User = Depends(require_roles(*_roles)),
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
     status: ReviewStatusFilter = Query(ReviewStatusFilter.PENDING, description="Filter by review status"),
@@ -32,7 +32,7 @@ async def queue(
     - **REVIEWED**: completed reviews (APPROVE / REJECT / MODIFY)
     - **ALL**: no filter, returns everything
     """
-    items, total = await ReviewService(db).list(page, page_size, status)
+    items, total = await ReviewService(db, user).list(page, page_size, status)
     return ReviewPage(items=items, total=total, page=page, page_size=page_size)
 
 
@@ -40,9 +40,9 @@ async def queue(
 async def get_review(
     review_id: UUID,
     db: DBSession,
-    _: User = Depends(require_roles(*_roles)),
+    user: User = Depends(require_roles(*_roles)),
 ) -> ReviewQueueItem:
-    return await ReviewService(db).get(review_id)
+    return await ReviewService(db, user).get(review_id)
 
 
 @router.post(
@@ -63,7 +63,7 @@ async def decision(
     - **REJECT**: AI prediction is rejected (original is preserved for audit)
     - **MODIFY**: reviewer provides corrections; originals are preserved alongside
     """
-    return await ReviewService(db).decide(
+    return await ReviewService(db, user).decide(
         review_id,
         payload,
         user.id,

@@ -71,3 +71,7 @@ async def delete_report(report_id: str, request: Request, db: DBSession, user: U
 @router.post("/{report_id}/close", response_model=ReportRead, summary="Close a report")
 async def close_report(report_id: str, request: Request, db: DBSession, user: User = Depends(require_roles(UserRole.ADMIN, UserRole.HSE_MANAGER))) -> ReportRead:
     return await ReportService(db, user).close(report_id, user.id, request.client.host if request.client else None)
+
+@router.post("/{report_id}/reset", response_model=ReportRead, summary="Reset a report to NEW state")
+async def reset_report(report_id: str, request: Request, db: DBSession, user: User = Depends(require_roles(UserRole.ADMIN, UserRole.HSE_MANAGER))) -> ReportRead:
+    return await ReportService(db, user).reset(report_id, user.id, request.client.host if request.client else None)

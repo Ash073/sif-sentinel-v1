@@ -39,13 +39,22 @@ class SiteService:
         return site
 
     async def get(self, site_id: UUID) -> Site:
+        from app.core.constants import UserRole
+        if self.current_user and self.current_user.role != UserRole.ADMIN and self.current_user.site_id:
+            if site_id != self.current_user.site_id:
+                raise AppError("FORBIDDEN", "You can only access your assigned site", 403)
+                
         site = await self.db.get(Site, site_id)
         if not site:
             raise NotFoundError("site")
         return site
 
     async def list(self) -> list[Site]:
-        return list(await self.db.scalars(select(Site).order_by(Site.name)))
+        query = select(Site)
+        from app.core.constants import UserRole
+        if self.current_user and self.current_user.role != UserRole.ADMIN and self.current_user.site_id:
+            query = query.where(Site.id == self.current_user.site_id)
+        return list(await self.db.scalars(query.order_by(Site.name)))
 
     async def update(self, site_id: UUID, payload: SiteUpdate) -> Site:
         site = await self.get(site_id)

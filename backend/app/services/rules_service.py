@@ -12,9 +12,13 @@ from app.models.life_saving_rule import LifeSavingRule
 from app.models.report_analysis import ReportAnalysis
 
 
+from app.models.user import User
+from app.services.audit_service import record_audit
+
 class RulesService:
-    def __init__(self, db: AsyncSession) -> None:
+    def __init__(self, db: AsyncSession, current_user: User | None = None) -> None:
         self.db = db
+        self.current_user = current_user
 
     async def list(self) -> list[LifeSavingRule]:
         """Return all active Life-Saving Rules ordered by code."""
@@ -66,6 +70,9 @@ class RulesService:
     async def create(self, payload) -> LifeSavingRule:
         rule = LifeSavingRule(**payload.model_dump())
         self.db.add(rule)
+        await self.db.flush()
+        if self.current_user:
+            await record_audit(self.db, user_id=self.current_user.id, action="RULE_CREATED", entity_type="rule", entity_id=rule.id, details=payload.model_dump(), ip_address=None)
         await self.db.commit()
         await self.db.refresh(rule)
         return rule
@@ -74,11 +81,15 @@ class RulesService:
         rule = await self.get(rule_id)
         for key, value in payload.model_dump(exclude_unset=True).items():
             setattr(rule, key, value)
+        if self.current_user:
+            await record_audit(self.db, user_id=self.current_user.id, action="RULE_UPDATED", entity_type="rule", entity_id=rule.id, details=payload.model_dump(exclude_unset=True), ip_address=None)
         await self.db.commit()
         await self.db.refresh(rule)
         return rule
 
     async def delete(self, rule_id: str) -> None:
         rule = await self.get(rule_id)
+        if self.current_user:
+            await record_audit(self.db, user_id=self.current_user.id, action="RULE_DELETED", entity_type="rule", entity_id=rule.id, details={"code": rule.code}, ip_address=None)
         await self.db.delete(rule)
         await self.db.commit()

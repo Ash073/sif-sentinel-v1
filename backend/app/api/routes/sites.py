@@ -15,12 +15,12 @@ async def create_site(payload: SiteCreate, db: DBSession, user: User = Depends(r
     return await SiteService(db, user).create(payload)
 
 @router.get("", response_model=list[SiteRead], summary="List sites")
-async def list_sites(db: DBSession, _: User = Depends(require_roles(UserRole.ADMIN, UserRole.HSE_MANAGER, UserRole.HSE_ANALYST, UserRole.REVIEWER, UserRole.VIEWER))) -> list[SiteRead]:
-    return await SiteService(db).list()
+async def list_sites(db: DBSession, user: User = Depends(require_roles(UserRole.ADMIN, UserRole.HSE_MANAGER, UserRole.HSE_ANALYST, UserRole.REVIEWER, UserRole.VIEWER))) -> list[SiteRead]:
+    return await SiteService(db, user).list()
 
 @router.get("/{site_id}", response_model=SiteRead, summary="Get a site")
-async def get_site(site_id: UUID, db: DBSession, _: User = Depends(require_roles(UserRole.ADMIN, UserRole.HSE_MANAGER, UserRole.HSE_ANALYST, UserRole.REVIEWER, UserRole.VIEWER))) -> SiteRead:
-    return await SiteService(db).get(site_id)
+async def get_site(site_id: UUID, db: DBSession, user: User = Depends(require_roles(UserRole.ADMIN, UserRole.HSE_MANAGER, UserRole.HSE_ANALYST, UserRole.REVIEWER, UserRole.VIEWER))) -> SiteRead:
+    return await SiteService(db, user).get(site_id)
 
 @router.patch("/{site_id}", response_model=SiteRead, summary="Update a site")
 async def update_site(site_id: UUID, payload: SiteUpdate, db: DBSession, user: User = Depends(require_roles(UserRole.ADMIN, UserRole.HSE_MANAGER))) -> SiteRead:
