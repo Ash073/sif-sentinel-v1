@@ -10,6 +10,7 @@ from app.core.constants import ReviewDecision
 from app.core.exceptions import AppError
 from app.models.model_prediction import ModelPrediction
 from app.models.review import Review
+from app.models.report import Report
 from app.services.nlp.sif_classifier import model_metadata as _raw_metadata
 
 
@@ -23,22 +24,22 @@ def current_model_metadata() -> dict:
 
 async def get_feedback(db: AsyncSession) -> dict:
     """Aggregate human-review feedback statistics from the database."""
-    total = await db.scalar(select(func.count()).select_from(ModelPrediction)) or 0
+    total = await db.scalar(select(func.count()).select_from(ModelPrediction).join(Report, Report.id == ModelPrediction.report_id).where(Report.is_deleted.is_(False))) or 0
     reviewed = (
         await db.scalar(
-            select(func.count()).select_from(Review).where(Review.decision != ReviewDecision.PENDING)
+            select(func.count()).select_from(Review).join(Report, Report.id == Review.report_id).where(Review.decision != ReviewDecision.PENDING, Report.is_deleted.is_(False))
         )
         or 0
     )
     approved = (
         await db.scalar(
-            select(func.count()).select_from(Review).where(Review.decision == ReviewDecision.APPROVE)
+            select(func.count()).select_from(Review).join(Report, Report.id == Review.report_id).where(Review.decision == ReviewDecision.APPROVE, Report.is_deleted.is_(False))
         )
         or 0
     )
     corrected = (
         await db.scalar(
-            select(func.count()).select_from(Review).where(Review.decision == ReviewDecision.MODIFY)
+            select(func.count()).select_from(Review).join(Report, Report.id == Review.report_id).where(Review.decision == ReviewDecision.MODIFY, Report.is_deleted.is_(False))
         )
         or 0
     )

@@ -5,7 +5,7 @@ from typing import Any
 from uuid import UUID
 
 import structlog
-from sqlalchemy import func, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.constants import (
@@ -106,6 +106,8 @@ class InterventionService:
         self, report: Report, analysis: ReportAnalysis, precursor_priority: str | None = None
     ) -> list[InterventionRecommendation]:
         """Persist idempotent report recommendations from authoritative analysis fields."""
+        if report.is_deleted:
+            raise NotFoundError("report")
         risk_priority = analysis.risk_priority
         state = self._control_state(
             getattr(analysis.barrier_status, "value", analysis.barrier_status),
@@ -165,8 +167,34 @@ class InterventionService:
         await self.db.flush()
         return recommendation
 
+    async def _active_query(self):
+        # Report recommendations require a live parent. Pattern snapshots are
+        # immutable: suppress them when live evidence no longer supports them.
+        from app.services.precursor_engine.pattern_aggregator import aggregate_patterns
+        metrics = {item.key: item for item in await aggregate_patterns(self.db)}
+        candidates = (await self.db.execute(
+            select(InterventionRecommendation.id, InterventionRecommendation.evidence_snapshot,
+                   PrecursorPattern.pattern_key)
+            .join(PrecursorPattern, PrecursorPattern.id == InterventionRecommendation.precursor_pattern_id)
+        )).all()
+        pattern_ids = []
+        for item_id, evidence, key in candidates:
+            metric = metrics.get(key)
+            if metric and metric.occurrence_count >= 3 and all(
+                evidence.get(field) == value for field, value in {
+                    "occurrence_count": metric.occurrence_count,
+                    "trend": metric.trend, "pattern_priority": metric.priority,
+                }.items()
+            ):
+                pattern_ids.append(item_id)
+        live_report = select(Report.id).where(Report.is_deleted.is_(False))
+        return select(InterventionRecommendation).where(or_(
+            InterventionRecommendation.report_id.in_(live_report),
+            (InterventionRecommendation.report_id.is_(None)) & InterventionRecommendation.id.in_(pattern_ids),
+        ))
+
     async def list(self, page: int = 1, page_size: int = 20, report_human_id: str | None = None, priority: str | None = None, status: InterventionReviewStatus | None = None, category: str | None = None) -> tuple[list[InterventionRead], int]:
-        query = select(InterventionRecommendation)
+        query = await self._active_query()
         if report_human_id:
             query = query.join(Report).where(Report.report_id == report_human_id)
         if priority:
@@ -183,14 +211,14 @@ class InterventionService:
         return [InterventionRead.model_validate(row) for row in rows], total
 
     async def get(self, recommendation_id: UUID) -> InterventionRecommendation:
-        item = await self.db.get(InterventionRecommendation, recommendation_id)
+        item = await self.db.scalar((await self._active_query()).where(InterventionRecommendation.id == recommendation_id))
         if not item:
             raise NotFoundError("intervention recommendation")
         return item
 
     async def review(self, recommendation_id: UUID, payload: InterventionReviewRequest, actor_id: UUID, ip: str | None) -> InterventionRead:
         item = await self.db.scalar(
-            select(InterventionRecommendation)
+            (await self._active_query())
             .where(InterventionRecommendation.id == recommendation_id)
             .with_for_update()
         )
@@ -216,8 +244,9 @@ class InterventionService:
         return InterventionRead.model_validate(item)
 
     async def summary(self) -> InterventionSummary:
-        rows = (await self.db.execute(select(InterventionRecommendation.category, func.count()).group_by(InterventionRecommendation.category))).all()
-        total = await self.db.scalar(select(func.count()).select_from(InterventionRecommendation)) or 0
-        critical = await self.db.scalar(select(func.count()).select_from(InterventionRecommendation).where(InterventionRecommendation.priority == "CRITICAL")) or 0
-        pending = await self.db.scalar(select(func.count()).select_from(InterventionRecommendation).where(InterventionRecommendation.review_status == InterventionReviewStatus.PENDING)) or 0
+        active = (await self._active_query()).subquery()
+        rows = (await self.db.execute(select(active.c.category, func.count()).group_by(active.c.category))).all()
+        total = await self.db.scalar(select(func.count()).select_from(active)) or 0
+        critical = await self.db.scalar(select(func.count()).select_from(active).where(active.c.priority == "CRITICAL")) or 0
+        pending = await self.db.scalar(select(func.count()).select_from(active).where(active.c.review_status == InterventionReviewStatus.PENDING)) or 0
         return InterventionSummary(total=total, critical=critical, pending=pending, by_category={category: count for category, count in rows})

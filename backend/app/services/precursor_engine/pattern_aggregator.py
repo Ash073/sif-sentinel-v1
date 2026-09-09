@@ -38,7 +38,7 @@ def latest_analysis_subquery():
     return select(ReportAnalysis.report_id, func.max(ReportAnalysis.created_at).label("latest_created")).group_by(ReportAnalysis.report_id).subquery()
 
 
-async def aggregate_patterns(db: AsyncSession, date_from: datetime | None = None, date_to: datetime | None = None) -> list[PatternMetrics]:
+async def aggregate_patterns(db: AsyncSession, date_from: datetime | None = None, date_to: datetime | None = None, *, site_id=None) -> list[PatternMetrics]:
     now = datetime.now(UTC)
     settings = get_settings()
     lookback_days = settings.precursor_lookback_days
@@ -57,6 +57,8 @@ async def aggregate_patterns(db: AsyncSession, date_from: datetime | None = None
     failure = func.lower(func.trim(PrecursorCandidate.failure_type)).label("failure_type")
     
     filters = [Report.reported_at >= cutoff_start, Report.is_deleted == False]
+    if site_id is not None:
+        filters.append(Report.site_id == site_id)
     if date_from:
         filters.append(Report.reported_at >= date_from)
     if date_to:

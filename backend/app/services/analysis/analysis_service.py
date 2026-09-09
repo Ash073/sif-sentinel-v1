@@ -169,11 +169,9 @@ class AnalysisService:
                 build_pattern_key(c.activity, c.hazard, c.barrier, c.failure_type).key
                 for c in result.precursor_candidates
             ]
-            statement = select(PrecursorPattern.priority).where(
-                PrecursorPattern.pattern_key.in_(keys),
-                PrecursorPattern.priority.in_(["CRITICAL", "HIGH", "MEDIUM"])
-            )
-            rows = (await self.db.execute(statement)).scalars().all()
+            from app.services.precursor_engine.pattern_aggregator import aggregate_patterns
+            rows = [metric.priority for metric in await aggregate_patterns(self.db)
+                    if metric.key in keys and metric.priority in {"CRITICAL", "HIGH", "MEDIUM"}]
             if rows:
                 if "CRITICAL" in rows:
                     precursor_priority = "CRITICAL"

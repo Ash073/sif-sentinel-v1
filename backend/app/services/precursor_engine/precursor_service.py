@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy import and_, delete, exists, func, select
+from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import NotFoundError
@@ -60,59 +60,46 @@ class PrecursorService:
             else:
                 self.db.add(PrecursorPattern(pattern_key=item.key, **values))
                 
-        if existing:
-            await self.db.execute(delete(PrecursorPattern).where(PrecursorPattern.pattern_key.not_in(keys) if keys else True))
+        # Preserve historical pattern IDs referenced by recommendations. Operational
+        # reads always derive metrics from live reports, including below-threshold removal.
             
         await self.db.flush()
         # A recurring pattern may warrant one preventive advisory recommendation.
         # Import locally to keep precursor aggregation independent of the API layer.
         from app.services.intervention_service import InterventionService
         intervention_service = InterventionService(self.db)
-        for pattern in (await self.db.scalars(select(PrecursorPattern))).all():
+        for pattern in (await self.db.scalars(select(PrecursorPattern).where(PrecursorPattern.pattern_key.in_(keys)))).all():
             await intervention_service.generate_for_pattern(pattern)
         if commit:
             await self.db.commit()
         return len(metrics)
 
     async def list(self, *, site_id: UUID | None = None, activity: str | None = None, hazard: str | None = None, barrier: str | None = None, priority: str | None = None, date_from: datetime | None = None, date_to: datetime | None = None, limit: int = 50, sort: str = "risk_score") -> list[PrecursorSummary]:
-        if (date_from or date_to) and not site_id:
-            metrics = await aggregate_patterns(self.db, date_from, date_to)
-            ids = {item.pattern_key: item.id for item in (await self.db.scalars(select(PrecursorPattern).where(PrecursorPattern.pattern_key.in_([metric.key for metric in metrics])))).all()}
-            filtered = [metric for metric in metrics if metric.key in ids and (not activity or metric.activity == activity.casefold()) and (not hazard or metric.hazard == hazard.casefold()) and (not barrier or metric.barrier == barrier.casefold()) and (not priority or metric.priority == priority.upper())]
-            ordered = sorted(filtered, key=lambda metric: metric.last_seen if sort == "recent" else metric.risk_score, reverse=True)
-            return [self._summary_from_metrics(ids[metric.key], metric) for metric in ordered[:limit]]
-            
-        filters = []
-        for field, value in ((PrecursorPattern.activity, activity), (PrecursorPattern.hazard, hazard), (PrecursorPattern.barrier, barrier), (PrecursorPattern.priority, priority)):
-            if value:
-                filters.append(field == value.casefold())
-        if date_from:
-            filters.append(PrecursorPattern.last_seen >= date_from)
-        if date_to:
-            filters.append(PrecursorPattern.first_seen <= date_to)
-            
-        if site_id:
-            site_match = and_(
-                Report.site_id == site_id,
-                Report.is_deleted == False,
-                PrecursorCandidate.report_id == Report.id,
-                PrecursorCandidate.category == PrecursorPattern.category,
-                func_lower(PrecursorCandidate.activity) == PrecursorPattern.activity,
-                func_lower(PrecursorCandidate.hazard) == PrecursorPattern.hazard,
-                func_lower(PrecursorCandidate.barrier) == PrecursorPattern.barrier,
-                func_lower(PrecursorCandidate.failure_type) == PrecursorPattern.failure_type,
-            )
-            filters.append(exists(select(1).select_from(Report).join(PrecursorCandidate).where(site_match)))
-            
-        order = PrecursorPattern.last_seen.desc() if sort == "recent" else PrecursorPattern.risk_score.desc()
-        patterns = (await self.db.scalars(select(PrecursorPattern).where(*filters).order_by(order).limit(limit))).all()
-        return [self._summary(pattern) for pattern in patterns]
+        metrics = await aggregate_patterns(self.db, date_from, date_to, site_id=site_id)
+        ids = {item.pattern_key: item.id for item in (await self.db.scalars(
+            select(PrecursorPattern).where(PrecursorPattern.pattern_key.in_([metric.key for metric in metrics]))
+        )).all()}
+        filtered = [metric for metric in metrics if metric.key in ids
+                    and (not activity or metric.activity == activity.casefold())
+                    and (not hazard or metric.hazard == hazard.casefold())
+                    and (not barrier or metric.barrier == barrier.casefold())
+                    and (not priority or metric.priority == priority.upper())]
+        ordered = sorted(filtered, key=lambda metric: metric.last_seen if sort == "recent" else metric.risk_score, reverse=True)
+        return [self._summary_from_metrics(ids[metric.key], metric) for metric in ordered[:limit]]
+
+    async def _live_summary(self, pattern: PrecursorPattern) -> PrecursorSummary:
+        metrics = await aggregate_patterns(self.db)
+        metric = next((item for item in metrics if item.key == pattern.pattern_key), None)
+        if metric is None:
+            raise NotFoundError("precursor")
+        return self._summary_from_metrics(pattern.id, metric)
 
     async def detail(self, precursor_id: UUID) -> PrecursorDetail:
         pattern = await self.db.get(PrecursorPattern, precursor_id)
         if not pattern:
             raise NotFoundError("precursor")
             
+        summary = await self._live_summary(pattern)
         match = and_(
             PrecursorCandidate.category == pattern.category,
             func_lower(PrecursorCandidate.activity) == pattern.activity, 
@@ -128,12 +115,13 @@ class PrecursorService:
         reports = [RepresentativeReport(report_id=report.report_id, reported_at=report.reported_at, site_name=site_name, department=report.department, sif_level=analysis.sif_level.value if analysis.sif_level else None) for report, analysis, site_name in rows]
         all_rows = (await self.db.execute(select(Site.name, Report.department).select_from(Report).join(PrecursorCandidate, PrecursorCandidate.report_id == Report.id).join(Site, Site.id == Report.site_id).where(match, Report.is_deleted == False).distinct())).all()
         
-        return PrecursorDetail(**self._summary(pattern).model_dump(), sites=sorted({row[0] for row in all_rows}), departments=sorted({row[1] for row in all_rows}), representative_reports=reports)
+        return PrecursorDetail(**summary.model_dump(), sites=sorted({row[0] for row in all_rows}), departments=sorted({row[1] for row in all_rows}), representative_reports=reports)
 
     async def graph(self, precursor_id: UUID) -> PrecursorGraph:
         pattern = await self.db.get(PrecursorPattern, precursor_id)
         if not pattern:
             raise NotFoundError("precursor")
+        pattern = await self._live_summary(pattern)
         nodes = [GraphNode(id="activity", label=pattern.activity, type="activity", statistics={"occurrences": pattern.occurrence_count}), GraphNode(id="hazard", label=pattern.hazard, type="hazard", statistics={"sif_density": pattern.sif_density}), GraphNode(id="barrier", label=pattern.barrier, type="barrier", statistics={"risk_score": pattern.risk_score}), GraphNode(id="failure", label=pattern.failure_type, type="failure", statistics={"recent_count": pattern.recent_count}), GraphNode(id="sif", label="SIF potential", type="sif", statistics={"sif_count": pattern.sif_count})]
         edges = [GraphEdge(source="activity", target="hazard", label="exposes"), GraphEdge(source="hazard", target="barrier", label="controlled by"), GraphEdge(source="barrier", target="failure", label="failure"), GraphEdge(source="failure", target="sif", label="risk signal")]
         return PrecursorGraph(nodes=nodes, edges=edges)

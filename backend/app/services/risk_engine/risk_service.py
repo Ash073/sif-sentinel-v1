@@ -69,7 +69,7 @@ class RiskService:
 
     @staticmethod
     def _date_filters(date_from: datetime | None, date_to: datetime | None) -> list:
-        filters = []
+        filters = [Report.is_deleted.is_(False)]
         if date_from:
             filters.append(Report.reported_at >= date_from)
         if date_to:

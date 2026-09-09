@@ -4,12 +4,16 @@ Responsibility: LSR database access and analytics aggregation.
 Routes delegate all DB operations to this service.
 """
 
-from sqlalchemy import case, func, or_, select
+from uuid import UUID
+
+from sqlalchemy import case, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import NotFoundError
 from app.models.life_saving_rule import LifeSavingRule
 from app.models.report_analysis import ReportAnalysis
+from app.models.report import Report
+from app.services.precursor_engine.pattern_aggregator import latest_analysis_subquery
 
 
 from app.models.user import User
@@ -32,11 +36,13 @@ class RulesService:
 
     async def get(self, rule_id: str) -> LifeSavingRule:
         """Get a single rule by UUID or code string. Raises NotFoundError if missing."""
-        item = await self.db.scalar(
-            select(LifeSavingRule).where(
-                or_(LifeSavingRule.id == rule_id, LifeSavingRule.code == rule_id)
-            )
-        )
+        try:
+            identifier = UUID(str(rule_id))
+        except ValueError:
+            condition = LifeSavingRule.code == rule_id
+        else:
+            condition = LifeSavingRule.id == identifier
+        item = await self.db.scalar(select(LifeSavingRule).where(condition))
         if not item:
             raise NotFoundError("rule")
         return item
@@ -48,6 +54,7 @@ class RulesService:
         aggregates ReportAnalysis rows matching the rule's name.
         """
         item = await self.get(rule_id)
+        latest = latest_analysis_subquery()
         total, sif = (
             await self.db.execute(
                 select(
@@ -56,7 +63,9 @@ class RulesService:
                         func.sum(case((ReportAnalysis.sif_potential.is_(True), 1), else_=0)),
                         0,
                     ),
-                ).where(ReportAnalysis.life_saving_rule == item.name)
+                ).select_from(ReportAnalysis).join(Report, Report.id == ReportAnalysis.report_id)
+                .join(latest, (latest.c.report_id == ReportAnalysis.report_id) & (latest.c.latest_created == ReportAnalysis.created_at))
+                .where(ReportAnalysis.life_saving_rule == item.name, Report.is_deleted.is_(False))
             )
         ).one()
         total, sif = int(total), int(sif)

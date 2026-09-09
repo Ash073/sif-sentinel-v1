@@ -4,7 +4,6 @@ from sqlalchemy import Date, case, cast, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.constants import ReportStatus, SIFLevel
-from app.models.precursor_pattern import PrecursorPattern
 from app.models.report import Report
 from app.models.report_analysis import ReportAnalysis
 from app.models.site import Site
@@ -30,9 +29,10 @@ class AnalyticsService:
         latest = latest_analysis_subquery()
         metrics = (await self.db.execute(select(func.count(Report.id), func.coalesce(func.sum(case((ReportAnalysis.sif_potential.is_(True), 1), else_=0)), 0), func.coalesce(func.sum(case((ReportAnalysis.sif_level == SIFLevel.HIGH, 1), else_=0)), 0), func.coalesce(func.sum(case((Report.status == ReportStatus.REVIEW_REQUIRED, 1), else_=0)), 0), func.count(func.distinct(Report.site_id))).select_from(Report).outerjoin(latest, latest.c.report_id == Report.id).outerjoin(ReportAnalysis, (ReportAnalysis.report_id == latest.c.report_id) & (ReportAnalysis.created_at == latest.c.latest_created)).where(Report.is_deleted == False))).one()
         total, sif, high, review, sites = (int(value or 0) for value in metrics)
-        active = await self.db.scalar(select(func.count()).select_from(PrecursorPattern)) or 0
+        from app.services.precursor_engine.pattern_aggregator import aggregate_patterns
+        active = len(await aggregate_patterns(self.db))
         
-        review_queue = await self.db.scalar(select(func.count(Review.id)).where(Review.decision == ReviewDecision.PENDING)) or 0
+        review_queue = await self.db.scalar(select(func.count(Review.id)).join(Report, Report.id == Review.report_id).where(Review.decision == ReviewDecision.PENDING, Report.is_deleted.is_(False))) or 0
         
         ca_summary = await self.corrective_action_summary()
         
@@ -50,12 +50,14 @@ class AnalyticsService:
         )
 
     async def corrective_action_summary(self) -> CorrectiveActionSummary:
+        from app.services.corrective_action_service import CorrectiveActionService
+        visible = (await CorrectiveActionService(self.db)._visible_query()).with_only_columns(CorrectiveAction.id)
         ca_metrics = (await self.db.execute(select(
             func.count(CorrectiveAction.id),
-            func.coalesce(func.sum(case((CorrectiveAction.status == 'OPEN', 1), else_=0)), 0),
-            func.coalesce(func.sum(case(((CorrectiveAction.status == 'OPEN') & (CorrectiveAction.due_date < datetime.now(UTC)), 1), else_=0)), 0),
-            func.coalesce(func.sum(case((CorrectiveAction.status == 'COMPLETED', 1), else_=0)), 0)
-        ))).one()
+            func.coalesce(func.sum(case((CorrectiveAction.status.in_(['DRAFT', 'SUBMITTED', 'UNDER_REVIEW', 'APPROVED', 'IN_PROGRESS', 'VERIFICATION_REQUIRED']), 1), else_=0)), 0),
+            func.coalesce(func.sum(case(((CorrectiveAction.status.in_(['DRAFT', 'SUBMITTED', 'UNDER_REVIEW', 'APPROVED', 'IN_PROGRESS', 'VERIFICATION_REQUIRED'])) & (CorrectiveAction.due_date < datetime.now(UTC)), 1), else_=0)), 0),
+            func.coalesce(func.sum(case((CorrectiveAction.status.in_(['VERIFIED', 'CLOSED']), 1), else_=0)), 0)
+        ).where(CorrectiveAction.id.in_(visible)))).one()
         ca_total, ca_open, ca_overdue, ca_completed = (int(value or 0) for value in ca_metrics)
         return CorrectiveActionSummary(
             total=ca_total,

@@ -194,7 +194,9 @@ class ReviewService:
         """
         # --- Load ---
         review = await self.db.scalar(
-            select(Review).where(Review.id == review_id).with_for_update()
+            select(Review).join(Report, Report.id == Review.report_id)
+            .where(Review.id == review_id, Report.is_deleted.is_(False))
+            .with_for_update(of=Review).execution_options(populate_existing=True)
         )
         if not review:
             raise NotFoundError("review")
@@ -208,7 +210,9 @@ class ReviewService:
             )
 
         # --- Access control ---
-        report = await self.db.get(Report, review.report_id)
+        report = await self.db.scalar(select(Report).where(Report.id == review.report_id, Report.is_deleted.is_(False)).with_for_update().execution_options(populate_existing=True))
+        if report is None:
+            raise NotFoundError("report")
         if self.current_user and self.current_user.role != UserRole.ADMIN and self.current_user.site_id:
             if report and report.site_id != self.current_user.site_id:
                 raise AppError("FORBIDDEN", "You do not have access to this site's data", 403)

@@ -2,6 +2,8 @@ import os
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.pool import NullPool
+from sqlalchemy import event
+from sqlalchemy.orm import Session, with_loader_criteria
 
 from app.core.config import get_settings
 
@@ -34,6 +36,20 @@ def _build_engine():
 
 engine = _build_engine()
 SessionLocal = async_sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
+
+
+@event.listens_for(Session, "do_orm_execute")
+def exclude_deleted_reports(execute_state):
+    """Apply to Report aliases and relationship loads as well as direct ORM reads.
+
+    Only the administrator inspection repository opts out. Child-only queries
+    still explicitly check their report association in the owning service.
+    """
+    if execute_state.is_select and not execute_state.execution_options.get("include_deleted_reports"):
+        from app.models.report import Report
+        execute_state.statement = execute_state.statement.options(
+            with_loader_criteria(Report, lambda cls: cls.is_deleted.is_(False), include_aliases=True)
+        )
 
 
 async def get_db():

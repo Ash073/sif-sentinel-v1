@@ -31,7 +31,7 @@ os.environ.setdefault("SIF_MODEL_VERSION", "v1")
 import app.models  # noqa: E402, F401
 from app.db.base import Base  # noqa: E402
 from app.db.session import SessionLocal, engine  # noqa: E402
-from app.main import app  # noqa: E402
+from app.main import app as fastapi_app  # noqa: E402
 
 
 @pytest_asyncio.fixture(scope="session", autouse=True)
@@ -79,7 +79,7 @@ async def transactional_db():
     
     original_session_local = app.db.session.SessionLocal
     app.db.session.SessionLocal = lambda: session
-    app.dependency_overrides[get_db] = lambda: session
+    fastapi_app.dependency_overrides[get_db] = lambda: session
     
     yield session
     
@@ -87,13 +87,13 @@ async def transactional_db():
     await transaction.rollback()
     await connection.close()
     
-    app.dependency_overrides.clear()
+    fastapi_app.dependency_overrides.clear()
     app.db.session.SessionLocal = original_session_local
 
 
 @pytest.fixture()
 def client(transactional_db):
-    with TestClient(app) as test_client:
+    with TestClient(fastapi_app) as test_client:
         yield test_client
 
 

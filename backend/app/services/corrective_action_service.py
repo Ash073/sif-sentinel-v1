@@ -19,6 +19,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.exceptions import AppError, NotFoundError
 from app.models.audit_log import AuditLog
 from app.models.corrective_action import CorrectiveAction
+from app.models.report import Report
 from app.schemas.corrective_action import (
     CorrectiveActionCreate,
     CorrectiveActionDecisionRequest,
@@ -47,6 +48,14 @@ class CorrectiveActionService:
         """Creates a new corrective action in DRAFT state."""
         from app.core.constants import UserRole
         from app.models.report import Report
+
+        if payload.report_id:
+            await self._active_report(payload.report_id)
+        if payload.intervention_recommendation_id:
+            from app.services.intervention_service import InterventionService
+            recommendation = await InterventionService(self.db).get(payload.intervention_recommendation_id)
+            if recommendation.report_id and recommendation.report_id != payload.report_id:
+                raise AppError("REPORT_MISMATCH", "Recommendation belongs to a different report", 422)
         
         if self.current_user and self.current_user.role != UserRole.ADMIN and self.current_user.site_id:
             report = await self.db.get(Report, payload.report_id)
@@ -95,6 +104,11 @@ class CorrectiveActionService:
         action = await self.db.get(CorrectiveAction, action_id)
         if not action:
             raise NotFoundError("corrective action")
+        if action.report_id:
+            await self._active_report(action.report_id)
+        if action.intervention_recommendation_id:
+            from app.services.intervention_service import InterventionService
+            await InterventionService(self.db).get(action.intervention_recommendation_id)
             
         from app.core.constants import UserRole
         if self.current_user and self.current_user.role != UserRole.ADMIN and self.current_user.site_id:
@@ -114,9 +128,7 @@ class CorrectiveActionService:
         page: int = 1,
         page_size: int = 50,
     ) -> tuple[list[CorrectiveAction], int]:
-        query = select(CorrectiveAction).outerjoin(Report, Report.id == CorrectiveAction.report_id).where(
-            (CorrectiveAction.report_id.is_(None)) | (Report.is_deleted == False)
-        )
+        query = await self._visible_query()
         from app.core.constants import UserRole
         if self.current_user and self.current_user.role != UserRole.ADMIN and self.current_user.site_id:
             query = query.where(Report.site_id == self.current_user.site_id)
@@ -474,8 +486,7 @@ class CorrectiveActionService:
         """Exports approved/verified/closed action plans with complete governance data."""
         from app.models.report import Report
         query = (
-            select(CorrectiveAction)
-            .outerjoin(Report, Report.id == CorrectiveAction.report_id)
+            (await self._visible_query())
             .where(
                 CorrectiveAction.status.in_(["APPROVED", "IN_PROGRESS", "VERIFICATION_REQUIRED", "VERIFIED", "CLOSED"]),
                 (CorrectiveAction.report_id.is_(None)) | (Report.is_deleted == False)
@@ -509,6 +520,7 @@ class CorrectiveActionService:
         ]
 
     async def _get_for_update(self, action_id: UUID) -> CorrectiveAction:
+        await self.get(action_id)
         action = await self.db.scalar(
             select(CorrectiveAction)
             .where(CorrectiveAction.id == action_id)
@@ -525,3 +537,19 @@ class CorrectiveActionService:
                 raise AppError("FORBIDDEN", "You do not have access to this site's data", 403)
                 
         return action
+
+    async def _visible_query(self):
+        from app.services.intervention_service import InterventionService
+        from app.models.intervention_recommendation import InterventionRecommendation
+        interventions = (await InterventionService(self.db)._active_query()).with_only_columns(InterventionRecommendation.id)
+        return select(CorrectiveAction).outerjoin(Report, Report.id == CorrectiveAction.report_id).where(
+            CorrectiveAction.report_id.is_(None) | Report.is_deleted.is_(False),
+            CorrectiveAction.intervention_recommendation_id.is_(None)
+            | CorrectiveAction.intervention_recommendation_id.in_(interventions),
+        )
+
+    async def _active_report(self, report_id: UUID) -> Report:
+        report = await self.db.scalar(select(Report).where(Report.id == report_id, Report.is_deleted.is_(False)))
+        if report is None:
+            raise NotFoundError("report")
+        return report
