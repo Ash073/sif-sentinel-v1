@@ -28,7 +28,7 @@ class AnalyticsService:
 
     async def summary(self) -> DashboardSummary:
         latest = latest_analysis_subquery()
-        metrics = (await self.db.execute(select(func.count(Report.id), func.coalesce(func.sum(case((ReportAnalysis.sif_potential.is_(True), 1), else_=0)), 0), func.coalesce(func.sum(case((ReportAnalysis.sif_level == SIFLevel.HIGH, 1), else_=0)), 0), func.coalesce(func.sum(case((Report.status == ReportStatus.REVIEW_REQUIRED, 1), else_=0)), 0), func.count(func.distinct(Report.site_id))).select_from(Report).outerjoin(latest, latest.c.report_id == Report.id).outerjoin(ReportAnalysis, (ReportAnalysis.report_id == latest.c.report_id) & (ReportAnalysis.created_at == latest.c.latest_created)))).one()
+        metrics = (await self.db.execute(select(func.count(Report.id), func.coalesce(func.sum(case((ReportAnalysis.sif_potential.is_(True), 1), else_=0)), 0), func.coalesce(func.sum(case((ReportAnalysis.sif_level == SIFLevel.HIGH, 1), else_=0)), 0), func.coalesce(func.sum(case((Report.status == ReportStatus.REVIEW_REQUIRED, 1), else_=0)), 0), func.count(func.distinct(Report.site_id))).select_from(Report).outerjoin(latest, latest.c.report_id == Report.id).outerjoin(ReportAnalysis, (ReportAnalysis.report_id == latest.c.report_id) & (ReportAnalysis.created_at == latest.c.latest_created)).where(Report.is_deleted == False))).one()
         total, sif, high, review, sites = (int(value or 0) for value in metrics)
         active = await self.db.scalar(select(func.count()).select_from(PrecursorPattern)) or 0
         
@@ -70,20 +70,20 @@ class AnalyticsService:
         latest = latest_analysis_subquery()
         dialect = self.db.bind.dialect.name
         day = func.date(Report.reported_at).label("day") if dialect == "sqlite" else cast(Report.reported_at, Date).label("day")
-        statement = select(day, func.count(Report.id).label("total"), func.coalesce(func.sum(case((ReportAnalysis.sif_potential.is_(True), 1), else_=0)), 0).label("sif"), func.coalesce(func.sum(case((ReportAnalysis.sif_level == SIFLevel.HIGH, 1), else_=0)), 0).label("high")).select_from(Report).outerjoin(latest, latest.c.report_id == Report.id).outerjoin(ReportAnalysis, (ReportAnalysis.report_id == latest.c.report_id) & (ReportAnalysis.created_at == latest.c.latest_created)).where(Report.reported_at >= start).group_by(day).order_by(day)
+        statement = select(day, func.count(Report.id).label("total"), func.coalesce(func.sum(case((ReportAnalysis.sif_potential.is_(True), 1), else_=0)), 0).label("sif"), func.coalesce(func.sum(case((ReportAnalysis.sif_level == SIFLevel.HIGH, 1), else_=0)), 0).label("high")).select_from(Report).outerjoin(latest, latest.c.report_id == Report.id).outerjoin(ReportAnalysis, (ReportAnalysis.report_id == latest.c.report_id) & (ReportAnalysis.created_at == latest.c.latest_created)).where(Report.reported_at >= start, Report.is_deleted == False).group_by(day).order_by(day)
         return [TimeSeriesPoint(date=str(row.day), total_reports=int(row.total), sif_reports=int(row.sif), high_sif_reports=int(row.high), sif_rate=round(int(row.sif) / int(row.total), 3) if row.total else 0.0) for row in (await self.db.execute(statement)).all()]
 
     async def distribution(self, field: str) -> list[DistributionItem]:
         column = {"activity": ReportAnalysis.activity, "hazard": ReportAnalysis.hazard, "lsr": ReportAnalysis.life_saving_rule}[field]
         latest = latest_analysis_subquery()
-        total = await self.db.scalar(select(func.count(Report.id))) or 0
-        statement = select(column.label("name"), func.count(Report.id).label("count"), func.coalesce(func.sum(case((ReportAnalysis.sif_potential.is_(True), 1), else_=0)), 0).label("sif")).select_from(Report).join(ReportAnalysis, ReportAnalysis.report_id == Report.id).join(latest, (latest.c.report_id == ReportAnalysis.report_id) & (latest.c.latest_created == ReportAnalysis.created_at)).where(column.is_not(None)).group_by(column).order_by(func.count(Report.id).desc())
+        total = await self.db.scalar(select(func.count(Report.id)).where(Report.is_deleted == False)) or 0
+        statement = select(column.label("name"), func.count(Report.id).label("count"), func.coalesce(func.sum(case((ReportAnalysis.sif_potential.is_(True), 1), else_=0)), 0).label("sif")).select_from(Report).join(ReportAnalysis, ReportAnalysis.report_id == Report.id).join(latest, (latest.c.report_id == ReportAnalysis.report_id) & (latest.c.latest_created == ReportAnalysis.created_at)).where(column.is_not(None), Report.is_deleted == False).group_by(column).order_by(func.count(Report.id).desc())
         return [DistributionItem(name=row.name, count=int(row.count), sif_count=int(row.sif), sif_density=round(int(row.sif) / int(row.count), 3) if row.count else 0.0, percentage=round(int(row.count) / total, 3) if total else 0.0) for row in (await self.db.execute(statement)).all()]
 
     async def site_comparison(self) -> list[DistributionItem]:
         latest = latest_analysis_subquery()
-        total = await self.db.scalar(select(func.count(Report.id))) or 0
-        statement = select(Site.name.label("name"), func.count(Report.id).label("count"), func.coalesce(func.sum(case((ReportAnalysis.sif_potential.is_(True), 1), else_=0)), 0).label("sif")).select_from(Report).join(Site, Site.id == Report.site_id).outerjoin(latest, latest.c.report_id == Report.id).outerjoin(ReportAnalysis, (ReportAnalysis.report_id == latest.c.report_id) & (ReportAnalysis.created_at == latest.c.latest_created)).group_by(Site.name).order_by(func.count(Report.id).desc())
+        total = await self.db.scalar(select(func.count(Report.id)).where(Report.is_deleted == False)) or 0
+        statement = select(Site.name.label("name"), func.count(Report.id).label("count"), func.coalesce(func.sum(case((ReportAnalysis.sif_potential.is_(True), 1), else_=0)), 0).label("sif")).select_from(Report).join(Site, Site.id == Report.site_id).outerjoin(latest, latest.c.report_id == Report.id).outerjoin(ReportAnalysis, (ReportAnalysis.report_id == latest.c.report_id) & (ReportAnalysis.created_at == latest.c.latest_created)).where(Report.is_deleted == False).group_by(Site.name).order_by(func.count(Report.id).desc())
         return [DistributionItem(name=row.name, count=int(row.count), sif_count=int(row.sif), sif_density=round(int(row.sif) / int(row.count), 3) if row.count else 0.0, percentage=round(int(row.count) / total, 3) if total else 0.0) for row in (await self.db.execute(statement)).all()]
 
     async def barrier_failures(self, window: str) -> list[BarrierFailurePoint]:
@@ -91,7 +91,7 @@ class AnalyticsService:
         latest = latest_analysis_subquery()
         dialect = self.db.bind.dialect.name
         day = func.date(Report.reported_at).label("day") if dialect == "sqlite" else cast(Report.reported_at, Date).label("day")
-        statement = select(day, func.count(Report.id).label("failed")).select_from(Report).join(ReportAnalysis, ReportAnalysis.report_id == Report.id).join(latest, (latest.c.report_id == ReportAnalysis.report_id) & (latest.c.latest_created == ReportAnalysis.created_at)).where(Report.reported_at >= datetime.now(UTC) - timedelta(days=days), ReportAnalysis.barrier_failure.is_not(None)).group_by(day).order_by(day)
+        statement = select(day, func.count(Report.id).label("failed")).select_from(Report).join(ReportAnalysis, ReportAnalysis.report_id == Report.id).join(latest, (latest.c.report_id == ReportAnalysis.report_id) & (latest.c.latest_created == ReportAnalysis.created_at)).where(Report.reported_at >= datetime.now(UTC) - timedelta(days=days), ReportAnalysis.barrier_failure.is_not(None), Report.is_deleted == False).group_by(day).order_by(day)
         return [BarrierFailurePoint(date=str(row.day), failed_count=int(row.failed)) for row in (await self.db.execute(statement)).all()]
 
     async def export_csv(self) -> str:

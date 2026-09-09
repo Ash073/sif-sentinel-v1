@@ -61,6 +61,8 @@ class ReportRead(ORMModel):
     source_type: SourceType
     status: ReportStatus
     created_by: UUID
+    is_deleted: bool
+    deleted_at: datetime | None = None
     created_at: datetime
     updated_at: datetime
 

@@ -114,11 +114,12 @@ class CorrectiveActionService:
         page: int = 1,
         page_size: int = 50,
     ) -> tuple[list[CorrectiveAction], int]:
-        query = select(CorrectiveAction)
+        query = select(CorrectiveAction).outerjoin(Report, Report.id == CorrectiveAction.report_id).where(
+            (CorrectiveAction.report_id.is_(None)) | (Report.is_deleted == False)
+        )
         from app.core.constants import UserRole
         if self.current_user and self.current_user.role != UserRole.ADMIN and self.current_user.site_id:
-            from app.models.report import Report
-            query = query.join(Report, Report.id == CorrectiveAction.report_id).where(Report.site_id == self.current_user.site_id)
+            query = query.where(Report.site_id == self.current_user.site_id)
 
         if report_id:
             query = query.where(CorrectiveAction.report_id == report_id)
@@ -471,15 +472,19 @@ class CorrectiveActionService:
 
     async def export_approved_actions(self) -> list[CorrectiveActionExportItem]:
         """Exports approved/verified/closed action plans with complete governance data."""
+        from app.models.report import Report
         query = (
             select(CorrectiveAction)
-            .where(CorrectiveAction.status.in_(["APPROVED", "IN_PROGRESS", "VERIFICATION_REQUIRED", "VERIFIED", "CLOSED"]))
+            .outerjoin(Report, Report.id == CorrectiveAction.report_id)
+            .where(
+                CorrectiveAction.status.in_(["APPROVED", "IN_PROGRESS", "VERIFICATION_REQUIRED", "VERIFIED", "CLOSED"]),
+                (CorrectiveAction.report_id.is_(None)) | (Report.is_deleted == False)
+            )
             .order_by(CorrectiveAction.created_at.desc())
         )
         from app.core.constants import UserRole
         if self.current_user and self.current_user.role != UserRole.ADMIN and self.current_user.site_id:
-            from app.models.report import Report
-            query = query.join(Report, Report.id == CorrectiveAction.report_id).where(Report.site_id == self.current_user.site_id)
+            query = query.where(Report.site_id == self.current_user.site_id)
             
         rows = (await self.db.scalars(query)).all()
         return [

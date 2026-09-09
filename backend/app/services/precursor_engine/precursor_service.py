@@ -94,6 +94,7 @@ class PrecursorService:
         if site_id:
             site_match = and_(
                 Report.site_id == site_id,
+                Report.is_deleted == False,
                 PrecursorCandidate.report_id == Report.id,
                 PrecursorCandidate.category == PrecursorPattern.category,
                 func_lower(PrecursorCandidate.activity) == PrecursorPattern.activity,
@@ -121,11 +122,11 @@ class PrecursorService:
         )
         
         latest = latest_analysis_subquery()
-        base = select(Report, ReportAnalysis, Site.name.label("site_name")).join(PrecursorCandidate, PrecursorCandidate.report_id == Report.id).join(ReportAnalysis, ReportAnalysis.report_id == Report.id).join(latest, (latest.c.report_id == ReportAnalysis.report_id) & (latest.c.latest_created == ReportAnalysis.created_at)).join(Site, Site.id == Report.site_id).where(match)
+        base = select(Report, ReportAnalysis, Site.name.label("site_name")).join(PrecursorCandidate, PrecursorCandidate.report_id == Report.id).join(ReportAnalysis, ReportAnalysis.report_id == Report.id).join(latest, (latest.c.report_id == ReportAnalysis.report_id) & (latest.c.latest_created == ReportAnalysis.created_at)).join(Site, Site.id == Report.site_id).where(match, Report.is_deleted == False)
         rows = (await self.db.execute(base.order_by(Report.reported_at.desc()).limit(5))).all()
         
         reports = [RepresentativeReport(report_id=report.report_id, reported_at=report.reported_at, site_name=site_name, department=report.department, sif_level=analysis.sif_level.value if analysis.sif_level else None) for report, analysis, site_name in rows]
-        all_rows = (await self.db.execute(select(Site.name, Report.department).select_from(Report).join(PrecursorCandidate, PrecursorCandidate.report_id == Report.id).join(Site, Site.id == Report.site_id).where(match).distinct())).all()
+        all_rows = (await self.db.execute(select(Site.name, Report.department).select_from(Report).join(PrecursorCandidate, PrecursorCandidate.report_id == Report.id).join(Site, Site.id == Report.site_id).where(match, Report.is_deleted == False).distinct())).all()
         
         return PrecursorDetail(**self._summary(pattern).model_dump(), sites=sorted({row[0] for row in all_rows}), departments=sorted({row[1] for row in all_rows}), representative_reports=reports)
 

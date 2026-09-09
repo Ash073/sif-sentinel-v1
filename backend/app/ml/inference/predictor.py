@@ -148,6 +148,8 @@ class SIFPredictor:
                     (base_dir / name).exists()
                     for name in ("model.safetensors", "pytorch_model.bin")
                 ):
+                    if get_settings().app_env == "production":
+                        raise RuntimeError("ML_MODELS_UNAVAILABLE")
                     import structlog as _structlog
                     _structlog.get_logger(__name__).warning(
                         "sif_transformer_weights_unavailable",
@@ -300,6 +302,8 @@ class SIFPredictor:
                 path.exists()
                 for path in (model_path, metadata_path)
             ):
+                if get_settings().app_env == "production":
+                    raise RuntimeError("ML_MODELS_UNAVAILABLE")
                 import structlog as _structlog
                 _structlog.get_logger(__name__).warning(
                     "sif_model_artifacts_missing",

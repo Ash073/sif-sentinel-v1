@@ -18,10 +18,21 @@ class ReportService:
         self.db, self.repo = db, ReportRepository(db)
         self.current_user = current_user
 
-    async def create(self, payload: ReportCreate, user_id: UUID, ip_address: str | None) -> Report:
+    async def create(self, payload: ReportCreate, user_id: UUID, ip_address: str | None, idempotency_key: str | None = None) -> Report:
         from app.models.site import Site
         if not await self.db.get(Site, payload.site_id):
             raise AppError("SITE_NOT_FOUND", "Site not found", 404)
+            
+        if idempotency_key:
+            from sqlalchemy import select
+            existing = await self.db.scalar(
+                select(Report).where(
+                    Report.site_id == payload.site_id, 
+                    Report.idempotency_key == idempotency_key
+                )
+            )
+            if existing:
+                return existing
             
         if self.current_user and self.current_user.role != UserRole.ADMIN and self.current_user.site_id:
             if payload.site_id != self.current_user.site_id:
@@ -30,11 +41,16 @@ class ReportService:
         human_id = payload.report_id or self._new_human_id()
         if await self.repo.get_by_human_id(human_id):
             raise AppError("REPORT_ID_EXISTS", "Report identifier already exists", 409)
-        report = Report(**payload.model_dump(exclude={"report_id"}), report_id=human_id, created_by=user_id)
+        report = Report(
+            **payload.model_dump(exclude={"report_id"}), 
+            report_id=human_id, 
+            created_by=user_id,
+            idempotency_key=idempotency_key
+        )
         self.db.add(report)
         await self.db.flush()
         await record_audit(self.db, user_id=user_id, action="REPORT_CREATED", entity_type="report", entity_id=report.id,
-                           details={"report_id": report.report_id}, ip_address=ip_address)
+                           details={"report_id": report.report_id, "idempotency_key": idempotency_key}, ip_address=ip_address)
         await self.db.commit()
         await self.db.refresh(report)
         logger.info("report_created", report_id=human_id, user_id=str(user_id))
@@ -85,6 +101,11 @@ class ReportService:
             search=search,
         )
 
+    async def list_deleted(self, page: int, page_size: int) -> tuple[list[Report], int]:
+        if self.current_user and self.current_user.role != UserRole.ADMIN:
+            raise AppError("FORBIDDEN", "Only administrators can view deleted reports", 403)
+        return await self.repo.list_deleted(page=page, page_size=page_size)
+
     async def update(self, human_id: str, payload: ReportUpdate, user_id: UUID, ip_address: str | None) -> Report:
         report = await self.get(human_id)
         if report.status != ReportStatus.NEW:
@@ -104,12 +125,14 @@ class ReportService:
     async def delete(self, human_id: str, user_id: UUID, ip_address: str | None) -> None:
         report = await self.get(human_id)
         report.is_deleted = True
+        report.deleted_at = datetime.now(UTC)
+        report.deleted_by = user_id
         await record_audit(self.db, user_id=user_id, action="REPORT_DELETED", entity_type="report", entity_id=report.id,
                            details={"report_id": report.report_id}, ip_address=ip_address)
         await self.db.commit()
 
     async def close(self, human_id: str, user_id: UUID, ip_address: str | None) -> Report:
-        report = await self.get(human_id)
+        report = await self._get_for_update(human_id)
         if report.status not in (ReportStatus.ANALYZED, ReportStatus.REVIEW_REQUIRED):
             raise AppError("INVALID_TRANSITION", f"Cannot close report from status: {report.status}", 409)
             
@@ -122,7 +145,7 @@ class ReportService:
 
     async def reset(self, human_id: str, user_id: UUID, ip_address: str | None) -> Report:
         """Reset a report back to NEW state to allow re-analysis (Admin/HSE Manager only)."""
-        report = await self.get(human_id)
+        report = await self._get_for_update(human_id)
         if report.status in (ReportStatus.NEW, ReportStatus.CLOSED):
             raise AppError("INVALID_TRANSITION", f"Cannot reset report from status: {report.status}", 409)
             
@@ -136,3 +159,19 @@ class ReportService:
     @staticmethod
     def _new_human_id() -> str:
         return f"SIF-{datetime.now(UTC):%Y%m%d}-{uuid4().hex[:8].upper()}"
+
+    async def _get_for_update(self, human_id: str) -> Report:
+        from sqlalchemy import select
+        report = await self.db.scalar(
+            select(Report)
+            .where(Report.report_id == human_id, Report.is_deleted == False)
+            .with_for_update()
+        )
+        if not report:
+            raise NotFoundError("report")
+            
+        if self.current_user and self.current_user.role != UserRole.ADMIN and self.current_user.site_id:
+            if report.site_id != self.current_user.site_id:
+                raise AppError("FORBIDDEN", "You do not have access to reports for this site", 403)
+                
+        return report

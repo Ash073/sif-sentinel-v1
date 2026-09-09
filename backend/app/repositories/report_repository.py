@@ -33,3 +33,10 @@ class ReportRepository:
         total = await self.db.scalar(select(func.count()).select_from(Report).where(*filters)) or 0
         rows = await self.db.scalars(statement.offset((page - 1) * page_size).limit(page_size))
         return list(rows), total
+
+    async def list_deleted(self, page: int, page_size: int) -> tuple[list[Report], int]:
+        filters = [Report.is_deleted == True]
+        statement = select(Report).where(*filters).order_by(Report.deleted_at.desc())
+        total = await self.db.scalar(select(func.count()).select_from(Report).where(*filters)) or 0
+        rows = await self.db.scalars(statement.offset((page - 1) * page_size).limit(page_size))
+        return list(rows), total

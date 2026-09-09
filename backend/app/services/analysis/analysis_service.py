@@ -44,7 +44,7 @@ class AnalysisService:
         if self.db is None:
             raise AppError("NO_DB_SESSION", "Database session is required", 500)
 
-        report = await self.db.scalar(select(Report).where(Report.report_id == report_id))
+        report = await self.db.scalar(select(Report).where(Report.report_id == report_id, Report.is_deleted == False))
         if not report:
             raise NotFoundError("report")
 
@@ -124,7 +124,7 @@ class AnalysisService:
         # serializes concurrent requests here; SQLite test runs retain the
         # same state guard even though it has no row-level lock primitive.
         report = await self.db.scalar(
-            select(Report).where(Report.report_id == human_id).with_for_update()
+            select(Report).where(Report.report_id == human_id, Report.is_deleted == False).with_for_update()
         )
         if not report:
             raise NotFoundError("report")

@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import DateTime, Enum, ForeignKey, Index, String, Text, Boolean
+from sqlalchemy import DateTime, Enum, ForeignKey, Index, String, Text, Boolean, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import Uuid
 
@@ -12,7 +12,10 @@ from app.models.mixins import UUIDTimestampMixin
 
 class Report(UUIDTimestampMixin, Base):
     __tablename__ = "reports"
-    __table_args__ = (Index("ix_reports_filter", "site_id", "report_type", "status", "reported_at"),)
+    __table_args__ = (
+        Index("ix_reports_filter", "site_id", "report_type", "status", "reported_at"),
+        UniqueConstraint("site_id", "idempotency_key", name="uq_report_site_idempotency"),
+    )
     report_id: Mapped[str] = mapped_column(String(64), unique=True, index=True, nullable=False)
     report_type: Mapped[ReportType] = mapped_column(Enum(ReportType, native_enum=False), nullable=False, index=True)
     report_text: Mapped[str] = mapped_column(Text, nullable=False)
@@ -24,9 +27,12 @@ class Report(UUIDTimestampMixin, Base):
     source_type: Mapped[SourceType] = mapped_column(Enum(SourceType, native_enum=False), nullable=False, index=True)
     status: Mapped[ReportStatus] = mapped_column(Enum(ReportStatus, native_enum=False), default=ReportStatus.NEW, nullable=False, index=True)
     is_deleted: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, index=True)
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    deleted_by: Mapped[uuid.UUID | None] = mapped_column(Uuid, ForeignKey("users.id"))
+    idempotency_key: Mapped[str | None] = mapped_column(String(100), index=True)
     created_by: Mapped[uuid.UUID] = mapped_column(Uuid, ForeignKey("users.id"), nullable=False, index=True)
     site = relationship("Site", back_populates="reports")
-    creator = relationship("User", back_populates="reports")
+    creator = relationship("User", foreign_keys=[created_by], back_populates="reports")
     analyses = relationship("ReportAnalysis", back_populates="report", cascade="all, delete-orphan")
     reviews = relationship("Review", back_populates="report", cascade="all, delete-orphan")
     predictions = relationship("ModelPrediction", back_populates="report", cascade="all, delete-orphan")

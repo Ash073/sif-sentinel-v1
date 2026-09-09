@@ -16,6 +16,6 @@ class User(UUIDTimestampMixin, Base):
     role: Mapped[UserRole] = mapped_column(Enum(UserRole, native_enum=False), default=UserRole.VIEWER, nullable=False, index=True)
     site_id: Mapped[uuid.UUID | None] = mapped_column(Uuid, ForeignKey("sites.id"), nullable=True, index=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
-    reports = relationship("Report", back_populates="creator")
+    reports = relationship("Report", back_populates="creator", primaryjoin="User.id == Report.created_by")
     reviews = relationship("Review", back_populates="reviewer")
     audit_logs = relationship("AuditLog", back_populates="user")

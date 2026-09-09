@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query, Request, status
+from fastapi import APIRouter, Depends, Query, Request, status, Header
 
 from app.api.deps import DBSession, require_roles
 from app.core.constants import ReportStatus, ReportType, SourceType, UserRole
@@ -47,12 +47,23 @@ async def get_report_analysis(
     return await AnalysisService(db).get_analysis(report_id)
 
 @router.post("", response_model=ReportRead, status_code=status.HTTP_201_CREATED, summary="Create an unsafe-act or near-miss report")
-async def create_report(payload: ReportCreate, request: Request, db: DBSession, user: User = Depends(require_roles(UserRole.ADMIN, UserRole.HSE_MANAGER, UserRole.HSE_ANALYST, UserRole.REVIEWER))) -> ReportRead:
-    return await ReportService(db, user).create(payload, user.id, request.client.host if request.client else None)
+async def create_report(
+    payload: ReportCreate, 
+    request: Request, 
+    db: DBSession, 
+    user: User = Depends(require_roles(UserRole.ADMIN, UserRole.HSE_MANAGER, UserRole.HSE_ANALYST, UserRole.REVIEWER)),
+    idempotency_key: str | None = Header(default=None, max_length=100, alias="Idempotency-Key")
+) -> ReportRead:
+    return await ReportService(db, user).create(payload, user.id, request.client.host if request.client else None, idempotency_key)
 
 @router.get("", response_model=ReportPage, summary="List reports with database-backed filtering and pagination")
 async def list_reports(db: DBSession, user: User = Depends(require_roles(UserRole.ADMIN, UserRole.HSE_MANAGER, UserRole.HSE_ANALYST, UserRole.REVIEWER, UserRole.VIEWER)), page: int = Query(1, ge=1), page_size: int = Query(20, ge=1, le=100), site_id: UUID | None = None, report_type: ReportType | None = None, status: ReportStatus | None = None, source_type: SourceType | None = None, date_from: datetime | None = None, date_to: datetime | None = None, search: str | None = Query(default=None, max_length=200)) -> ReportPage:
     reports, total = await ReportService(db, user).list(page=page, page_size=page_size, site_id=site_id, report_type=report_type, status=status, source_type=source_type, date_from=date_from, date_to=date_to, search=search)
+    return ReportPage(items=reports, total=total, page=page, page_size=page_size)
+
+@router.get("/deleted", response_model=ReportPage, summary="List soft-deleted reports (ADMIN only)")
+async def list_deleted_reports(db: DBSession, user: User = Depends(require_roles(UserRole.ADMIN)), page: int = Query(1, ge=1), page_size: int = Query(20, ge=1, le=100)) -> ReportPage:
+    reports, total = await ReportService(db, user).list_deleted(page=page, page_size=page_size)
     return ReportPage(items=reports, total=total, page=page, page_size=page_size)
 
 @router.get("/{report_id}", response_model=ReportRead, summary="Get a report by human-readable ID")

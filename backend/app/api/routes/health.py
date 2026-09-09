@@ -1,5 +1,7 @@
 from fastapi import APIRouter
+from fastapi.responses import PlainTextResponse
 from sqlalchemy import text
+from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
 
 from app.api.deps import DBSession
 from app.core.config import get_settings
@@ -28,3 +30,7 @@ async def readiness(db: DBSession) -> HealthResponse:
     except Exception as exc:
         raise AppError("DATABASE_UNAVAILABLE", "Database is not ready", 503) from exc
     return HealthResponse(status="ready")
+
+@router.get("/metrics", summary="Prometheus Metrics")
+async def metrics():
+    return PlainTextResponse(generate_latest(), media_type=CONTENT_TYPE_LATEST)

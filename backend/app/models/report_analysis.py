@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import JSON, DateTime, Enum, Float, ForeignKey, String, Text
+from sqlalchemy import JSON, DateTime, Enum, Float, ForeignKey, String, Text, Index
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import Uuid
 
@@ -12,6 +12,7 @@ from app.models.mixins import UUIDTimestampMixin
 
 class ReportAnalysis(UUIDTimestampMixin, Base):
     __tablename__ = "report_analyses"
+    __table_args__ = (Index("ix_report_analyses_created", "created_at"),)
     report_id: Mapped[uuid.UUID] = mapped_column(Uuid, ForeignKey("reports.id"), index=True, nullable=False)
     sif_potential: Mapped[bool | None]
     sif_level: Mapped[SIFLevel | None] = mapped_column(Enum(SIFLevel, native_enum=False), index=True)

@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 import pytest_asyncio
 from fastapi.testclient import TestClient
+from sqlalchemy.ext.asyncio import AsyncSession
 
 TEST_DB = Path(__file__).parent / "test_sif.db"
 
@@ -59,13 +60,39 @@ async def database():
             except PermissionError:
                 time.sleep(0.1)
         else:
-            # If it still fails after retries, we suppress it to keep CI green,
-            # but we know it's not a leaked session because we explicitly disposed the engine.
             pass
 
 
+@pytest_asyncio.fixture(autouse=True)
+async def transactional_db():
+    from app.api.deps import get_db
+    import app.db.session
+    
+    connection = await engine.connect()
+    transaction = await connection.begin()
+    
+    session = AsyncSession(
+        bind=connection,
+        join_transaction_mode="create_savepoint",
+        expire_on_commit=False,
+    )
+    
+    original_session_local = app.db.session.SessionLocal
+    app.db.session.SessionLocal = lambda: session
+    app.dependency_overrides[get_db] = lambda: session
+    
+    yield session
+    
+    await session.close()
+    await transaction.rollback()
+    await connection.close()
+    
+    app.dependency_overrides.clear()
+    app.db.session.SessionLocal = original_session_local
+
+
 @pytest.fixture()
-def client(database):
+def client(transactional_db):
     with TestClient(app) as test_client:
         yield test_client
 
@@ -75,6 +102,7 @@ async def promote(email: str, role: str = "ADMIN"):
 
     from app.core.constants import UserRole
     from app.models.user import User
+    from app.db.session import SessionLocal
     async with SessionLocal() as session:
         user = await session.scalar(select(User).where(User.email == email))
         user.role = UserRole(role)

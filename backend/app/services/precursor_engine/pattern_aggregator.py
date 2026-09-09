@@ -56,7 +56,7 @@ async def aggregate_patterns(db: AsyncSession, date_from: datetime | None = None
     barrier = func.lower(func.trim(PrecursorCandidate.barrier)).label("barrier")
     failure = func.lower(func.trim(PrecursorCandidate.failure_type)).label("failure_type")
     
-    filters = [Report.reported_at >= cutoff_start]
+    filters = [Report.reported_at >= cutoff_start, Report.is_deleted == False]
     if date_from:
         filters.append(Report.reported_at >= date_from)
     if date_to:

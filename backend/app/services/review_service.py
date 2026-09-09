@@ -95,6 +95,7 @@ def _joined_query():
         select(Review, Report, ReportAnalysis)
         .join(Report, Report.id == Review.report_id)
         .outerjoin(ReportAnalysis, ReportAnalysis.id == Review.analysis_id)
+        .where(Report.is_deleted == False)
     )
 
 
@@ -139,9 +140,9 @@ class ReviewService:
             base = base.where(Report.site_id == self.current_user.site_id)
 
         # Count query mirrors the same filter
-        count_q = select(func.count()).select_from(Review)
+        count_q = select(func.count()).select_from(Review).join(Report, Report.id == Review.report_id).where(Report.is_deleted == False)
         if self.current_user and self.current_user.role != UserRole.ADMIN and self.current_user.site_id:
-            count_q = count_q.join(Report, Report.id == Review.report_id).where(Report.site_id == self.current_user.site_id)
+            count_q = count_q.where(Report.site_id == self.current_user.site_id)
 
         if status_filter == ReviewStatusFilter.PENDING:
             count_q = count_q.where(Review.decision == ReviewDecision.PENDING)
