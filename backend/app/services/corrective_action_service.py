@@ -111,9 +111,9 @@ class CorrectiveActionService:
             await InterventionService(self.db).get(action.intervention_recommendation_id)
             
         from app.core.constants import UserRole
-        if self.current_user and self.current_user.role != UserRole.ADMIN and self.current_user.site_id:
+        if self.current_user and self.current_user.role != UserRole.ADMIN and self.current_user.site_id and action.report_id:
             from app.models.report import Report
-            report = await self.db.get(Report, action.report_id)
+            report = await self.db.scalar(select(Report).where(Report.id == action.report_id, Report.is_deleted.is_(False)))
             if report and report.site_id != self.current_user.site_id:
                 raise AppError("FORBIDDEN", "You do not have access to this site's data", 403)
                 
@@ -520,7 +520,6 @@ class CorrectiveActionService:
         ]
 
     async def _get_for_update(self, action_id: UUID) -> CorrectiveAction:
-        await self.get(action_id)
         action = await self.db.scalar(
             select(CorrectiveAction)
             .where(CorrectiveAction.id == action_id)
@@ -529,10 +528,17 @@ class CorrectiveActionService:
         if not action:
             raise NotFoundError("corrective action")
             
+        if action.report_id:
+            await self._active_report(action.report_id)
+            
+        if action.intervention_recommendation_id:
+            from app.services.intervention_service import InterventionService
+            await InterventionService(self.db).get(action.intervention_recommendation_id)
+            
         from app.core.constants import UserRole
-        if self.current_user and self.current_user.role != UserRole.ADMIN and self.current_user.site_id:
+        if self.current_user and self.current_user.role != UserRole.ADMIN and self.current_user.site_id and action.report_id:
             from app.models.report import Report
-            report = await self.db.get(Report, action.report_id)
+            report = await self.db.scalar(select(Report).where(Report.id == action.report_id, Report.is_deleted.is_(False)))
             if report and report.site_id != self.current_user.site_id:
                 raise AppError("FORBIDDEN", "You do not have access to this site's data", 403)
                 

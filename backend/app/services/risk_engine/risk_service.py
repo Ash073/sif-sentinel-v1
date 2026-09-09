@@ -18,15 +18,16 @@ class RiskService:
 
     def _base(self):
         latest = latest_analysis_subquery()
-        return select(Report, ReportAnalysis).join(ReportAnalysis, ReportAnalysis.report_id == Report.id).join(latest, (latest.c.report_id == ReportAnalysis.report_id) & (latest.c.latest_created == ReportAnalysis.created_at))
+        return select(Report, ReportAnalysis).join(ReportAnalysis, ReportAnalysis.report_id == Report.id).join(latest, (latest.c.report_id == ReportAnalysis.report_id) & (latest.c.latest_created == ReportAnalysis.created_at)).where(Report.is_deleted.is_(False))
 
     async def sites(self, date_from: datetime | None, date_to: datetime | None, limit: int) -> list[SiteRiskItem]:
         now = datetime.now(UTC)
         recent = now - timedelta(days=30)
         filters = self._date_filters(date_from, date_to)
-        latest = latest_analysis_subquery()
         key = (func.coalesce(ReportAnalysis.activity, "unknown") + "|" + func.coalesce(ReportAnalysis.hazard, "unknown") + "|" + func.coalesce(ReportAnalysis.barrier, "unknown") + "|" + func.coalesce(ReportAnalysis.barrier_failure, "unknown"))
-        statement = select(Site.id, Site.name, func.count(Report.id).label("total"), func.coalesce(func.sum(case((ReportAnalysis.sif_potential.is_(True), 1), else_=0)), 0).label("sif"), func.coalesce(func.sum(case((ReportAnalysis.sif_level.in_([SIFLevel.HIGH, SIFLevel.MEDIUM]), 1), else_=0)), 0).label("high"), func.coalesce(func.sum(case((ReportAnalysis.barrier_failure.is_not(None), 1), else_=0)), 0).label("failed"), func.coalesce(func.sum(case((Report.reported_at >= recent, 1), else_=0)), 0).label("recent"), func.count(func.distinct(case((ReportAnalysis.barrier_failure.is_not(None), key)))).label("patterns")).select_from(Report).join(ReportAnalysis, ReportAnalysis.report_id == Report.id).join(latest, (latest.c.report_id == ReportAnalysis.report_id) & (latest.c.latest_created == ReportAnalysis.created_at)).join(Site, Site.id == Report.site_id).where(*filters).group_by(Site.id, Site.name)
+        statement = self._base().join(Site, Site.id == Report.site_id).with_only_columns(
+            Site.id, Site.name, func.count(Report.id).label("total"), func.coalesce(func.sum(case((ReportAnalysis.sif_potential.is_(True), 1), else_=0)), 0).label("sif"), func.coalesce(func.sum(case((ReportAnalysis.sif_level.in_([SIFLevel.HIGH, SIFLevel.MEDIUM]), 1), else_=0)), 0).label("high"), func.coalesce(func.sum(case((ReportAnalysis.barrier_failure.is_not(None), 1), else_=0)), 0).label("failed"), func.coalesce(func.sum(case((Report.reported_at >= recent, 1), else_=0)), 0).label("recent"), func.count(func.distinct(case((ReportAnalysis.barrier_failure.is_not(None), key)))).label("patterns")
+        ).where(*filters).group_by(Site.id, Site.name)
         items = []
         for row in (await self.db.execute(statement)).mappings():
             total, sif, failed = int(row["total"]), int(row["sif"]), int(row["failed"])
@@ -38,8 +39,9 @@ class RiskService:
     async def dimensions(self, field: str, date_from: datetime | None, date_to: datetime | None, limit: int) -> list[RiskItem]:
         column = {"activity": ReportAnalysis.activity, "hazard": ReportAnalysis.hazard}[field]
         now = datetime.now(UTC)
-        latest = latest_analysis_subquery()
-        statement = select(column.label("name"), func.count(Report.id).label("total"), func.coalesce(func.sum(case((ReportAnalysis.sif_potential.is_(True), 1), else_=0)), 0).label("sif"), func.coalesce(func.sum(case((ReportAnalysis.barrier_failure.is_not(None), 1), else_=0)), 0).label("failed"), func.max(Report.reported_at).label("last_seen")).select_from(Report).join(ReportAnalysis, ReportAnalysis.report_id == Report.id).join(latest, (latest.c.report_id == ReportAnalysis.report_id) & (latest.c.latest_created == ReportAnalysis.created_at)).where(column.is_not(None), *self._date_filters(date_from, date_to)).group_by(column)
+        statement = self._base().with_only_columns(
+            column.label("name"), func.count(Report.id).label("total"), func.coalesce(func.sum(case((ReportAnalysis.sif_potential.is_(True), 1), else_=0)), 0).label("sif"), func.coalesce(func.sum(case((ReportAnalysis.barrier_failure.is_not(None), 1), else_=0)), 0).label("failed"), func.max(Report.reported_at).label("last_seen")
+        ).where(column.is_not(None), *self._date_filters(date_from, date_to)).group_by(column)
         items = []
         for row in (await self.db.execute(statement)).mappings():
             total, sif, failed = int(row["total"]), int(row["sif"]), int(row["failed"])
@@ -53,8 +55,9 @@ class RiskService:
         return sorted(items, key=lambda item: item.risk_score, reverse=True)[:limit]
 
     async def barriers(self, date_from: datetime | None, date_to: datetime | None, limit: int) -> list[BarrierRiskItem]:
-        latest = latest_analysis_subquery()
-        statement = select(ReportAnalysis.barrier.label("barrier"), func.count(Report.id).label("total"), func.coalesce(func.sum(case((ReportAnalysis.barrier_failure.is_not(None), 1), else_=0)), 0).label("failed"), func.coalesce(func.sum(case((ReportAnalysis.sif_potential.is_(True), 1), else_=0)), 0).label("sif"), func.max(Report.reported_at).label("last_seen")).select_from(Report).join(ReportAnalysis, ReportAnalysis.report_id == Report.id).join(latest, (latest.c.report_id == ReportAnalysis.report_id) & (latest.c.latest_created == ReportAnalysis.created_at)).where(ReportAnalysis.barrier.is_not(None), *self._date_filters(date_from, date_to)).group_by(ReportAnalysis.barrier)
+        statement = self._base().with_only_columns(
+            ReportAnalysis.barrier.label("barrier"), func.count(Report.id).label("total"), func.coalesce(func.sum(case((ReportAnalysis.barrier_failure.is_not(None), 1), else_=0)), 0).label("failed"), func.coalesce(func.sum(case((ReportAnalysis.sif_potential.is_(True), 1), else_=0)), 0).label("sif"), func.max(Report.reported_at).label("last_seen")
+        ).where(ReportAnalysis.barrier.is_not(None), *self._date_filters(date_from, date_to)).group_by(ReportAnalysis.barrier)
         now = datetime.now(UTC)
         items = []
         for row in (await self.db.execute(statement)).mappings():
@@ -69,7 +72,7 @@ class RiskService:
 
     @staticmethod
     def _date_filters(date_from: datetime | None, date_to: datetime | None) -> list:
-        filters = [Report.is_deleted.is_(False)]
+        filters = []
         if date_from:
             filters.append(Report.reported_at >= date_from)
         if date_to:

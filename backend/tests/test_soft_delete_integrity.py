@@ -160,10 +160,13 @@ async def test_deleted_inspection_endpoint_is_admin_only(client, admin_headers, 
     assert response.status_code == 200
     assert [item["id"] for item in response.json()["items"]] == [str(retained_rows.deleted.id)]
     assert client.get("/api/v1/reports/deleted").status_code in (401, 403)
-    email = f"viewer-{uuid4().hex}@example.test"
+    email = f"viewer-{uuid4().hex}@sif.demo"
     registration = client.post("/api/v1/auth/register", json={
         "email": email, "password": "test-password-123", "full_name": "Viewer",
+        "site_id": str(retained_rows.site.id),
     })
+    if registration.status_code != 201:
+        print("Registration error:", registration.json())
     assert registration.status_code == 201
     token = client.post("/api/v1/auth/login", json={"email": email, "password": "test-password-123"}).json()["access_token"]
     assert client.get("/api/v1/reports/deleted", headers={"Authorization": f"Bearer {token}"}).status_code == 403

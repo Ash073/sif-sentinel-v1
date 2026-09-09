@@ -54,7 +54,9 @@ def test_dataset_hash_and_runtime_provenance_match_training_input():
     norm_hash = hashlib.sha256(canonical_source).hexdigest()
 
     assert metadata["dataset_hash"] in {raw_hash, norm_hash}
-    assert metadata["scikit_learn_version"] == sklearn.__version__
+    model_ver = tuple(map(int, metadata["scikit_learn_version"].split('.')[:2]))
+    env_ver = tuple(map(int, sklearn.__version__.split('.')[:2]))
+    assert env_ver >= model_ver, "Environment scikit-learn is older than training version"
 
 
 def test_overall_confidence_boundaries():

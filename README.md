@@ -36,3 +36,7 @@ uv sync
 uv run uvicorn app.main:app --reload
 ```
 For more backend setup, testing, and execution details, see [backend/README.md](backend/README.md).
+
+
+testing:
+uv run pytest -v 2>&1
