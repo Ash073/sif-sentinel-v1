@@ -16,10 +16,15 @@ router = APIRouter(prefix="/dashboard", tags=["Dashboard analytics"])
 _read_roles = (UserRole.ADMIN, UserRole.HSE_MANAGER, UserRole.HSE_ANALYST, UserRole.REVIEWER, UserRole.VIEWER)
 
 
+from app.schemas.dashboard import CorrectiveActionSummary
+
 @router.get("/summary", response_model=DashboardSummary, summary="Organization-wide report and precursor summary")
 async def summary(db: DBSession, _: User = Depends(require_roles(*_read_roles))) -> DashboardSummary:
     return await AnalyticsService(db).summary()
 
+@router.get("/corrective-action-summary", response_model=CorrectiveActionSummary, summary="Summary of corrective actions")
+async def corrective_action_summary(db: DBSession, _: User = Depends(require_roles(*_read_roles))) -> CorrectiveActionSummary:
+    return await AnalyticsService(db).corrective_action_summary()
 
 @router.get("/sif-trend", response_model=list[TimeSeriesPoint], summary="Daily SIF signal trend")
 async def sif_trend(db: DBSession, _: User = Depends(require_roles(*_read_roles)), window: str = Query("30d", pattern="^(7d|30d|90d|1y)$")) -> list[TimeSeriesPoint]:

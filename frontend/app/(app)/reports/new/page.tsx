@@ -35,12 +35,18 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
+import { useAuth } from '@/components/providers/AuthProvider';
+import { ShieldAlert } from 'lucide-react';
+
 export default function NewReportPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const [successData, setSuccessData] = useState<{ report_id: string } | null>(null);
 
   const sitesQ = useQuery({ queryKey: ['sites'], queryFn: sitesApi.list, staleTime: 5 * 60 * 1000 });
+
+  const canCreate = user && ['ADMIN', 'HSE_MANAGER', 'HSE_ANALYST', 'REVIEWER'].includes(user.role);
 
   const {
     register,
@@ -91,6 +97,24 @@ export default function NewReportPage() {
     mutation.mutate(data);
   };
 
+  if (!canCreate) {
+    return (
+      <div className="max-w-2xl mx-auto mt-12 text-center space-y-6 bg-white p-12 rounded-3xl border border-slate-100 shadow-sm">
+        <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-6">
+          <ShieldAlert className="w-8 h-8" />
+        </div>
+        <h2 className="text-2xl font-bold text-slate-900">Access Denied</h2>
+        <p className="text-slate-500">Your current role ({user?.role}) does not have permission to create safety reports.</p>
+        
+        <div className="pt-8 flex gap-4 justify-center">
+          <Button variant="outline" onClick={() => router.push('/dashboard')}>
+            Return to Dashboard
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   if (successData) {
     return (
       <div className="max-w-2xl mx-auto mt-12 text-center space-y-6 bg-white p-12 rounded-3xl border border-slate-100 shadow-sm">
@@ -132,7 +156,7 @@ export default function NewReportPage() {
           {/* Report Type */}
           <div className="space-y-2">
             <Label htmlFor="report_type">Report Type <span className="text-red-500">*</span></Label>
-            <Select onValueChange={(v) => setValue('report_type', v as any)} defaultValue={watch('report_type')}>
+            <Select onValueChange={(v) => setValue('report_type', v as ReportType)} defaultValue={watch('report_type')}>
               <SelectTrigger id="report_type" className={errors.report_type ? "border-red-500" : ""}>
                 <SelectValue placeholder="Select type" />
               </SelectTrigger>
@@ -189,7 +213,7 @@ export default function NewReportPage() {
           {/* Source Type */}
           <div className="space-y-2">
             <Label htmlFor="source_type">Source Type <span className="text-red-500">*</span></Label>
-            <Select onValueChange={(v) => setValue('source_type', v as any)} defaultValue={watch('source_type')}>
+            <Select onValueChange={(v) => setValue('source_type', v as SourceType)} defaultValue={watch('source_type')}>
               <SelectTrigger id="source_type">
                 <SelectValue />
               </SelectTrigger>

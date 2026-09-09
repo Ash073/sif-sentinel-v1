@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { reviewsApi } from '@/lib/api/reviews';
 import {
   ReviewDecisionBadge
@@ -43,22 +43,19 @@ function DecisionDialog({ review, open, onClose }: DecisionDialogProps) {
   const [correctedBarrierFailure, setCorrectedBarrierFailure] = useState('');
   const [correctedLsr, setCorrectedLsr] = useState('');
 
-  // Reset state when review changes
-  import('react').then(React => {
-    React.useEffect(() => {
-      if (review) {
-        setDecision(review.decision === 'PENDING' ? 'APPROVE' : review.decision);
-        setComment(review.reviewer_comment || '');
-        setCorrectedSifLevel(review.corrected_sif_level || '');
-        setCorrectedActivity(review.corrected_activity || '');
-        setCorrectedHazard(review.corrected_hazard || '');
-        setCorrectedBarrier(review.corrected_barrier || '');
-        setCorrectedBarrierStatus(review.corrected_barrier_status || '');
-        setCorrectedBarrierFailure(review.corrected_barrier_failure || '');
-        setCorrectedLsr(review.corrected_life_saving_rule || '');
-      }
-    }, [review]);
-  });
+  useEffect(() => {
+    if (review) {
+      setDecision(review.decision === 'PENDING' ? 'APPROVE' : review.decision);
+      setComment(review.reviewer_comment || '');
+      setCorrectedSifLevel(review.corrected_sif_level || '');
+      setCorrectedActivity(review.corrected_activity || '');
+      setCorrectedHazard(review.corrected_hazard || '');
+      setCorrectedBarrier(review.corrected_barrier || '');
+      setCorrectedBarrierStatus(review.corrected_barrier_status || '');
+      setCorrectedBarrierFailure(review.corrected_barrier_failure || '');
+      setCorrectedLsr(review.corrected_life_saving_rule || '');
+    }
+  }, [review]);
 
   const mutation = useMutation({
     mutationFn: () =>

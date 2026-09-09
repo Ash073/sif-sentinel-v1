@@ -53,12 +53,18 @@ export function Header() {
           <div className="w-8 h-8 rounded-[10px] bg-primary flex items-center justify-center shrink-0">
             <ShieldAlert className="w-4 h-4 text-primary-foreground" />
           </div>
-          <span className="font-bold text-[16px] tracking-tight text-foreground hidden sm:inline-block">FinexySentinel</span>
+          <span className="font-bold text-[16px] tracking-tight text-foreground hidden sm:inline-block">SIF SENTINEL</span>
         </Link>
       </div>
 
-      {/* Middle: Empty space, because nav is in sidebar */}
-      <div className="flex-1 hidden lg:flex"></div>
+      {/* Center: Main Navigation */}
+      <div className="flex-1 hidden lg:flex items-center justify-center gap-8">
+        <Link href="/dashboard" className="text-[13px] font-medium text-muted-foreground hover:text-foreground transition-colors">Overview</Link>
+        <Link href="/reports" className="text-[13px] font-medium text-muted-foreground hover:text-foreground transition-colors">Reports</Link>
+        <Link href="/precursors" className="text-[13px] font-medium text-muted-foreground hover:text-foreground transition-colors">Intelligence</Link>
+        <Link href="/interventions" className="text-[13px] font-medium text-muted-foreground hover:text-foreground transition-colors">Operations</Link>
+        <Link href="/reviews" className="text-[13px] font-medium text-muted-foreground hover:text-foreground transition-colors">Reviews</Link>
+      </div>
 
       {/* Right: Search, Notifications, Profile */}
       <div className="flex items-center gap-4">

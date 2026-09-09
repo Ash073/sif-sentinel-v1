@@ -9,11 +9,14 @@ from app.models.report import Report
 from app.repositories.report_repository import ReportRepository
 from app.schemas.report import ReportCreate, ReportUpdate
 from app.services.audit_service import record_audit
+import structlog
 
+logger = structlog.get_logger(__name__)
 
 class ReportService:
-    def __init__(self, db: AsyncSession) -> None:
+    def __init__(self, db: AsyncSession, current_user: "User" = None) -> None:
         self.db, self.repo = db, ReportRepository(db)
+        self.current_user = current_user
 
     async def create(self, payload: ReportCreate, user_id: UUID, ip_address: str | None) -> Report:
         from app.models.site import Site
@@ -29,12 +32,18 @@ class ReportService:
                            details={"report_id": report.report_id}, ip_address=ip_address)
         await self.db.commit()
         await self.db.refresh(report)
+        logger.info("report_created", report_id=human_id, user_id=str(user_id))
         return report
 
     async def get(self, human_id: str) -> Report:
         report = await self.repo.get_by_human_id(human_id)
         if not report:
             raise NotFoundError("report")
+            
+        if self.current_user and self.current_user.role != "ADMIN" and self.current_user.site_id:
+            if report.site_id != self.current_user.site_id:
+                raise AppError("FORBIDDEN", "You do not have access to reports for this site", 403)
+                
         return report
 
     async def list(
@@ -55,6 +64,10 @@ class ReportService:
         Delegates entirely to ReportRepository so route handlers never
         access the repository directly.
         """
+        # IDOR Protection: Scoped list
+        if self.current_user and self.current_user.role != "ADMIN" and self.current_user.site_id:
+            site_id = self.current_user.site_id
+
         return await self.repo.list(
             page=page,
             page_size=page_size,
@@ -89,6 +102,18 @@ class ReportService:
                            details={"report_id": report.report_id}, ip_address=ip_address)
         await self.db.delete(report)
         await self.db.commit()
+
+    async def close(self, human_id: str, user_id: UUID, ip_address: str | None) -> Report:
+        report = await self.get(human_id)
+        if report.status in (ReportStatus.CLOSED, ReportStatus.FAILED):
+            raise AppError("REPORT_ALREADY_CLOSED", "Report is already closed or failed", 409)
+            
+        report.status = ReportStatus.CLOSED
+        await record_audit(self.db, user_id=user_id, action="REPORT_CLOSED", entity_type="report", entity_id=report.id,
+                           details={"report_id": report.report_id}, ip_address=ip_address)
+        await self.db.commit()
+        await self.db.refresh(report)
+        return report
 
     @staticmethod
     def _new_human_id() -> str:

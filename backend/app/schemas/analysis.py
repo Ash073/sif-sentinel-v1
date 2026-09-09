@@ -98,6 +98,9 @@ class AnalysisResponse(BaseModel):
     llm_timestamp: datetime | None = None
     llm_error_code: str | None = None
 
+    # Audit & Tracking
+    precursor_priority_used: str | None = None
+
 
 class CounterfactualRequest(BaseModel):
     report_text: str | None = None

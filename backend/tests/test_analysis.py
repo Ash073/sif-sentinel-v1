@@ -122,3 +122,24 @@ def test_reanalysis_is_rejected_without_changing_current_precursor_candidates(cl
     )
     assert patched.status_code == 409
     assert patched.json()["error"]["code"] == "REPORT_NOT_EDITABLE"
+
+
+def test_safety_graph_and_causal_chains_persisted(client, admin_headers):
+    report_id = _create_report(
+        client,
+        admin_headers,
+        "AN-GRAPH",
+        "Worker fell from scaffolding due to missing guardrails.",
+    )
+    res = client.post(f"/api/v1/reports/{report_id}/analyze", headers=admin_headers)
+    assert res.status_code == 200
+    body = res.json()
+    assert body.get("safety_graph") is not None
+    assert body.get("causal_chains") is not None
+    
+    # Verify persistence via get_analysis
+    get_res = client.get(f"/api/v1/reports/{report_id}/analysis", headers=admin_headers)
+    assert get_res.status_code == 200
+    get_body = get_res.json()
+    assert get_body.get("safety_graph") == body["safety_graph"]
+    assert get_body.get("causal_chains") == body["causal_chains"]

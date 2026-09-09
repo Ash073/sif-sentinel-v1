@@ -30,15 +30,17 @@ async def main():
         # Get or create a user
         user = await db.scalar(select(User).limit(1))
         if not user:
+            from app.core.security import hash_password
             user = User(
                 email="admin@sifsentinel.com",
                 full_name="Admin User",
                 role="ADMIN",
+                password_hash=hash_password("admin123"),
                 is_active=True
             )
             db.add(user)
             await db.flush()
-            print("Created Admin User.")
+            print("Created Admin User with password admin123.")
             
         await db.commit()
 

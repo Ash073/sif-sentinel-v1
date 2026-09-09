@@ -6,6 +6,12 @@ class HealthResponse(BaseModel):
     service: str = "sif-backend"
 
 
+class CorrectiveActionSummary(BaseModel):
+    total: int
+    open: int
+    overdue: int
+    completed: int
+
 class DashboardSummary(BaseModel):
     total_reports: int
     total_sif_reports: int
@@ -15,6 +21,8 @@ class DashboardSummary(BaseModel):
     sites_monitored: int
     sif_rate: float
     high_risk_rate: float
+    review_queue_count: int
+    corrective_actions: CorrectiveActionSummary
 
 
 class TimeSeriesPoint(BaseModel):

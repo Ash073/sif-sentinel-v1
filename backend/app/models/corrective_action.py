@@ -1,10 +1,11 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import JSON, DateTime, ForeignKey, Index, String, Text
+from sqlalchemy import JSON, DateTime, Enum, ForeignKey, Index, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import Uuid
 
+from app.core.constants import CorrectiveActionStatus
 from app.db.base import Base
 from app.models.mixins import UUIDTimestampMixin
 
@@ -34,7 +35,7 @@ class CorrectiveAction(UUIDTimestampMixin, Base):
     hierarchy_level: Mapped[str] = mapped_column(String(50), nullable=False)
     action_type: Mapped[str] = mapped_column(String(50), nullable=False)
     priority: Mapped[str] = mapped_column(String(20), nullable=False)
-    status: Mapped[str] = mapped_column(String(30), default="DRAFT", nullable=False)
+    status: Mapped[CorrectiveActionStatus] = mapped_column(Enum(CorrectiveActionStatus, native_enum=False), default=CorrectiveActionStatus.DRAFT, nullable=False)
 
     # Immutable provenance snapshot of the original recommendation
     original_recommendation: Mapped[dict] = mapped_column(JSON, nullable=False)

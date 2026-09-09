@@ -22,13 +22,20 @@ from app.services.precursor_engine.precursor_service import PrecursorService
 from app.services.risk_engine.calculator import calculate_risk
 
 
+from app.core.interfaces import AnalysisPipelineProtocol
+
 class AnalysisService:
-    def __init__(self, db: AsyncSession | None) -> None:
+    def __init__(self, db: AsyncSession | None, pipeline: AnalysisPipelineProtocol | None = None) -> None:
         self.db = db
+        if pipeline is None:
+            from app.services.nlp import analysis_pipeline
+            self.pipeline = analysis_pipeline
+        else:
+            self.pipeline = pipeline
 
     def analyze_direct(self, text: str) -> AnalysisResponse:
         try:
-            result = analyze_text(text)
+            result = self.pipeline.analyze_text(text)
         except RuntimeError as exc:
             raise AppError("MODEL_UNAVAILABLE", "Safety classifier is unavailable", 503) from exc
         return self._response(result)
@@ -36,21 +43,32 @@ class AnalysisService:
     async def get_analysis(self, report_id: str) -> AnalysisResponse:
         if self.db is None:
             raise AppError("NO_DB_SESSION", "Database session is required", 500)
-            
+
         report = await self.db.scalar(select(Report).where(Report.report_id == report_id))
         if not report:
             raise NotFoundError("report")
-            
+
         analysis = await self.db.scalar(select(ReportAnalysis).where(ReportAnalysis.report_id == report.id))
         if not analysis:
             raise NotFoundError("analysis")
-            
+
         prediction = await self.db.scalar(select(ModelPrediction).where(ModelPrediction.report_id == report.id))
-        
+
         prediction_json = prediction.prediction_json if prediction else {}
         evidence_terms = prediction_json.get("evidence_terms", []) if isinstance(prediction_json, dict) else []
-        overall_confidence = prediction_json.get("overall_confidence", 0.0) if isinstance(prediction_json, dict) else 0.0
-        
+
+        # G13: evidence_sentences now persisted on analysis; fall back to prediction_json for old records
+        evidence_sentences = (
+            analysis.evidence_sentences
+            if getattr(analysis, "evidence_sentences", None) is not None
+            else (prediction_json.get("evidence_sentences", []) if isinstance(prediction_json, dict) else [])
+        )
+        overall_confidence = (
+            prediction_json.get("overall_confidence", analysis.overall_confidence or 0.0)
+            if isinstance(prediction_json, dict)
+            else (analysis.overall_confidence or 0.0)
+        )
+
         risk = None
         if analysis.risk_score is not None:
             risk = {
@@ -59,7 +77,7 @@ class AnalysisService:
                 "components": analysis.risk_components or [],
                 "version": analysis.risk_version or "v1"
             }
-            
+
         return AnalysisResponse(
             report_id=report.report_id,
             analysis_id=analysis.id,
@@ -74,7 +92,8 @@ class AnalysisService:
             life_saving_rule=analysis.life_saving_rule,
             rule_confidence=analysis.rule_confidence,
             evidence_span=analysis.evidence_span,
-            evidence_sentences=[],
+            # G13: return persisted causal intelligence from DB (was previously lost on page reload)
+            evidence_sentences=evidence_sentences,
             evidence_terms=evidence_terms,
             overall_confidence=overall_confidence,
             review_required=(analysis.analysis_status == "REVIEW_REQUIRED"),
@@ -89,6 +108,10 @@ class AnalysisService:
             llm_model_used=analysis.llm_model_used,
             llm_timestamp=analysis.llm_timestamp,
             llm_error_code=analysis.llm_error_code,
+            # G13: causal intelligence now returned from DB persistence
+            safety_graph=getattr(analysis, "safety_graph", None),
+            causal_chains=getattr(analysis, "causal_chains", None),
+            reasoning_summary=getattr(analysis, "reasoning_summary", None),
         )
 
     async def analyze_report(
@@ -105,17 +128,37 @@ class AnalysisService:
         )
         if not report:
             raise NotFoundError("report")
-        if report.status != ReportStatus.NEW:
+
+        # Allow re-analysis of FAILED reports (support retry path for G09).
+        # All other non-NEW states indicate the report is already in the analysis lifecycle.
+        if report.status not in (ReportStatus.NEW, ReportStatus.FAILED):
             raise AppError(
                 "REPORT_ALREADY_ANALYZED",
                 "This report has already entered the analysis lifecycle.",
                 409,
             )
 
+        # G09: Transition to ANALYZING before running the intelligence pipeline.
+        # This makes the transitional state observable in the report list and prevents
+        # a concurrent duplicate analysis request from passing the NEW guard above.
+        report.status = ReportStatus.ANALYZING
+        await self.db.flush()
+
         try:
-            # We first extract text to get candidates, ignoring precursor priority for now
-            result = analyze_text(report.report_text)
+            result = self.pipeline.analyze_text(report.report_text)
         except RuntimeError as exc:
+            # G09/G34: On ML failure, mark report FAILED and record audit event.
+            report.status = ReportStatus.FAILED
+            await record_audit(
+                self.db,
+                user_id=actor_id,
+                action="ANALYSIS_FAILED",
+                entity_type="report",
+                entity_id=report.id,
+                details={"error": str(exc), "stage": "ml_classification"},
+                ip_address=ip_address,
+            )
+            await self.db.commit()
             raise AppError("MODEL_UNAVAILABLE", "Safety classifier is unavailable", 503) from exc
 
         # Check if the extracted candidates match any active precursor patterns
@@ -123,12 +166,12 @@ class AnalysisService:
         if result.precursor_candidates:
             from app.services.precursor_engine.pattern_builder import build_pattern_key
             keys = [
-                build_pattern_key(c.activity, c.hazard, c.barrier, c.failure_type).key 
+                build_pattern_key(c.activity, c.hazard, c.barrier, c.failure_type).key
                 for c in result.precursor_candidates
             ]
             statement = select(PrecursorPattern.priority).where(
                 PrecursorPattern.pattern_key.in_(keys),
-                PrecursorPattern.priority.in_(["CRITICAL", "HIGH", "MEDIUM"]) # Only care about elevated risk
+                PrecursorPattern.priority.in_(["CRITICAL", "HIGH", "MEDIUM"])
             )
             rows = (await self.db.execute(statement)).scalars().all()
             if rows:
@@ -138,7 +181,7 @@ class AnalysisService:
                     precursor_priority = "HIGH"
                 else:
                     precursor_priority = "MEDIUM"
-        
+
         # Recalculate risk with precursor intelligence
         import dataclasses
         risk_data = calculate_risk(
@@ -168,14 +211,20 @@ class AnalysisService:
                 life_saving_rule=result.life_saving_rule,
                 rule_confidence=result.rule_confidence,
                 evidence_span=result.evidence_span,
+                evidence_sentences=result.evidence_sentences,
                 explanation=result.explanation,
                 overall_confidence=result.overall_confidence,
                 model_version=result.model_version,
                 analysis_status="REVIEW_REQUIRED" if result.review_required else "COMPLETE",
+                # G13: Persist causal intelligence so GET /reports/{id}/analysis returns it
+                safety_graph=getattr(result, "safety_graph", None),
+                causal_chains=getattr(result, "causal_chains", None),
+                reasoning_summary=getattr(result, "reasoning_summary", None),
+                # G16: Persist precursor_priority used at risk calculation time for auditability
+                precursor_priority_used=precursor_priority,
             )
-            
+
             # Phase J: Request optional LLM Assistance
-            # Context explicitly bound to structured authoritative results to prevent injection overrides
             llm_context = {
                 "structured_evidence": {
                     "activity": result.activity,
@@ -197,11 +246,7 @@ class AnalysisService:
                 structured_evidence=llm_context["structured_evidence"],
                 authoritative_results=llm_context["authoritative_results"]
             )
-            
-            # llm_attempted = True iff LLM was enabled (we made an attempt).
-            # llm_used = True iff that attempt produced a usable summary.
-            # This distinction allows dashboards to show:
-            #   enabled + attempted + failed  vs.  disabled (no attempt).
+
             _llm_was_enabled = get_settings().llm_enabled
             analysis.llm_attempted = _llm_was_enabled
             analysis.llm_used = llm_res.success
@@ -210,7 +255,7 @@ class AnalysisService:
             analysis.llm_timestamp = llm_res.timestamp if _llm_was_enabled else None
             analysis.reviewer_summary = llm_res.summary
             analysis.llm_error_code = llm_res.error_code
-            
+
             self.db.add(analysis)
             await self.db.flush()
 
@@ -268,8 +313,6 @@ class AnalysisService:
                 ))
 
             await PrecursorService(self.db).rebuild()
-            # Phase K is strictly downstream advisory intelligence.  This uses
-            # persisted deterministic analysis/risk fields and cannot mutate them.
             await InterventionService(self.db).generate_for_report(
                 report, analysis, precursor_priority=precursor_priority
             )
@@ -285,8 +328,26 @@ class AnalysisService:
             await self.db.commit()
             await self.db.refresh(analysis)
 
-        except Exception:
+        except AppError:
             await self.db.rollback()
+            raise
+        except Exception as exc:
+            # G09/G34: On unexpected persistence exception, mark report FAILED with audit.
+            await self.db.rollback()
+            try:
+                report.status = ReportStatus.FAILED
+                await record_audit(
+                    self.db,
+                    user_id=actor_id,
+                    action="ANALYSIS_FAILED",
+                    entity_type="report",
+                    entity_id=report.id,
+                    details={"error": type(exc).__name__, "stage": "persistence"},
+                    ip_address=ip_address,
+                )
+                await self.db.commit()
+            except Exception:
+                pass
             raise
 
         return self._response(result, human_id, analysis.id, analysis_db_obj=analysis)
@@ -358,6 +419,6 @@ class AnalysisService:
             resp.llm_model_used = analysis_db_obj.llm_model_used
             resp.llm_timestamp = analysis_db_obj.llm_timestamp
             resp.llm_error_code = analysis_db_obj.llm_error_code
-            
-        return resp
+            resp.precursor_priority_used = analysis_db_obj.precursor_priority_used
 
+        return resp

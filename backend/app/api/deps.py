@@ -17,6 +17,9 @@ bearer_scheme = HTTPBearer(auto_error=False)
 DBSession = Annotated[AsyncSession, Depends(get_db)]
 
 
+from app.models.token_blocklist import TokenBlocklist
+from sqlalchemy import select
+
 async def get_current_user(db: DBSession, credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer_scheme)]) -> User:
     if not credentials:
         raise AppError("AUTHENTICATION_REQUIRED", "Bearer token required", 401)
@@ -24,6 +27,10 @@ async def get_current_user(db: DBSession, credentials: Annotated[HTTPAuthorizati
     try:
         payload = jwt.decode(credentials.credentials, settings.jwt_secret_key, algorithms=[settings.jwt_algorithm])
         user_id = UUID(payload["sub"])
+        jti = payload.get("jti")
+        if jti:
+            if await db.scalar(select(TokenBlocklist).where(TokenBlocklist.jti == jti)):
+                raise AppError("INVALID_TOKEN", "Token has been invalidated", 401)
     except (jwt.PyJWTError, KeyError, ValueError):
         raise AppError("INVALID_TOKEN", "Invalid or expired access token", 401) from None
     user = await db.get(User, user_id)

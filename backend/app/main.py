@@ -16,12 +16,19 @@ settings = get_settings()
 async def lifespan(_: FastAPI):
     yield
 
+from slowapi.errors import RateLimitExceeded
+from app.core.rate_limit import limiter, rate_limit_exceeded_handler
+
 app = FastAPI(
     title="SIF Sentinel Safety Intelligence API",
     version="0.1.0",
     description="Deterministic safety intelligence with human review and optional LLM assistance.",
     lifespan=lifespan,
 )
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)
+
 app.add_middleware(RequestIDMiddleware)
 app.add_middleware(CORSMiddleware, allow_origins=settings.cors_origin_list, allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 register_error_handlers(app)

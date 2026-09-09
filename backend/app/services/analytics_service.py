@@ -17,6 +17,11 @@ from app.schemas.dashboard import (
 from app.services.precursor_engine.pattern_aggregator import latest_analysis_subquery
 
 
+from app.models.review import Review
+from app.models.corrective_action import CorrectiveAction
+from app.core.constants import ReviewDecision
+from app.schemas.dashboard import CorrectiveActionSummary
+
 class AnalyticsService:
     def __init__(self, db: AsyncSession) -> None:
         self.db = db
@@ -26,7 +31,38 @@ class AnalyticsService:
         metrics = (await self.db.execute(select(func.count(Report.id), func.coalesce(func.sum(case((ReportAnalysis.sif_potential.is_(True), 1), else_=0)), 0), func.coalesce(func.sum(case((ReportAnalysis.sif_level == SIFLevel.HIGH, 1), else_=0)), 0), func.coalesce(func.sum(case((Report.status == ReportStatus.REVIEW_REQUIRED, 1), else_=0)), 0), func.count(func.distinct(Report.site_id))).select_from(Report).outerjoin(latest, latest.c.report_id == Report.id).outerjoin(ReportAnalysis, (ReportAnalysis.report_id == latest.c.report_id) & (ReportAnalysis.created_at == latest.c.latest_created)))).one()
         total, sif, high, review, sites = (int(value or 0) for value in metrics)
         active = await self.db.scalar(select(func.count()).select_from(PrecursorPattern)) or 0
-        return DashboardSummary(total_reports=total, total_sif_reports=sif, high_risk_reports=high, review_required=review, active_precursors=active, sites_monitored=sites, sif_rate=round(sif / total, 3) if total else 0.0, high_risk_rate=round(high / total, 3) if total else 0.0)
+        
+        review_queue = await self.db.scalar(select(func.count(Review.id)).where(Review.decision == ReviewDecision.PENDING)) or 0
+        
+        ca_summary = await self.corrective_action_summary()
+        
+        return DashboardSummary(
+            total_reports=total,
+            total_sif_reports=sif,
+            high_risk_reports=high,
+            review_required=review,
+            active_precursors=active,
+            sites_monitored=sites,
+            sif_rate=round(sif / total, 3) if total else 0.0,
+            high_risk_rate=round(high / total, 3) if total else 0.0,
+            review_queue_count=review_queue,
+            corrective_actions=ca_summary
+        )
+
+    async def corrective_action_summary(self) -> CorrectiveActionSummary:
+        ca_metrics = (await self.db.execute(select(
+            func.count(CorrectiveAction.id),
+            func.coalesce(func.sum(case((CorrectiveAction.status == 'OPEN', 1), else_=0)), 0),
+            func.coalesce(func.sum(case(((CorrectiveAction.status == 'OPEN') & (CorrectiveAction.due_date < datetime.now(UTC)), 1), else_=0)), 0),
+            func.coalesce(func.sum(case((CorrectiveAction.status == 'COMPLETED', 1), else_=0)), 0)
+        ))).one()
+        ca_total, ca_open, ca_overdue, ca_completed = (int(value or 0) for value in ca_metrics)
+        return CorrectiveActionSummary(
+            total=ca_total,
+            open=ca_open,
+            overdue=ca_overdue,
+            completed=ca_completed
+        )
 
     async def sif_trend(self, window: str) -> list[TimeSeriesPoint]:
         days = {"7d": 7, "30d": 30, "90d": 90, "1y": 365}[window]
@@ -73,6 +109,14 @@ class AnalyticsService:
         writer.writerow(["Sites Monitored", summary.sites_monitored])
         writer.writerow(["SIF Rate", summary.sif_rate])
         writer.writerow(["High Risk Rate", summary.high_risk_rate])
+        writer.writerow(["Review Queue Count", summary.review_queue_count])
+        
+        writer.writerow([])
+        writer.writerow(["Corrective Actions", "Count"])
+        writer.writerow(["Total CA", summary.corrective_actions.total])
+        writer.writerow(["Open CA", summary.corrective_actions.open])
+        writer.writerow(["Overdue CA", summary.corrective_actions.overdue])
+        writer.writerow(["Completed CA", summary.corrective_actions.completed])
         
         writer.writerow([])
         writer.writerow(["Site", "Total Reports", "SIF Count", "SIF Density"])

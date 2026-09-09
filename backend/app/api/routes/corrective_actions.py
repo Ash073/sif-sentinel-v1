@@ -10,6 +10,7 @@ from app.schemas.corrective_action import (
     CorrectiveActionDecisionRequest,
     CorrectiveActionExportItem,
     CorrectiveActionModifyRequest,
+    CorrectiveActionPage,
     CorrectiveActionRead,
     CorrectiveActionVerifyRequest,
 )
@@ -64,7 +65,7 @@ async def export_corrective_actions(
     return await CorrectiveActionService(db).export_approved_actions()
 
 
-@router.get("", response_model=list[CorrectiveActionRead], summary="List corrective actions with filtering")
+@router.get("", response_model=CorrectiveActionPage, summary="List corrective actions with filtering")
 async def list_corrective_actions(
     db: DBSession,
     _: User = Depends(require_roles(*_all_roles)),
@@ -72,14 +73,23 @@ async def list_corrective_actions(
     status: str | None = None,
     priority: str | None = None,
     hierarchy_level: str | None = None,
-) -> list[CorrectiveActionRead]:
-    actions = await CorrectiveActionService(db).list_actions(
+    page: int = 1,
+    page_size: int = 50,
+) -> CorrectiveActionPage:
+    actions, total = await CorrectiveActionService(db).list_actions(
         report_id=report_id,
         status=status,
         priority=priority,
         hierarchy_level=hierarchy_level,
+        page=page,
+        page_size=page_size,
     )
-    return [CorrectiveActionRead.model_validate(a) for a in actions]
+    return CorrectiveActionPage(
+        items=[CorrectiveActionRead.model_validate(a) for a in actions],
+        total=total,
+        page=page,
+        page_size=page_size,
+    )
 
 
 @router.get("/{action_id}", response_model=CorrectiveActionRead, summary="Get a corrective action by ID")

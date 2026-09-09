@@ -13,7 +13,7 @@ from typing import Any
 from uuid import UUID
 
 import structlog
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import AppError, NotFoundError
@@ -94,7 +94,9 @@ class CorrectiveActionService:
         status: str | None = None,
         priority: str | None = None,
         hierarchy_level: str | None = None,
-    ) -> list[CorrectiveAction]:
+        page: int = 1,
+        page_size: int = 50,
+    ) -> tuple[list[CorrectiveAction], int]:
         query = select(CorrectiveAction)
         if report_id:
             query = query.where(CorrectiveAction.report_id == report_id)
@@ -105,9 +107,13 @@ class CorrectiveActionService:
         if hierarchy_level:
             query = query.where(CorrectiveAction.hierarchy_level == hierarchy_level.upper())
 
+        total = await self.db.scalar(select(func.count()).select_from(query.subquery())) or 0
+
         query = query.order_by(CorrectiveAction.created_at.desc(), CorrectiveAction.id)
+        query = query.offset((page - 1) * page_size).limit(page_size)
+        
         rows = (await self.db.scalars(query)).all()
-        return list(rows)
+        return list(rows), total
 
     async def submit(self, action_id: UUID, actor_id: UUID, ip: str | None = None) -> CorrectiveAction:
         """Transitions action from DRAFT -> SUBMITTED."""

@@ -25,10 +25,12 @@ class SourceType(StrEnum):
 
 class ReportStatus(StrEnum):
     NEW = "NEW"
+    ANALYZING = "ANALYZING"
     ANALYZED = "ANALYZED"
     REVIEW_REQUIRED = "REVIEW_REQUIRED"
     REVIEWED = "REVIEWED"
     CLOSED = "CLOSED"
+    FAILED = "FAILED"
 
 
 class SIFLevel(StrEnum):
@@ -81,3 +83,15 @@ class InterventionReviewStatus(StrEnum):
     ACCEPTED = "ACCEPTED"
     MODIFIED = "MODIFIED"
     REJECTED = "REJECTED"
+
+
+class CorrectiveActionStatus(StrEnum):
+    DRAFT = "DRAFT"
+    SUBMITTED = "SUBMITTED"
+    APPROVED = "APPROVED"
+    IN_PROGRESS = "IN_PROGRESS"
+    VERIFICATION_REQUIRED = "VERIFICATION_REQUIRED"
+    VERIFIED = "VERIFIED"
+    CLOSED = "CLOSED"
+    REJECTED = "REJECTED"
+    CANCELLED = "CANCELLED"

@@ -1,14 +1,9 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Outfit } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const outfit = Outfit({
+  variable: "--font-sans",
   subsets: ["latin"],
 });
 
@@ -17,8 +12,8 @@ import { QueryProvider } from "@/components/providers/QueryProvider";
 import { Toaster } from "@/components/ui/toast";
 
 export const metadata: Metadata = {
-  title: "SIF Sentinel",
-  description: "Premium Industrial Safety Intelligence",
+  title: "SIF Sentinel | Enterprise Safety AI",
+  description: "Prevent Fatalities Before They Happen",
 };
 
 export default function RootLayout({
@@ -29,10 +24,10 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${outfit.variable} dark h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col" suppressHydrationWarning>
+      <body className="min-h-full flex flex-col font-sans" suppressHydrationWarning>
         <QueryProvider>
           <AuthProvider>{children}</AuthProvider>
         </QueryProvider>

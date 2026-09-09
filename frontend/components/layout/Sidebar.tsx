@@ -6,37 +6,28 @@ import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard, Activity, ShieldCheck, 
   LogOut, FileText, CheckSquare, ChevronRight,
-  Brain, Settings
+  Brain, Settings, FilePlus, Box
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { useState, useRef, useEffect } from 'react';
 
-export const NAVIGATION_ITEMS = [
+export interface NavItem {
+  name: string;
+  href?: string;
+  icon: React.ElementType;
+  roles: string[];
+  children?: { name: string; href: string }[];
+}
+
+export const NAVIGATION_ITEMS: NavItem[] = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, roles: ['ADMIN', 'HSE_MANAGER', 'HSE_ANALYST', 'REVIEWER', 'VIEWER'] },
-  { name: 'Reports', href: '/reports', icon: FileText, roles: ['ADMIN', 'HSE_MANAGER', 'HSE_ANALYST', 'REVIEWER', 'VIEWER'] },
-  { name: 'Human Reviews', href: '/reviews', icon: CheckSquare, roles: ['ADMIN', 'REVIEWER'] },
-  { name: 'AI Copilot', href: '/copilot', icon: Brain, roles: ['ADMIN', 'HSE_MANAGER', 'HSE_ANALYST', 'REVIEWER', 'VIEWER'] },
-  { 
-    name: 'Intelligence', 
-    icon: Activity, 
-    roles: ['ADMIN', 'HSE_MANAGER', 'HSE_ANALYST', 'REVIEWER', 'VIEWER'],
-    children: [
-      { name: 'Risk Intelligence', href: '/risk' },
-      { name: 'Precursors', href: '/precursors' },
-      { name: 'ML Models', href: '/models' }
-    ]
-  },
-  { 
-    name: 'Operations', 
-    icon: ShieldCheck, 
-    roles: ['ADMIN', 'HSE_MANAGER', 'HSE_ANALYST', 'REVIEWER', 'VIEWER'],
-    children: [
-      { name: 'Interventions', href: '/interventions' },
-      { name: 'Corrective Actions', href: '/corrective-actions' },
-      { name: 'Life-Saving Rules', href: '/rules' }
-    ]
-  },
+  { name: 'New Report', href: '/reports/new', icon: FilePlus, roles: ['ADMIN', 'HSE_MANAGER', 'HSE_ANALYST', 'REVIEWER'] },
+  { name: 'Risk', href: '/risk', icon: Activity, roles: ['ADMIN', 'HSE_MANAGER', 'HSE_ANALYST', 'REVIEWER', 'VIEWER'] },
+  { name: 'Precursors', href: '/precursors', icon: Brain, roles: ['ADMIN', 'HSE_MANAGER', 'HSE_ANALYST', 'REVIEWER', 'VIEWER'] },
+  { name: 'LSR', href: '/rules', icon: ShieldCheck, roles: ['ADMIN', 'HSE_MANAGER', 'HSE_ANALYST', 'REVIEWER', 'VIEWER'] },
+  { name: 'Interventions', href: '/interventions', icon: CheckSquare, roles: ['ADMIN', 'HSE_MANAGER', 'HSE_ANALYST'] },
+  { name: 'Models', href: '/models', icon: Box, roles: ['ADMIN', 'HSE_MANAGER', 'HSE_ANALYST'] },
   { name: 'Admin', href: '/admin', icon: Settings, roles: ['ADMIN'] },
 ];
 

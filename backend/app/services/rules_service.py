@@ -62,3 +62,23 @@ class RulesService:
             "sif_reports": sif,
             "sif_density": round(sif / total, 3) if total else 0.0,
         }
+
+    async def create(self, payload) -> LifeSavingRule:
+        rule = LifeSavingRule(**payload.model_dump())
+        self.db.add(rule)
+        await self.db.commit()
+        await self.db.refresh(rule)
+        return rule
+
+    async def update(self, rule_id: str, payload) -> LifeSavingRule:
+        rule = await self.get(rule_id)
+        for key, value in payload.model_dump(exclude_unset=True).items():
+            setattr(rule, key, value)
+        await self.db.commit()
+        await self.db.refresh(rule)
+        return rule
+
+    async def delete(self, rule_id: str) -> None:
+        rule = await self.get(rule_id)
+        await self.db.delete(rule)
+        await self.db.commit()

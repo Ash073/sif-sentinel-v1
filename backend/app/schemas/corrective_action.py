@@ -38,6 +38,8 @@ class CorrectiveActionVerifyRequest(BaseModel):
     effective: bool = True
 
 
+from app.core.constants import CorrectiveActionStatus
+
 class CorrectiveActionRead(ORMModel):
     id: UUID
     report_id: UUID | None
@@ -48,7 +50,7 @@ class CorrectiveActionRead(ORMModel):
     hierarchy_level: str
     action_type: str
     priority: str
-    status: str
+    status: CorrectiveActionStatus
     original_recommendation: dict
     user_modifications: list[dict]
     assigned_to: str | None
@@ -69,9 +71,11 @@ class CorrectiveActionRead(ORMModel):
     updated_at: datetime
 
 
-class CorrectiveActionListResponse(BaseModel):
-    total: int
+class CorrectiveActionPage(BaseModel):
     items: list[CorrectiveActionRead]
+    total: int
+    page: int
+    page_size: int
 
 
 class CorrectiveActionExportItem(BaseModel):

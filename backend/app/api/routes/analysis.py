@@ -1,7 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 
 from app.api.deps import require_roles
 from app.core.constants import UserRole
+from app.core.rate_limit import limiter
 from app.models.user import User
 from app.schemas.analysis import (
     AnalysisResponse,
@@ -24,7 +25,8 @@ router = APIRouter(tags=["Analysis"])
 
 
 @router.post("/analyze", response_model=AnalysisResponse, summary="Analyze text without persisting a report")
-async def analyze_text_endpoint(payload: AnalyzeTextRequest, _: User = Depends(require_roles(UserRole.ADMIN, UserRole.HSE_MANAGER, UserRole.HSE_ANALYST, UserRole.REVIEWER))) -> AnalysisResponse:
+@limiter.limit("20/minute")
+async def analyze_text_endpoint(request: Request, payload: AnalyzeTextRequest, _: User = Depends(require_roles(UserRole.ADMIN, UserRole.HSE_MANAGER, UserRole.HSE_ANALYST, UserRole.REVIEWER))) -> AnalysisResponse:
     return AnalysisService(None).analyze_direct(payload.text)
 
 

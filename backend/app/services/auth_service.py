@@ -15,7 +15,12 @@ class AuthService:
         existing = await self.db.scalar(select(User).where(User.email == str(payload.email).lower()))
         if existing:
             raise AppError("EMAIL_ALREADY_REGISTERED", "An account with that email already exists", 409)
-        user = User(email=str(payload.email).lower(), password_hash=hash_password(payload.password), full_name=payload.full_name)
+        user = User(
+            email=str(payload.email).lower(), 
+            password_hash=hash_password(payload.password), 
+            full_name=payload.full_name,
+            site_id=payload.site_id
+        )
         self.db.add(user)
         await self.db.commit()
         await self.db.refresh(user)
@@ -28,3 +33,9 @@ class AuthService:
         if not user.is_active:
             raise AppError("INACTIVE_USER", "This account is inactive", 403)
         return user
+
+    async def change_password(self, user: User, current_password: str, new_password: str) -> None:
+        if not verify_password(current_password, user.password_hash):
+            raise AppError("INVALID_CREDENTIALS", "Incorrect current password", 401)
+        user.password_hash = hash_password(new_password)
+        await self.db.commit()

@@ -5,256 +5,269 @@ import { useQuery } from '@tanstack/react-query';
 import { reportsApi } from '@/lib/api/reports';
 import { dashboardApi } from '@/lib/api/dashboard';
 import { precursorsApi } from '@/lib/api/precursors';
-import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { interventionsApi } from '@/lib/api/interventions';
+import { riskApi } from '@/lib/api/risk';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { 
-  ArrowUpRight, ArrowDownRight, FilePlus, Download, 
-  Search, Filter, Activity, ListTodo, AlertTriangle
+  FilePlus, Activity, ListTodo, AlertTriangle, 
+  ShieldCheck, Brain, TrendingUp, CheckSquare, ShieldAlert
 } from 'lucide-react';
 import Link from 'next/link';
-import { PrecursorGraph } from '@/components/dashboard/PrecursorGraph';
 
 export default function DashboardPage() {
   const { user } = useAuth();
-  const [selectedPrecursorId, setSelectedPrecursorId] = useState<string | null>(null);
+  
+  const isManager = user && ['ADMIN', 'HSE_MANAGER'].includes(user.role);
+  const canCreateReport = user && ['ADMIN', 'HSE_MANAGER', 'HSE_ANALYST', 'REVIEWER'].includes(user.role);
 
   const { data: stats } = useQuery({
     queryKey: ['dashboard-stats'],
     queryFn: dashboardApi.getSummary,
   });
 
-  const { data: sifTrendData } = useQuery({
-    queryKey: ['dashboard-sif-trend'],
-    queryFn: () => dashboardApi.getSifTrend('30d'),
+  const { data: intSummary } = useQuery({
+    queryKey: ['interventions-summary'],
+    queryFn: interventionsApi.getSummary,
   });
 
-  const { data: precursors, isLoading: precursorsLoading } = useQuery({
+  const { data: precursors } = useQuery({
     queryKey: ['precursors-top'],
-    queryFn: () => precursorsApi.list({ limit: 5, sort: 'risk_score' }),
+    queryFn: () => precursorsApi.list({ limit: 4, sort: 'risk_score' }),
   });
 
-  // Default to the first precursor if none is selected and data is available
-  const activePrecursorId = selectedPrecursorId || (precursors?.[0]?.id) || null;
-
-  const { data: graphData, isLoading: graphLoading } = useQuery({
-    queryKey: ['precursor-graph', activePrecursorId],
-    queryFn: () => activePrecursorId ? precursorsApi.getGraph(activePrecursorId) : Promise.reject('No ID'),
-    enabled: !!activePrecursorId,
+  const { data: recentReports } = useQuery({
+    queryKey: ['reports', 'recent'],
+    queryFn: () => reportsApi.list({ page: 1, page_size: 5 }),
   });
 
-  // Formatting chart data
-  const volumeChartData = sifTrendData?.map(pt => ({
-    date: new Date(pt.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }),
-    total: pt.total_reports,
-    sif: pt.sif_reports
-  })) || [];
-
-  const rateChartData = sifTrendData?.map(pt => ({
-    date: new Date(pt.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }),
-    rate: Number((pt.sif_rate * 100).toFixed(1))
-  })) || [];
+  const { data: barrierHealth } = useQuery({
+    queryKey: ['dashboard-barrier-health'],
+    queryFn: () => riskApi.getBarriers({ limit: 5 }),
+  });
 
   return (
-    <div className="flex flex-col gap-8 pb-8">
+    <div className="flex flex-col gap-6 pb-8 animate-in fade-in duration-300">
       {/* Header Area */}
-      <div>
-        <h1 className="text-[28px] font-medium text-slate-900 tracking-tight">Good morning, {user?.full_name?.split(' ')[0] || 'User'}</h1>
-        <p className="text-[13px] text-slate-500 font-medium">Stay on top of your safety reports, monitor risk, and track precursors.</p>
+      <div className="flex justify-between items-end">
+        <div>
+          <h1 className="text-[24px] font-semibold text-slate-900 tracking-tight">
+            Good morning, {user?.full_name?.split(' ')[0] || 'User'}
+          </h1>
+          <p className="text-[13px] text-slate-500 mt-1">Safety intelligence at a glance.</p>
+        </div>
+        
+        {/* Quick Actions */}
+        <div className="flex gap-3">
+          {canCreateReport && (
+            <Link href="/reports/new" className="bg-slate-900 hover:bg-slate-800 text-white h-9 px-4 rounded-full flex items-center justify-center gap-2 text-[13px] font-medium transition-colors shadow-sm">
+              <FilePlus className="w-4 h-4" /> New Safety Report
+            </Link>
+          )}
+          {isManager && (
+            <Link href="/reviews" className="bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 h-9 px-4 rounded-full flex items-center justify-center gap-2 text-[13px] font-medium transition-colors shadow-sm">
+              <CheckSquare className="w-4 h-4" /> Review Pending
+            </Link>
+          )}
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        
-        {/* =========================================
-            LEFT COLUMN (3/12)
-        ========================================= */}
-        <div className="lg:col-span-3 flex flex-col gap-6">
-          
-          <div className="bg-white border border-slate-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] rounded-[24px] p-6 relative overflow-hidden group">
-            <div className="flex justify-between items-start mb-4">
-              <span className="text-[13px] text-slate-500 font-medium">Total Reports</span>
-              <div className="flex items-center gap-1 bg-slate-50 rounded-full px-2 py-1 border border-slate-100">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="text-[10px] font-medium text-slate-600">LIVE</span>
-              </div>
-            </div>
-            <div className="text-[40px] font-medium text-slate-900 tracking-tight leading-none mb-2">
-              {stats?.total_reports.toLocaleString() || '--'}
-            </div>
-            <div className="flex items-center gap-2 mb-8">
-              <div className="flex items-center text-[11px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">
-                SIF Rate: {stats ? (stats.sif_rate * 100).toFixed(1) : '--'}%
-              </div>
-            </div>
+      {/* KPI Cards (HSE_MANAGER focused) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex justify-between items-start mb-2">
+            <span className="text-[12px] font-medium text-slate-500 uppercase tracking-wide">SIF-Potential</span>
+            <AlertTriangle className="w-4 h-4 text-orange-500" />
+          </div>
+          <div className="text-[28px] font-semibold text-slate-900 leading-none">
+            {stats?.total_sif_reports || 0}
+          </div>
+        </div>
 
-            <div className="flex items-center gap-3">
-              <Link href="/reports/new" className="flex-1 bg-slate-900 hover:bg-slate-800 text-white h-10 rounded-full flex items-center justify-center gap-2 text-[13px] font-medium transition-colors shadow-sm">
-                <FilePlus className="w-4 h-4" /> New Report
+        <div className="bg-white border border-red-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex justify-between items-start mb-2">
+            <span className="text-[12px] font-medium text-red-600 uppercase tracking-wide">High/Critical Risk</span>
+            <ShieldAlert className="w-4 h-4 text-red-600" />
+          </div>
+          <div className="text-[28px] font-semibold text-red-600 leading-none">
+            {stats?.high_risk_reports || 0}
+          </div>
+        </div>
+
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex justify-between items-start mb-2">
+            <span className="text-[12px] font-medium text-slate-500 uppercase tracking-wide">Pending Reviews</span>
+            <ListTodo className="w-4 h-4 text-blue-500" />
+          </div>
+          <div className="text-[28px] font-semibold text-slate-900 leading-none">
+            {stats?.review_required || 0}
+          </div>
+        </div>
+
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex justify-between items-start mb-2">
+            <span className="text-[12px] font-medium text-slate-500 uppercase tracking-wide">Active Interventions</span>
+            <ShieldCheck className="w-4 h-4 text-emerald-500" />
+          </div>
+          <div className="text-[28px] font-semibold text-slate-900 leading-none">
+            {intSummary?.pending || 0}
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Column (2/3 width) */}
+        <div className="lg:col-span-2 flex flex-col gap-6">
+          
+          {/* Action Center */}
+          <div className="bg-slate-900 rounded-2xl p-6 text-white shadow-md relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
+            <h2 className="text-[15px] font-semibold mb-4 flex items-center gap-2">
+              <Activity className="w-4 h-4 text-emerald-400" /> Action Required
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <Link href="/reviews" className="bg-white/10 hover:bg-white/15 border border-white/10 rounded-xl p-4 transition-colors">
+                <div className="text-[20px] font-bold text-white mb-1">{stats?.review_required || 0}</div>
+                <div className="text-[12px] text-slate-300">Pending Reviews</div>
+              </Link>
+              <Link href="/reports?risk=high" className="bg-white/10 hover:bg-white/15 border border-white/10 rounded-xl p-4 transition-colors">
+                <div className="text-[20px] font-bold text-red-400 mb-1">{stats?.high_risk_reports || 0}</div>
+                <div className="text-[12px] text-slate-300">High-Risk Reports</div>
+              </Link>
+              <Link href="/interventions" className="bg-white/10 hover:bg-white/15 border border-white/10 rounded-xl p-4 transition-colors">
+                <div className="text-[20px] font-bold text-white mb-1">{intSummary?.pending || 0}</div>
+                <div className="text-[12px] text-slate-300">Pending Interventions</div>
               </Link>
             </div>
           </div>
 
-          <div className="bg-card border border-border rounded-[24px] p-5 text-foreground flex flex-col justify-between shadow-sm">
-            <div className="flex justify-between items-start mb-3">
-              <span className="text-[13px] font-medium text-muted-foreground">Pending Reviews</span>
-              <div className="w-8 h-8 rounded-full bg-muted border border-border flex items-center justify-center">
-                <ListTodo className="w-4 h-4 text-muted-foreground" />
-              </div>
+          {/* Precursor Intelligence */}
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-[15px] font-semibold text-slate-900 flex items-center gap-2">
+                <Brain className="w-4 h-4 text-purple-600" /> Precursor Intelligence
+              </h3>
+              <Link href="/precursors" className="text-[12px] font-medium text-blue-600 hover:text-blue-800">View all →</Link>
             </div>
-            <div>
-              <div className="text-[28px] font-semibold tracking-tight mb-1">{stats?.review_required || 0}</div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="border-b border-slate-100">
+                    <th className="py-2 px-3 text-[11px] font-medium text-slate-500 uppercase tracking-wide">Activity & Hazard</th>
+                    <th className="py-2 px-3 text-[11px] font-medium text-slate-500 uppercase tracking-wide">Barrier Failure</th>
+                    <th className="py-2 px-3 text-[11px] font-medium text-slate-500 uppercase tracking-wide text-right">Trend</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {precursors?.map((p) => (
+                    <tr key={p.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors group">
+                      <td className="py-3 px-3">
+                        <div className="text-[13px] font-medium text-slate-900">{p.activity}</div>
+                        <div className="text-[12px] text-slate-500">{p.hazard}</div>
+                      </td>
+                      <td className="py-3 px-3 text-[13px] text-slate-700">{p.barrier}</td>
+                      <td className="py-3 px-3 text-right">
+                        <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
+                          p.trend === 'INCREASING' ? 'bg-red-50 text-red-600' : 'bg-emerald-50 text-emerald-600'
+                        }`}>
+                          {p.trend}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                  {!precursors?.length && (
+                    <tr><td colSpan={3} className="py-4 text-center text-sm text-slate-500">No active precursors detected.</td></tr>
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
 
-          <div className="bg-card border border-border rounded-[24px] p-5 text-foreground flex flex-col justify-between shadow-sm">
-            <div className="flex justify-between items-start mb-3">
-              <span className="text-[13px] font-medium text-muted-foreground">Active Precursors</span>
-              <div className="w-8 h-8 rounded-full bg-muted border border-border flex items-center justify-center">
-                <Activity className="w-4 h-4 text-muted-foreground" />
-              </div>
+          {/* Recent Reports */}
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-[15px] font-semibold text-slate-900">Recent Reports</h3>
+              <Link href="/reports" className="text-[12px] font-medium text-blue-600 hover:text-blue-800">View all →</Link>
             </div>
-            <div>
-              <div className="text-[28px] font-semibold tracking-tight mb-1">{stats?.active_precursors || 0}</div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="border-b border-slate-100">
+                    <th className="py-2 px-3 text-[11px] font-medium text-slate-500 uppercase tracking-wide">ID</th>
+                    <th className="py-2 px-3 text-[11px] font-medium text-slate-500 uppercase tracking-wide">Location</th>
+                    <th className="py-2 px-3 text-[11px] font-medium text-slate-500 uppercase tracking-wide">Type</th>
+                    <th className="py-2 px-3 text-[11px] font-medium text-slate-500 uppercase tracking-wide text-right">Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {recentReports?.items?.map((r) => (
+                    <tr key={r.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer">
+                      <td className="py-3 px-3">
+                        <Link href={`/reports/${r.report_id}`} className="text-[13px] font-medium text-blue-600 hover:underline">
+                          {r.report_id}
+                        </Link>
+                      </td>
+                      <td className="py-3 px-3 text-[13px] text-slate-700">{r.location}</td>
+                      <td className="py-3 px-3 text-[13px] text-slate-700">{r.report_type.replace('_', ' ')}</td>
+                      <td className="py-3 px-3 text-[12px] text-slate-500 text-right">
+                        {new Date(r.reported_at).toLocaleDateString()}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
 
         </div>
 
-        {/* =========================================
-            RIGHT COLUMN (9/12)
-        ========================================= */}
-        <div className="lg:col-span-9 flex flex-col gap-6">
+        {/* Right Column (1/3 width) */}
+        <div className="flex flex-col gap-6">
           
-          {/* Charts Row */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            
-            {/* Bar Chart (Volume) */}
-            <div className="bg-card border border-border rounded-[24px] p-6 shadow-sm flex flex-col h-[300px]">
-              <div className="flex justify-between items-start mb-6">
-                <div>
-                  <h3 className="text-[16px] font-semibold text-foreground">Safety Signal Volume (30d)</h3>
-                  <p className="text-[12px] text-muted-foreground mt-1">Total vs High SIF Potential</p>
+          {/* Barrier Health */}
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+            <h3 className="text-[15px] font-semibold text-slate-900 mb-4 flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-emerald-600" /> Barrier Health
+            </h3>
+            <div className="space-y-4">
+              {(barrierHealth as any[])?.slice(0, 5).map((b: any, i: number) => (
+                <div key={i} className="flex flex-col gap-1">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[13px] font-medium text-slate-700 truncate pr-2">{b.barrier}</span>
+                    <span className="text-[12px] font-bold text-red-600 bg-red-50 px-1.5 rounded">{b.failed_count} failures</span>
+                  </div>
+                  <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                    <div className="bg-red-500 h-full rounded-full" style={{ width: `${Math.min(100, (b.failed_count / 10) * 100)}%` }}></div>
+                  </div>
                 </div>
-              </div>
-              <div className="flex-1">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={volumeChartData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }} barGap={0} barSize={24}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
-                    <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} dy={10} />
-                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} />
-                    <Tooltip cursor={{ fill: 'hsl(var(--muted))' }} contentStyle={{ borderRadius: '12px', border: '1px solid hsl(var(--border))' }} />
-                    <Bar dataKey="total" stackId="a" fill="#f97316" radius={[12, 12, 0, 0]} />
-                    <Bar dataKey="sif" stackId="a" fill="hsl(var(--foreground))" radius={[0, 0, 12, 12]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            {/* Line Chart (SIF Rate) */}
-            <div className="bg-card border border-border rounded-[24px] p-6 shadow-sm flex flex-col h-[300px]">
-              <div className="flex justify-between items-start mb-6">
-                <div>
-                  <h3 className="text-[16px] font-semibold text-foreground">SIF Rate Trend (30d)</h3>
-                  <p className="text-[12px] text-muted-foreground mt-1">Percentage of reports with SIF Potential</p>
-                </div>
-              </div>
-              <div className="flex-1">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={rateChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
-                    <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} dy={10} />
-                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} tickFormatter={(val) => `${val}%`} />
-                    <Tooltip contentStyle={{ borderRadius: '12px', border: '1px solid hsl(var(--border))' }} formatter={(value: any) => [`${value}%`, 'SIF Rate']} />
-                    <Line type="monotone" dataKey="rate" stroke="#ef4444" strokeWidth={3} dot={{ r: 4, fill: '#ef4444', strokeWidth: 0 }} activeDot={{ r: 6 }} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-          </div>
-
-          {/* Precursor Graph */}
-          <div>
-            <div className="flex justify-between items-end mb-4 px-2">
-              <div>
-                <h3 className="text-[18px] font-semibold text-slate-900 tracking-tight">Active Precursor Chain</h3>
-                <p className="text-[13px] text-slate-500">Visualizing the anatomy of the selected precursor pattern.</p>
-              </div>
-              {activePrecursorId && (
-                 <Link href={`/copilot?precursor=${activePrecursorId}`} className="text-[13px] font-medium text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-full transition-colors">
-                   Analyze with Copilot
-                 </Link>
+              ))}
+              {!(barrierHealth as any[])?.length && (
+                <p className="text-[13px] text-slate-500 text-center py-4">No barrier failure data available.</p>
               )}
             </div>
-            <PrecursorGraph data={graphData} isLoading={graphLoading} />
           </div>
 
-          {/* Precursors Table */}
-          <div className="bg-card border border-border rounded-[24px] p-6 shadow-sm flex flex-col">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-[16px] font-semibold text-foreground">Top Precursor Patterns</h3>
-            </div>
-
-            <div className="w-full overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="border-b border-border">
-                    <th className="py-3 px-4 text-[12px] font-medium text-muted-foreground">Activity & Hazard</th>
-                    <th className="py-3 px-4 text-[12px] font-medium text-muted-foreground">Failed Barrier</th>
-                    <th className="py-3 px-4 text-[12px] font-medium text-muted-foreground text-center">Risk Score</th>
-                    <th className="py-3 px-4 text-[12px] font-medium text-muted-foreground text-center">Occurrences</th>
-                    <th className="py-3 px-4 text-[12px] font-medium text-muted-foreground text-right">Trend</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {precursors?.map((precursor) => (
-                    <tr 
-                      key={precursor.id} 
-                      className={`border-b border-border hover:bg-muted/50 transition-colors cursor-pointer ${activePrecursorId === precursor.id ? 'bg-slate-50' : ''}`}
-                      onClick={() => setSelectedPrecursorId(precursor.id)}
-                    >
-                      <td className="py-4 px-4 text-[13px] font-medium text-foreground">
-                        <div className="flex flex-col">
-                          <span>{precursor.activity}</span>
-                          <span className="text-slate-500 font-normal">{precursor.hazard}</span>
-                        </div>
-                      </td>
-                      <td className="py-4 px-4 text-[13px] text-slate-700">
-                        {precursor.barrier}
-                      </td>
-                      <td className="py-4 px-4 text-center">
-                        <span className="inline-flex items-center text-[12px] font-bold text-red-700 bg-red-50 px-2 py-0.5 rounded-full">
-                          {precursor.risk_score.toFixed(1)}
-                        </span>
-                      </td>
-                      <td className="py-4 px-4 text-center text-[13px] font-medium text-slate-700">
-                        {precursor.occurrence_count}
-                      </td>
-                      <td className="py-4 px-4 text-[12px] font-medium text-right">
-                        <span className={`uppercase tracking-wide ${
-                          precursor.trend === 'INCREASING' ? 'text-red-600' : 
-                          precursor.trend === 'DECREASING' ? 'text-emerald-600' : 'text-slate-500'
-                        }`}>
-                          {precursor.trend}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                  {(!precursors || precursors.length === 0) && !precursorsLoading && (
-                    <tr>
-                      <td colSpan={5} className="py-8 text-center text-muted-foreground text-[13px]">
-                        No precursor patterns identified yet.
-                      </td>
-                    </tr>
-                  )}
-                  {precursorsLoading && (
-                    <tr>
-                      <td colSpan={5} className="py-8 text-center text-muted-foreground text-[13px]">
-                        Loading precursor patterns...
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+          {/* Quick Stats / Risk Overview */}
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+            <h3 className="text-[15px] font-semibold text-slate-900 mb-4 flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-blue-600" /> Risk Overview
+            </h3>
+            <div className="flex flex-col gap-3">
+              <div className="flex justify-between items-center p-3 rounded-xl bg-slate-50 border border-slate-100">
+                <span className="text-[13px] text-slate-600">Monitored Sites</span>
+                <span className="text-[14px] font-semibold text-slate-900">{stats?.sites_monitored || 0}</span>
+              </div>
+              <div className="flex justify-between items-center p-3 rounded-xl bg-slate-50 border border-slate-100">
+                <span className="text-[13px] text-slate-600">System SIF Rate</span>
+                <span className="text-[14px] font-semibold text-slate-900">
+                  {stats ? (stats.sif_rate * 100).toFixed(1) : '--'}%
+                </span>
+              </div>
+              <div className="flex justify-between items-center p-3 rounded-xl bg-slate-50 border border-slate-100">
+                <span className="text-[13px] text-slate-600">High Risk Rate</span>
+                <span className="text-[14px] font-semibold text-red-600">
+                  {stats ? (stats.high_risk_rate * 100).toFixed(1) : '--'}%
+                </span>
+              </div>
             </div>
           </div>
 

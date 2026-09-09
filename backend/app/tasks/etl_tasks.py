@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 
 from sqlalchemy import select
 from redis import Redis
+from tenacity import retry, stop_after_attempt, wait_exponential
 
 from app.core.celery_app import celery_app
 from app.core.config import get_settings
@@ -24,6 +25,7 @@ def process_csv_upload(self, content: str, user_id_str: str, ip_address: str | N
     # Run the async code inside a synchronous wrapper
     asyncio.run(_process_csv_upload_async(content, user_id_str, ip_address, self.request.id))
 
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
 async def _process_csv_upload_async(content: str, user_id_str: str, ip_address: str | None, task_id: str):
     user_id = uuid.UUID(user_id_str)
     reader = list(csv.DictReader(io.StringIO(content)))

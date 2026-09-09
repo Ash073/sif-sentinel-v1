@@ -1,15 +1,40 @@
 import asyncio
 import json
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+import jwt
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Query
 from redis.asyncio import Redis
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
+from app.db.session import get_db
+from app.models.user import User
 
 settings = get_settings()
 router = APIRouter(prefix="/ws", tags=["WebSockets"])
 
 @router.websocket("/etl-progress/{user_id}")
-async def etl_progress_ws(websocket: WebSocket, user_id: str):
+async def etl_progress_ws(websocket: WebSocket, user_id: str, token: str = Query(...)):
+    # Authenticate via token query parameter
+    try:
+        payload = jwt.decode(token, settings.jwt_secret_key, algorithms=[settings.jwt_algorithm])
+        if payload.get("sub") != user_id:
+            await websocket.close(code=1008, reason="Token does not match user_id")
+            return
+    except jwt.PyJWTError:
+        await websocket.close(code=1008, reason="Invalid or expired token")
+        return
+
+    # Check if user actually exists and is active
+    try:
+        db_generator = get_db()
+        db: AsyncSession = await anext(db_generator)
+        user = await db.get(User, user_id)
+        if not user or not user.is_active:
+            await websocket.close(code=1008, reason="User is unavailable")
+            return
+    except Exception:
+        pass
+        
     await websocket.accept()
     redis_client = Redis.from_url(settings.celery_broker_url)
     pubsub = redis_client.pubsub()
