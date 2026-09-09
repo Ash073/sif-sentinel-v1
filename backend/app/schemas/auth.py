@@ -13,8 +13,6 @@ class TokenResponse(BaseModel):
     token_type: str = "bearer"
     user: UserRead
 
-class PasswordResetRequest(BaseModel):
-    email: EmailStr
 
 class ChangePasswordRequest(BaseModel):
     current_password: str

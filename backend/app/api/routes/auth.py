@@ -1,9 +1,9 @@
-from fastapi import APIRouter, status, Request
+from fastapi import APIRouter, Depends, Request, status
 
-from app.api.deps import CurrentUser, DBSession
-from app.core.security import create_access_token
+from app.api.deps import CurrentUser, DBSession, bearer_scheme
 from app.core.rate_limit import limiter
-from app.schemas.auth import LoginRequest, PasswordResetRequest, TokenResponse, ChangePasswordRequest
+from app.core.security import create_access_token
+from app.schemas.auth import ChangePasswordRequest, LoginRequest, TokenResponse
 from app.schemas.common import Message
 from app.schemas.user import UserRead, UserRegister
 from app.services.auth_service import AuthService
@@ -25,47 +25,50 @@ async def login(request: Request, payload: LoginRequest, db: DBSession) -> Token
 async def me(user: CurrentUser) -> UserRead:
     return user
 
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from fastapi import Depends
-from app.api.deps import bearer_scheme
 import jwt
+from datetime import UTC, datetime
+from fastapi.security import HTTPAuthorizationCredentials
+
 from app.core.config import get_settings
 from app.models.token_blocklist import TokenBlocklist
-from datetime import datetime, UTC
+
 
 @router.post("/logout", response_model=Message, summary="Logout a user")
 async def logout(
-    user: CurrentUser, 
+    user: CurrentUser,
     db: DBSession,
-    credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme)
+    credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
 ) -> Message:
     if credentials:
         settings = get_settings()
         try:
-            payload = jwt.decode(credentials.credentials, settings.jwt_secret_key, algorithms=[settings.jwt_algorithm])
+            payload = jwt.decode(
+                credentials.credentials,
+                settings.jwt_secret_key,
+                algorithms=[settings.jwt_algorithm],
+            )
             jti = payload.get("jti")
             exp = payload.get("exp")
             if jti and exp:
-                blocklist = TokenBlocklist(jti=jti, expires_at=datetime.fromtimestamp(exp, tz=UTC))
-                db.add(blocklist)
+                db.add(TokenBlocklist(jti=jti, expires_at=datetime.fromtimestamp(exp, tz=UTC)))
                 await db.commit()
         except Exception:
             pass
     return Message(message="Successfully logged out.")
 
+
 @router.post("/refresh", response_model=TokenResponse, summary="Refresh access token")
 async def refresh(user: CurrentUser) -> TokenResponse:
     return TokenResponse(access_token=create_access_token(user.id), user=user)
 
-@router.post("/reset-password", response_model=Message, summary="Request password reset")
-@limiter.limit("5/minute")
-async def reset_password(request: Request, payload: PasswordResetRequest) -> Message:
-    print(f"MOCK: Password reset link for {payload.email} sent. Click https://example.com/reset?token=mock_token")
-    return Message(message="If that email is registered, a reset link has been sent.")
 
 @router.post("/change-password", response_model=Message, summary="Change password")
 @limiter.limit("10/minute")
-async def change_password(request: Request, payload: ChangePasswordRequest, user: CurrentUser, db: DBSession) -> Message:
+async def change_password(
+    request: Request,
+    payload: ChangePasswordRequest,
+    user: CurrentUser,
+    db: DBSession,
+) -> Message:
     await AuthService(db).change_password(user, payload.current_password, payload.new_password)
     return Message(message="Password changed successfully")
-

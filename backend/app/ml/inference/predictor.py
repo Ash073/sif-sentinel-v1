@@ -148,7 +148,12 @@ class SIFPredictor:
                     (base_dir / name).exists()
                     for name in ("model.safetensors", "pytorch_model.bin")
                 ):
-                    print("WARNING: SIF transformer weights unavailable, falling back to mock predictor", file=sys.stderr)
+                    import structlog as _structlog
+                    _structlog.get_logger(__name__).warning(
+                        "sif_transformer_weights_unavailable",
+                        version=version_to_use,
+                        fallback="mock_predictor",
+                    )
                     self._is_fallback = True
                     self._is_transformer = False
                     self._loaded_version = version_to_use
@@ -295,7 +300,12 @@ class SIFPredictor:
                 path.exists()
                 for path in (model_path, metadata_path)
             ):
-                print(f"WARNING: SIF model artifacts missing at {model_path}, falling back to mock predictor", file=sys.stderr)
+                import structlog as _structlog
+                _structlog.get_logger(__name__).warning(
+                    "sif_model_artifacts_missing",
+                    model_path=str(model_path),
+                    fallback="mock_predictor",
+                )
                 self._is_fallback = True
                 self._loaded_version = version_to_use
                 self._sif_index = 1

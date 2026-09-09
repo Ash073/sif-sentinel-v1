@@ -5,6 +5,8 @@ import json
 import uuid
 from datetime import datetime, timezone
 
+import structlog
+
 from sqlalchemy import select
 from redis import Redis
 from tenacity import retry, stop_after_attempt, wait_exponential
@@ -76,7 +78,9 @@ async def _process_csv_upload_async(content: str, user_id_str: str, ip_address: 
             try:
                 await AnalysisService(db).analyze_report(report.report_id, user_id, ip_address)
             except Exception as e:
-                print(f"Failed to analyze imported report {report_id}: {e}")
+                structlog.get_logger(__name__).error(
+                    "etl_report_analysis_failed", report_id=report_id, error=str(e)
+                )
                 
             processed_count += 1
             progress_pct = int((processed_count / total_rows) * 90)
@@ -88,6 +92,6 @@ async def _process_csv_upload_async(content: str, user_id_str: str, ip_address: 
         try:
             await PrecursorService(db).rebuild(commit=True)
         except Exception as e:
-            print(f"Failed to rebuild precursors: {e}")
+            structlog.get_logger(__name__).error("etl_precursor_rebuild_failed", error=str(e))
             
         report_progress(100, "Import complete")
