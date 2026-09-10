@@ -36,13 +36,24 @@ async def _process_csv_upload_async(content: str, user_id_str: str, ip_address: 
         return
 
     processed_count = 0
-    redis_client = Redis.from_url(settings.celery_broker_url)
-    
+    # Issue 4 Fix: Tolerate Redis being unavailable — imports must proceed even
+    # if the real-time progress channel is offline (e.g. local dev without Redis).
+    try:
+        redis_client = Redis.from_url(settings.celery_broker_url, socket_connect_timeout=2)
+        redis_client.ping()  # test connection immediately
+    except Exception:
+        redis_client = None
+
     def report_progress(progress_pct: int, status_msg: str):
-        redis_client.publish(
-            f"etl_progress_{user_id_str}",
-            json.dumps({"progress": progress_pct, "status": status_msg})
-        )
+        if redis_client is None:
+            return
+        try:
+            redis_client.publish(
+                f"etl_progress_{user_id_str}",
+                json.dumps({"progress": progress_pct, "status": status_msg})
+            )
+        except Exception:
+            pass  # Never let a Redis failure abort the import
 
     report_progress(0, "Starting import...")
     

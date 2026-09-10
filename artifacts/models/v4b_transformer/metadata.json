@@ -219,5 +219,6 @@
     "pr_auc": 1.0,
     "brier_score": 0.0
   },
-  "timestamp": "2026-09-10T05:57:37.400279+00:00"
+  "timestamp": "2026-09-10T05:57:37.400279+00:00",
+  "runtime_available": false
 }

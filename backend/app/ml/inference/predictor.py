@@ -6,6 +6,14 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import joblib
+
+try:
+    import torch
+    HAS_TORCH = True
+except ImportError:
+    torch = None  # type: ignore[assignment]
+    HAS_TORCH = False
+
 from app.core.config import get_settings
 from app.core.constants import SIFLevel
 from app.services.nlp.preprocessing import preprocess_text
@@ -556,7 +564,7 @@ class SIFPredictor:
         return SIFPrediction(
             is_sif,
             round(probability, 4),
-            level_for_probability(probability),
+            level_for_probability(probability, self._threshold),
             self._metadata.get(
                 "model_name",
                 "sif-classifier",
@@ -574,17 +582,22 @@ class SIFPredictor:
         return self._metadata.copy()
 
 
-def level_for_probability(probability: float) -> SIFLevel:
-    if probability >= 0.75:
+def level_for_probability(probability: float, threshold: float = 0.50) -> SIFLevel:
+    # If below the operating threshold the report is NOT SIF — level must reflect that
+    if probability < threshold:
+        if probability >= (threshold - 0.08):
+            return SIFLevel.REVIEW  # Ambiguity band: just below threshold
+        return SIFLevel.NON_SIF
+
+    # Above threshold: scale severity between threshold and 1.0
+    # Upper 25% of the positive range → CRITICAL/HIGH, middle → MEDIUM, lower → LOW
+    sif_range = 1.0 - threshold  # e.g. with threshold=0.82, range=0.18
+    relative = (probability - threshold) / sif_range if sif_range > 0 else 1.0
+
+    if relative >= 0.60:
         return SIFLevel.HIGH
 
-    if probability >= 0.60:
+    if relative >= 0.25:
         return SIFLevel.MEDIUM
 
-    if probability >= 0.55:
-        return SIFLevel.LOW
-
-    if probability >= 0.45:
-        return SIFLevel.REVIEW
-
-    return SIFLevel.NON_SIF
+    return SIFLevel.LOW

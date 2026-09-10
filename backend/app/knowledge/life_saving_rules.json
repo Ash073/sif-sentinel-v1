@@ -1,11 +1,434 @@
 [
-  {"code":"LSR-01","name":"Confined Space","description":"Controls for entry into confined spaces.","keywords":["confined space","entry","vessel","tank"],"activities":["Confined Space Work"],"hazards":["Toxic Atmosphere","Oxygen Deficiency"],"barriers":["Gas Testing","Atmospheric Monitoring","Permit"],"failure_patterns":["without gas testing","not tested","gas test missing"]},
-  {"code":"LSR-02","name":"Energy Isolation","description":"Verify isolation before work on equipment.","keywords":["energy isolation","isolation","lockout","tagout","de-energized"],"activities":["Maintenance","Electrical Work"],"hazards":["Stored Energy","Electrical Energy","Pressure"],"barriers":["Energy Isolation","Lockout Tagout"],"failure_patterns":["not verified","not isolated","without isolation"]},
-  {"code":"LSR-03","name":"Working at Height","description":"Controls for elevated work.","keywords":["height","elevated","ladder","scaffold","roof"],"activities":["Work at Height"],"hazards":["Fall Hazard"],"barriers":["Fall Protection","Guardrail"],"failure_patterns":["without harness","no guardrail","fall protection missing"]},
-  {"code":"LSR-04","name":"Line of Fire","description":"Keep people out of the path of hazardous energy or loads.","keywords":["line of fire","stood below","struck by","pinch point","suspended load"],"activities":["Lifting","Material Handling","Operations"],"hazards":["Line of Fire","Suspended Load","Moving Machinery"],"barriers":["Barricading","Spotter"],"failure_patterns":["stood below","inside exclusion zone","no barricade"]},
-  {"code":"LSR-05","name":"Hot Work","description":"Controls ignition during hot work.","keywords":["hot work","welding","cutting","grinding"],"activities":["Hot Work"],"hazards":["Fire","Explosion"],"barriers":["Fire Watch","Permit"],"failure_patterns":["no fire watch","permit expired"]},
-  {"code":"LSR-06","name":"Driving","description":"Controls vehicle movement risks.","keywords":["driving","vehicle","truck","reversing"],"activities":["Driving"],"hazards":["Vehicle Movement"],"barriers":["Vehicle Controls","Spotter"],"failure_patterns":["no spotter","speeding"]},
-  {"code":"LSR-07","name":"Safe Mechanical Lifting","description":"Controls lifting operations.","keywords":["lifting","crane","rigging","hoist"],"activities":["Lifting"],"hazards":["Suspended Load"],"barriers":["Lifting Plan","Competent Person","Barricading"],"failure_patterns":["no lifting plan","improper rigging"]},
-  {"code":"LSR-08","name":"Work Authorisation","description":"Ensure authorized, permitted work.","keywords":["permit","authorisation","authorization","approved"],"activities":["Maintenance","Hot Work","Confined Space Work"],"hazards":[],"barriers":["Permit","Authorization"],"failure_patterns":["without permit","not authorized","permit expired"]},
-  {"code":"LSR-09","name":"Bypassing Safety Controls","description":"Do not defeat critical safety controls.","keywords":["bypassed","override","disabled","interlock"],"activities":["Operations","Maintenance"],"hazards":["Moving Machinery","Stored Energy"],"barriers":["Authorization","PPE"],"failure_patterns":["bypassed","safety control disabled"]}
+  {
+    "code": "LSR-01",
+    "name": "Confined Space",
+    "description": "Controls for entry into confined spaces.",
+    "keywords": [
+      "confined space",
+      "entry",
+      "entered",
+      "enter",
+      "vessel",
+      "tank",
+      "nitrogen",
+      "oxygen deficient",
+      "oxygen deficiency",
+      "atmospheric",
+      "manhole",
+      "sewer",
+      "pit",
+      "silo",
+      "duct",
+      "vault",
+      "well",
+      "purged",
+      "inert",
+      "h2s",
+      "toxic atmosphere",
+      "gas monitoring"
+    ],
+    "activities": [
+      "Confined Space Work"
+    ],
+    "hazards": [
+      "Toxic Atmosphere",
+      "Oxygen Deficiency"
+    ],
+    "barriers": [
+      "Gas Testing",
+      "Atmospheric Monitoring",
+      "Permit"
+    ],
+    "failure_patterns": [
+      "without gas testing",
+      "not tested",
+      "gas test missing",
+      "without gas clearance",
+      "no gas test",
+      "gas test not done",
+      "without atmospheric",
+      "no atmospheric test",
+      "atmospheric not verified",
+      "without testing",
+      "without monitoring",
+      "not monitored",
+      "without clearance",
+      "prior to testing",
+      "before testing",
+      "entered without",
+      "entry without",
+      "access without permit"
+    ]
+  },
+  {
+    "code": "LSR-02",
+    "name": "Energy Isolation",
+    "description": "Verify isolation before work on equipment.",
+    "keywords": [
+      "energy isolation",
+      "isolation",
+      "lockout",
+      "tagout",
+      "loto",
+      "de-energized",
+      "deenergized",
+      "zero energy",
+      "stored energy",
+      "breaker",
+      "valve",
+      "bleed",
+      "vent",
+      "pressure release",
+      "electrical isolation",
+      "mechanical isolation",
+      "hydraulic isolation"
+    ],
+    "activities": [
+      "Maintenance",
+      "Electrical Work"
+    ],
+    "hazards": [
+      "Stored Energy",
+      "Electrical Energy",
+      "Pressure"
+    ],
+    "barriers": [
+      "Energy Isolation",
+      "Lockout Tagout"
+    ],
+    "failure_patterns": [
+      "not verified",
+      "not isolated",
+      "without isolation",
+      "without zero energy",
+      "loto not applied",
+      "lockout not applied",
+      "without lockout",
+      "without tagout",
+      "not de-energized",
+      "still energized",
+      "live",
+      "energized",
+      "under pressure",
+      "isolation not confirmed",
+      "not locked out"
+    ]
+  },
+  {
+    "code": "LSR-03",
+    "name": "Working at Height",
+    "description": "Controls for elevated work.",
+    "keywords": [
+      "height",
+      "elevated",
+      "elevation",
+      "ladder",
+      "scaffold",
+      "scaffolding",
+      "roof",
+      "platform",
+      "catwalk",
+      "mast",
+      "derrick",
+      "rig floor",
+      "aerial",
+      "fall",
+      "fell",
+      "dropped",
+      "overhead",
+      "above ground",
+      "ft elevation",
+      "meter elevation",
+      "feet high",
+      "meters high"
+    ],
+    "activities": [
+      "Work at Height"
+    ],
+    "hazards": [
+      "Fall Hazard"
+    ],
+    "barriers": [
+      "Fall Protection",
+      "Guardrail"
+    ],
+    "failure_patterns": [
+      "without harness",
+      "no harness",
+      "harness not clipped",
+      "lanyard not hooked",
+      "lanyard not clipped",
+      "no fall protection",
+      "fall protection missing",
+      "no guardrail",
+      "guardrail missing",
+      "without fall arrest",
+      "without lifeline",
+      "not tied off",
+      "unprotected edge",
+      "no anchor",
+      "harness not worn"
+    ]
+  },
+  {
+    "code": "LSR-04",
+    "name": "Line of Fire",
+    "description": "Keep people out of the path of hazardous energy or loads.",
+    "keywords": [
+      "line of fire",
+      "stood below",
+      "struck by",
+      "pinch point",
+      "suspended load",
+      "overhead load",
+      "dropped object",
+      "swinging load",
+      "caught between",
+      "caught in",
+      "exclusion zone",
+      "red zone",
+      "below the load",
+      "beneath load",
+      "under load"
+    ],
+    "activities": [
+      "Lifting",
+      "Material Handling",
+      "Operations"
+    ],
+    "hazards": [
+      "Line of Fire",
+      "Suspended Load",
+      "Moving Machinery"
+    ],
+    "barriers": [
+      "Barricading",
+      "Spotter"
+    ],
+    "failure_patterns": [
+      "stood below",
+      "inside exclusion zone",
+      "no barricade",
+      "under suspended",
+      "beneath suspended",
+      "below suspended",
+      "walked under",
+      "inside red zone",
+      "inside drop zone",
+      "no spotter",
+      "without tag lines",
+      "no exclusion zone"
+    ]
+  },
+  {
+    "code": "LSR-05",
+    "name": "Hot Work",
+    "description": "Controls ignition during hot work.",
+    "keywords": [
+      "hot work",
+      "welding",
+      "weld",
+      "cutting",
+      "grinding",
+      "spark",
+      "flame",
+      "ignition",
+      "brazing",
+      "torch",
+      "flammable atmosphere",
+      "combustible",
+      "open flame"
+    ],
+    "activities": [
+      "Hot Work"
+    ],
+    "hazards": [
+      "Fire",
+      "Explosion"
+    ],
+    "barriers": [
+      "Fire Watch",
+      "Permit"
+    ],
+    "failure_patterns": [
+      "no fire watch",
+      "permit expired",
+      "without permit",
+      "gas not tested",
+      "without gas test",
+      "flammable area",
+      "near hydrocarbon",
+      "without fire watch",
+      "no hot work permit"
+    ]
+  },
+  {
+    "code": "LSR-06",
+    "name": "Driving",
+    "description": "Controls vehicle movement risks.",
+    "keywords": [
+      "driving",
+      "vehicle",
+      "truck",
+      "reversing",
+      "forklift",
+      "heavy vehicle",
+      "light vehicle",
+      "speed",
+      "collision",
+      "pedestrian",
+      "road",
+      "transport",
+      "mvp"
+    ],
+    "activities": [
+      "Driving"
+    ],
+    "hazards": [
+      "Vehicle Movement"
+    ],
+    "barriers": [
+      "Vehicle Controls",
+      "Spotter"
+    ],
+    "failure_patterns": [
+      "no spotter",
+      "speeding",
+      "without seatbelt",
+      "no seatbelt",
+      "exceeded speed",
+      "no banksman",
+      "reversing without spotter",
+      "without banksman"
+    ]
+  },
+  {
+    "code": "LSR-07",
+    "name": "Safe Mechanical Lifting",
+    "description": "Controls lifting operations.",
+    "keywords": [
+      "lifting",
+      "crane",
+      "rigging",
+      "hoist",
+      "sling",
+      "shackle",
+      "lift",
+      "raised",
+      "suspended",
+      "overhead",
+      "block",
+      "drill collar",
+      "tubular",
+      "pipe",
+      "beam",
+      "load"
+    ],
+    "activities": [
+      "Lifting"
+    ],
+    "hazards": [
+      "Suspended Load"
+    ],
+    "barriers": [
+      "Lifting Plan",
+      "Competent Person",
+      "Barricading"
+    ],
+    "failure_patterns": [
+      "no lifting plan",
+      "improper rigging",
+      "cable snapped",
+      "sling failed",
+      "rigging failed",
+      "sling damaged",
+      "wire rope",
+      "overloaded",
+      "no load chart",
+      "exceeded swl",
+      "no tag line",
+      "no exclusion zone"
+    ]
+  },
+  {
+    "code": "LSR-08",
+    "name": "Work Authorisation",
+    "description": "Ensure authorized, permitted work.",
+    "keywords": [
+      "permit",
+      "authorisation",
+      "authorization",
+      "approved",
+      "ptw",
+      "safe work permit",
+      "work permit",
+      "hot work permit",
+      "permission",
+      "authorized",
+      "sanctioned"
+    ],
+    "activities": [
+      "Maintenance",
+      "Hot Work",
+      "Confined Space Work"
+    ],
+    "hazards": [],
+    "barriers": [
+      "Permit",
+      "Authorization"
+    ],
+    "failure_patterns": [
+      "without permit",
+      "not authorized",
+      "permit expired",
+      "no ptw",
+      "no permit",
+      "permit not issued",
+      "permit not obtained",
+      "unauthorized work",
+      "without authorization"
+    ]
+  },
+  {
+    "code": "LSR-09",
+    "name": "Bypassing Safety Controls",
+    "description": "Do not defeat critical safety controls.",
+    "keywords": [
+      "bypassed",
+      "override",
+      "disabled",
+      "interlock",
+      "jumper",
+      "defeat",
+      "circumvent",
+      "safety system",
+      "alarm disabled",
+      "trip bypassed",
+      "shutdown bypassed",
+      "esdv"
+    ],
+    "activities": [
+      "Operations",
+      "Maintenance"
+    ],
+    "hazards": [
+      "Moving Machinery",
+      "Stored Energy"
+    ],
+    "barriers": [
+      "Authorization",
+      "PPE"
+    ],
+    "failure_patterns": [
+      "bypassed",
+      "safety control disabled",
+      "interlock bypassed",
+      "trip bypassed",
+      "alarm bypassed",
+      "override applied",
+      "safety defeated",
+      "control defeated",
+      "jumpered"
+    ]
+  }
 ]

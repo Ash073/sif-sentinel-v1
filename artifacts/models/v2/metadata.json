@@ -43,5 +43,52 @@
     "backend_path": "artifacts/models/v2/",
     "env_var": "SIF_MODEL_BACKEND=v2",
     "endpoint": "POST /api/v1/reports/{id}/analyze"
-  }
+  },
+  "model_version": "sif-tfidf-logreg-v2",
+  "model_name": "sif-tfidf-logreg-v2",
+  "training_dataset_identifier": "safety-reports-raw-10k",
+  "total_records": 10000,
+  "split_strategy": "deterministic_group_aware_70_15_15",
+  "operating_threshold": 0.8225885057175697,
+  "validation_metrics_at_selected_threshold": {
+    "accuracy": 0.9995,
+    "f1": 0.9995,
+    "recall_sif": 1.0,
+    "precision_sif": 0.999
+  },
+  "test_metrics_at_selected_threshold": {
+    "accuracy": 0.9996,
+    "f1": 0.9996,
+    "recall_sif": 1.0,
+    "precision_sif": 0.9996,
+    "roc_auc": 0.9999
+  },
+  "calibration": {
+    "brier_score": 0.0004,
+    "expected_calibration_error": 0.0012
+  },
+  "top_sif_features": [
+    "harness",
+    "confined",
+    "energy",
+    "lockout",
+    "suspended",
+    "scaffold",
+    "nitrogen",
+    "lanyard",
+    "crane",
+    "isolation"
+  ],
+  "top_non_sif_features": [
+    "puddle",
+    "housekeeping",
+    "slip",
+    "administrative",
+    "meeting",
+    "reminder",
+    "training",
+    "routine",
+    "report",
+    "spill"
+  ]
 }

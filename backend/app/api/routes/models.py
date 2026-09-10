@@ -47,6 +47,6 @@ async def get_model(model_name: str, _: User = Depends(require_roles(*_analyst_r
 @router.get("/{model_name}/metrics", response_model=dict[str, Any], summary="Get actual saved evaluation metrics")
 async def get_metrics(model_name: str, _: User = Depends(require_roles(*_analyst_roles))) -> dict[str, Any]:
     metadata = current_model_metadata()
-    if model_name not in (metadata["model_name"], metadata["model_version"]):
+    if model_name not in (metadata.get("model_name"), metadata.get("model_version")):
         raise AppError("MODEL_NOT_FOUND", "Model not found", 404)
-    return metadata["metrics"]
+    return metadata.get("metrics") or metadata.get("test_metrics_at_selected_threshold") or metadata.get("performance", {})

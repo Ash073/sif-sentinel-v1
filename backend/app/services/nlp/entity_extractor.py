@@ -1,6 +1,7 @@
 import re
 from dataclasses import dataclass, field
 from difflib import SequenceMatcher
+import threading
 
 from app.core.constants import BarrierStatus
 from app.knowledge.taxonomy import safety_concepts
@@ -12,6 +13,46 @@ try:
     HAS_RAPIDFUZZ = True
 except ImportError:
     HAS_RAPIDFUZZ = False
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Fix Issue 3: Module-level entity model cache — loaded ONCE, reused every call.
+# Previously joblib.load() was called on every extract_entities() invocation,
+# causing 4 disk reads per report (200 reads for a 50-report CSV batch).
+# ──────────────────────────────────────────────────────────────────────────────
+_ENTITY_LOCK = threading.Lock()
+_ENTITY_LOADED: bool = False
+_ENTITY_VEC = None
+_ENTITY_ACT_M = None
+_ENTITY_HAZ_M = None
+_ENTITY_BAR_M = None
+
+
+def _load_entity_models_once() -> None:
+    """Lazy-load entity ML models into module globals on first call."""
+    global _ENTITY_LOADED, _ENTITY_VEC, _ENTITY_ACT_M, _ENTITY_HAZ_M, _ENTITY_BAR_M
+    if _ENTITY_LOADED:
+        return
+    with _ENTITY_LOCK:
+        if _ENTITY_LOADED:
+            return
+        _ENTITY_LOADED = True
+        try:
+            import joblib
+            from pathlib import Path
+            _base_dir = Path(__file__).parents[4] / "artifacts" / "models" / "v2"
+            _vec_p  = _base_dir / "entity_vectorizer.joblib"
+            _act_p  = _base_dir / "activity_model.joblib"
+            _haz_p  = _base_dir / "hazard_model.joblib"
+            _bar_p  = _base_dir / "barrier_model.joblib"
+            if _vec_p.exists() and _act_p.exists() and _haz_p.exists() and _bar_p.exists():
+                _ENTITY_VEC   = joblib.load(_vec_p)
+                _ENTITY_ACT_M = joblib.load(_act_p)
+                _ENTITY_HAZ_M = joblib.load(_haz_p)
+                _ENTITY_BAR_M = joblib.load(_bar_p)
+        except Exception:
+            pass  # silently fall back to heuristic-only extraction
+
+
 
 
 @dataclass(frozen=True)
@@ -329,44 +370,33 @@ def extract_entities(document: PreprocessedText) -> ExtractedEntities:
         )
         status = BarrierStatus.FAILED if failure else BarrierStatus.UNKNOWN
 
-    # Load and evaluate ML entity models if available
-    try:
-        import joblib
-        from pathlib import Path
-        _base_dir = Path(__file__).parents[4] / "artifacts" / "models" / "v2"
-        _vec_p = _base_dir / "entity_vectorizer.joblib"
-        _act_p = _base_dir / "activity_model.joblib"
-        _haz_p = _base_dir / "hazard_model.joblib"
-        _bar_p = _base_dir / "barrier_model.joblib"
+    # Issue 3 Fix: Use cached globals instead of loading from disk on every call
+    _load_entity_models_once()
+    if _ENTITY_VEC is not None and _ENTITY_ACT_M is not None:
+        try:
+            _feat = _ENTITY_VEC.transform([document.normalized_text])
 
-        if _vec_p.exists() and _act_p.exists() and _haz_p.exists() and _bar_p.exists():
-            _vec = joblib.load(_vec_p)
-            _feat = _vec.transform([document.normalized_text])
-
-            _act_m = joblib.load(_act_p)
-            _ml_act = _act_m.predict(_feat)[0]
+            _ml_act = _ENTITY_ACT_M.predict(_feat)[0]
             if _ml_act != "NONE":
                 act_str = _ml_act
                 if _ml_act not in all_activities:
                     all_activities.insert(0, _ml_act)
 
-            _haz_m = joblib.load(_haz_p)
-            _ml_haz = _haz_m.predict(_feat)[0]
+            _ml_haz = _ENTITY_HAZ_M.predict(_feat)[0]
             if _ml_haz != "NONE":
                 haz_str = _ml_haz
                 if _ml_haz not in all_hazards:
                     all_hazards.insert(0, _ml_haz)
 
-            _bar_m = joblib.load(_bar_p)
-            _ml_bar = _bar_m.predict(_feat)[0]
+            _ml_bar = _ENTITY_BAR_M.predict(_feat)[0]
             if _ml_bar != "NONE":
                 bar_str = _ml_bar
                 if _ml_bar not in all_barriers:
                     all_barriers.insert(0, _ml_bar)
                 if status == BarrierStatus.UNKNOWN and failure:
                     status = BarrierStatus.FAILED
-    except Exception:
-        pass
+        except Exception:
+            pass
 
     terms = [item.original_span for item in structured.items] + ([failure] if failure else [])
     confidence = min(1.0, 0.18 * len(terms) + (0.18 if act_str and haz_str else 0.0))
