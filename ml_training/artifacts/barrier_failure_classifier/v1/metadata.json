@@ -1,0 +1,154 @@
+{
+  "model_name": "barrier_failure_classifier",
+  "model_version": "v1",
+  "task": "document-level classification of barrier_failure from report_text",
+  "dataset_name": "safety_reports.csv",
+  "dataset_sha256": "3225b279a2b0809ba3a6c8e44ee50b5821e21f6f9d9c91c216ade67f6f94d691",
+  "source_type": "SYNTHETIC",
+  "feature_definition": "report_text only; word (1,2) and character-within-word (3,5) TF-IDF",
+  "excluded_features": [
+    "id",
+    "report_type",
+    "activity",
+    "hazard",
+    "barrier",
+    "barrier_status",
+    "barrier_failure",
+    "sif_level",
+    "life_saving_rule",
+    "source_type"
+  ],
+  "preprocessing_version": "synthetic_text_v1",
+  "class_mapping": {
+    "0": "NONE",
+    "1": "bypassed",
+    "2": "expired",
+    "3": "not performed",
+    "4": "not used",
+    "5": "not verified"
+  },
+  "random_seed": 20260909,
+  "train_size": 7437,
+  "validation_size": 1250,
+  "test_size": 1313,
+  "evaluation_metrics": {
+    "accuracy": 1.0,
+    "macro_f1": 1.0,
+    "weighted_f1": 1.0,
+    "per_class": {
+      "NONE": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 741
+      },
+      "bypassed": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 80
+      },
+      "expired": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 28
+      },
+      "not performed": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 329
+      },
+      "not used": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 75
+      },
+      "not verified": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 60
+      }
+    },
+    "confusion_matrix": [
+      [
+        741,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        80,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        28,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        329,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        75,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        60
+      ]
+    ],
+    "class_order": [
+      "NONE",
+      "bypassed",
+      "expired",
+      "not performed",
+      "not used",
+      "not verified"
+    ],
+    "top_k_accuracy": 1.0,
+    "top_k": 3
+  },
+  "synthetic_data_warning": "TECHNICAL PROTOTYPE ONLY. Synthetic-data metrics are not real-world SIF validation.",
+  "intended_use": "Pipeline verification and controlled backend-integration testing with human review.",
+  "known_limitations": [
+    "Training labels and text were generated synthetically.",
+    "Synthetic templates create learnable artifacts and inflated held-out performance.",
+    "No real-world generalization, fairness, drift, or safety performance has been established.",
+    "Predictions must not replace deterministic safety logic or human review."
+  ],
+  "library_versions": {
+    "python": "3.13.7",
+    "scikit-learn": "1.6.1",
+    "numpy": "2.3.2",
+    "pandas": "2.3.2",
+    "scipy": "1.16.2",
+    "joblib": "1.5.2"
+  },
+  "training_timestamp": "2026-09-10T05:08:45.535766+00:00"
+}

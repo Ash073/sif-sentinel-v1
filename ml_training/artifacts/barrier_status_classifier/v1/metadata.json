@@ -1,0 +1,97 @@
+{
+  "model_name": "barrier_status_classifier",
+  "model_version": "v1",
+  "task": "document-level classification of barrier_status from report_text",
+  "dataset_name": "safety_reports.csv",
+  "dataset_sha256": "3225b279a2b0809ba3a6c8e44ee50b5821e21f6f9d9c91c216ade67f6f94d691",
+  "source_type": "SYNTHETIC",
+  "feature_definition": "report_text only; word (1,2) and character-within-word (3,5) TF-IDF",
+  "excluded_features": [
+    "id",
+    "report_type",
+    "activity",
+    "hazard",
+    "barrier",
+    "barrier_status",
+    "barrier_failure",
+    "sif_level",
+    "life_saving_rule",
+    "source_type"
+  ],
+  "preprocessing_version": "synthetic_text_v1",
+  "class_mapping": {
+    "0": "EFFECTIVE",
+    "1": "FAILED",
+    "2": "UNKNOWN"
+  },
+  "random_seed": 20260909,
+  "train_size": 7437,
+  "validation_size": 1250,
+  "test_size": 1313,
+  "evaluation_metrics": {
+    "accuracy": 1.0,
+    "macro_f1": 1.0,
+    "weighted_f1": 1.0,
+    "per_class": {
+      "EFFECTIVE": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 144
+      },
+      "FAILED": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 572
+      },
+      "UNKNOWN": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 597
+      }
+    },
+    "confusion_matrix": [
+      [
+        144,
+        0,
+        0
+      ],
+      [
+        0,
+        572,
+        0
+      ],
+      [
+        0,
+        0,
+        597
+      ]
+    ],
+    "class_order": [
+      "EFFECTIVE",
+      "FAILED",
+      "UNKNOWN"
+    ],
+    "top_k_accuracy": 1.0,
+    "top_k": 2
+  },
+  "synthetic_data_warning": "TECHNICAL PROTOTYPE ONLY. Synthetic-data metrics are not real-world SIF validation.",
+  "intended_use": "Pipeline verification and controlled backend-integration testing with human review.",
+  "known_limitations": [
+    "Training labels and text were generated synthetically.",
+    "Synthetic templates create learnable artifacts and inflated held-out performance.",
+    "No real-world generalization, fairness, drift, or safety performance has been established.",
+    "Predictions must not replace deterministic safety logic or human review."
+  ],
+  "library_versions": {
+    "python": "3.13.7",
+    "scikit-learn": "1.6.1",
+    "numpy": "2.3.2",
+    "pandas": "2.3.2",
+    "scipy": "1.16.2",
+    "joblib": "1.5.2"
+  },
+  "training_timestamp": "2026-09-10T05:08:29.710633+00:00"
+}

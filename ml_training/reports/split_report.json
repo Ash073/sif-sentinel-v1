@@ -1,0 +1,213 @@
+{
+  "random_seed": 20260909,
+  "method": "group-isolated 70/15/15 split stratified on SIF",
+  "train": {
+    "rows": 7437,
+    "groups": 3204,
+    "class_distributions": {
+      "sif_classifier": {
+        "False": 3559,
+        "True": 3878
+      },
+      "activity_classifier": {
+        "Confined Space Work": 827,
+        "Driving": 352,
+        "Electrical Work": 494,
+        "Excavation": 462,
+        "Hot Work": 351,
+        "Lifting": 764,
+        "Maintenance": 915,
+        "Operations": 2483,
+        "Work at Height": 789
+      },
+      "hazard_classifier": {
+        "Electrical Energy": 494,
+        "Engulfment": 462,
+        "Ergonomic": 169,
+        "Fall Hazard": 789,
+        "Fire": 351,
+        "Line of Fire": 243,
+        "Moving Machinery": 540,
+        "NONE": 1388,
+        "Slip/Trip": 926,
+        "Stored Energy": 484,
+        "Suspended Load": 764,
+        "Toxic Atmosphere": 827
+      },
+      "barrier_classifier": {
+        "Energy Isolation": 925,
+        "Fall Protection": 789,
+        "Fire Watch": 351,
+        "Gas Testing": 827,
+        "LOTO": 484,
+        "Line of Fire": 721,
+        "NONE": 2483,
+        "Safe Mechanical Lifting": 395,
+        "Shoring": 462
+      },
+      "barrier_status_classifier": {
+        "EFFECTIVE": 1076,
+        "FAILED": 3878,
+        "UNKNOWN": 2483
+      },
+      "barrier_failure_classifier": {
+        "NONE": 3559,
+        "bypassed": 940,
+        "expired": 362,
+        "not performed": 1122,
+        "not used": 299,
+        "not verified": 1155
+      },
+      "lsr_classifier": {
+        "Confined Space": 827,
+        "Energy Isolation": 1409,
+        "Hot Work": 351,
+        "Line of Fire": 1183,
+        "NONE": 2483,
+        "Safe Mechanical Lifting": 395,
+        "Working at Height": 789
+      }
+    }
+  },
+  "validation": {
+    "rows": 1250,
+    "groups": 687,
+    "class_distributions": {
+      "sif_classifier": {
+        "False": 700,
+        "True": 550
+      },
+      "activity_classifier": {
+        "Confined Space Work": 104,
+        "Driving": 177,
+        "Electrical Work": 29,
+        "Excavation": 50,
+        "Hot Work": 29,
+        "Lifting": 79,
+        "Maintenance": 113,
+        "Operations": 571,
+        "Work at Height": 98
+      },
+      "hazard_classifier": {
+        "Electrical Energy": 29,
+        "Engulfment": 50,
+        "Ergonomic": 39,
+        "Fall Hazard": 98,
+        "Fire": 29,
+        "Line of Fire": 169,
+        "Moving Machinery": 63,
+        "NONE": 330,
+        "Slip/Trip": 202,
+        "Stored Energy": 58,
+        "Suspended Load": 79,
+        "Toxic Atmosphere": 104
+      },
+      "barrier_classifier": {
+        "Energy Isolation": 84,
+        "Fall Protection": 98,
+        "Fire Watch": 29,
+        "Gas Testing": 104,
+        "LOTO": 58,
+        "Line of Fire": 216,
+        "NONE": 571,
+        "Safe Mechanical Lifting": 40,
+        "Shoring": 50
+      },
+      "barrier_status_classifier": {
+        "EFFECTIVE": 129,
+        "FAILED": 550,
+        "UNKNOWN": 571
+      },
+      "barrier_failure_classifier": {
+        "NONE": 700,
+        "bypassed": 245,
+        "expired": 30,
+        "not performed": 173,
+        "not used": 56,
+        "not verified": 46
+      },
+      "lsr_classifier": {
+        "Confined Space": 104,
+        "Energy Isolation": 142,
+        "Hot Work": 29,
+        "Line of Fire": 266,
+        "NONE": 571,
+        "Safe Mechanical Lifting": 40,
+        "Working at Height": 98
+      }
+    }
+  },
+  "test": {
+    "rows": 1313,
+    "groups": 687,
+    "class_distributions": {
+      "sif_classifier": {
+        "False": 741,
+        "True": 572
+      },
+      "activity_classifier": {
+        "Confined Space Work": 63,
+        "Driving": 54,
+        "Electrical Work": 28,
+        "Excavation": 47,
+        "Hot Work": 181,
+        "Lifting": 137,
+        "Maintenance": 84,
+        "Operations": 597,
+        "Work at Height": 122
+      },
+      "hazard_classifier": {
+        "Electrical Energy": 28,
+        "Engulfment": 47,
+        "Ergonomic": 76,
+        "Fall Hazard": 122,
+        "Fire": 181,
+        "Line of Fire": 10,
+        "Moving Machinery": 98,
+        "NONE": 279,
+        "Slip/Trip": 242,
+        "Stored Energy": 30,
+        "Suspended Load": 137,
+        "Toxic Atmosphere": 63
+      },
+      "barrier_classifier": {
+        "Energy Isolation": 82,
+        "Fall Protection": 122,
+        "Fire Watch": 181,
+        "Gas Testing": 63,
+        "LOTO": 30,
+        "Line of Fire": 82,
+        "NONE": 597,
+        "Safe Mechanical Lifting": 109,
+        "Shoring": 47
+      },
+      "barrier_status_classifier": {
+        "EFFECTIVE": 144,
+        "FAILED": 572,
+        "UNKNOWN": 597
+      },
+      "barrier_failure_classifier": {
+        "NONE": 741,
+        "bypassed": 80,
+        "expired": 28,
+        "not performed": 329,
+        "not used": 75,
+        "not verified": 60
+      },
+      "lsr_classifier": {
+        "Confined Space": 63,
+        "Energy Isolation": 112,
+        "Hot Work": 181,
+        "Line of Fire": 129,
+        "NONE": 597,
+        "Safe Mechanical Lifting": 109,
+        "Working at Height": 122
+      }
+    }
+  },
+  "cross_split_duplicate_group_intersections": {
+    "train_validation": 0,
+    "train_test": 0,
+    "validation_test": 0
+  }
+}

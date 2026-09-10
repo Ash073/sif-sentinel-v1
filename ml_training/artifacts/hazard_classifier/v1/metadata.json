@@ -1,0 +1,322 @@
+{
+  "model_name": "hazard_classifier",
+  "model_version": "v1",
+  "task": "document-level classification of hazard from report_text",
+  "dataset_name": "safety_reports.csv",
+  "dataset_sha256": "3225b279a2b0809ba3a6c8e44ee50b5821e21f6f9d9c91c216ade67f6f94d691",
+  "source_type": "SYNTHETIC",
+  "feature_definition": "report_text only; word (1,2) and character-within-word (3,5) TF-IDF",
+  "excluded_features": [
+    "id",
+    "report_type",
+    "activity",
+    "hazard",
+    "barrier",
+    "barrier_status",
+    "barrier_failure",
+    "sif_level",
+    "life_saving_rule",
+    "source_type"
+  ],
+  "preprocessing_version": "synthetic_text_v1",
+  "class_mapping": {
+    "0": "Electrical Energy",
+    "1": "Engulfment",
+    "2": "Ergonomic",
+    "3": "Fall Hazard",
+    "4": "Fire",
+    "5": "Line of Fire",
+    "6": "Moving Machinery",
+    "7": "NONE",
+    "8": "Slip/Trip",
+    "9": "Stored Energy",
+    "10": "Suspended Load",
+    "11": "Toxic Atmosphere"
+  },
+  "random_seed": 20260909,
+  "train_size": 7437,
+  "validation_size": 1250,
+  "test_size": 1313,
+  "evaluation_metrics": {
+    "accuracy": 1.0,
+    "macro_f1": 1.0,
+    "weighted_f1": 1.0,
+    "per_class": {
+      "Electrical Energy": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 28
+      },
+      "Engulfment": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 47
+      },
+      "Ergonomic": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 76
+      },
+      "Fall Hazard": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 122
+      },
+      "Fire": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 181
+      },
+      "Line of Fire": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 10
+      },
+      "Moving Machinery": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 98
+      },
+      "NONE": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 279
+      },
+      "Slip/Trip": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 242
+      },
+      "Stored Energy": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 30
+      },
+      "Suspended Load": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 137
+      },
+      "Toxic Atmosphere": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 63
+      }
+    },
+    "confusion_matrix": [
+      [
+        28,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        47,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        76,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        122,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        181,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        10,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        98,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        279,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        242,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        30,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        137,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        63
+      ]
+    ],
+    "class_order": [
+      "Electrical Energy",
+      "Engulfment",
+      "Ergonomic",
+      "Fall Hazard",
+      "Fire",
+      "Line of Fire",
+      "Moving Machinery",
+      "NONE",
+      "Slip/Trip",
+      "Stored Energy",
+      "Suspended Load",
+      "Toxic Atmosphere"
+    ],
+    "top_k_accuracy": 1.0,
+    "top_k": 3
+  },
+  "synthetic_data_warning": "TECHNICAL PROTOTYPE ONLY. Synthetic-data metrics are not real-world SIF validation.",
+  "intended_use": "Pipeline verification and controlled backend-integration testing with human review.",
+  "known_limitations": [
+    "Training labels and text were generated synthetically.",
+    "Synthetic templates create learnable artifacts and inflated held-out performance.",
+    "No real-world generalization, fairness, drift, or safety performance has been established.",
+    "Predictions must not replace deterministic safety logic or human review."
+  ],
+  "library_versions": {
+    "python": "3.13.7",
+    "scikit-learn": "1.6.1",
+    "numpy": "2.3.2",
+    "pandas": "2.3.2",
+    "scipy": "1.16.2",
+    "joblib": "1.5.2"
+  },
+  "training_timestamp": "2026-09-10T05:08:00.405983+00:00"
+}

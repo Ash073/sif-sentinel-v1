@@ -1,0 +1,93 @@
+{
+  "model_name": "sif_classifier",
+  "model_version": "v1",
+  "task": "document-level classification of sif_potential from report_text",
+  "dataset_name": "safety_reports.csv",
+  "dataset_sha256": "3225b279a2b0809ba3a6c8e44ee50b5821e21f6f9d9c91c216ade67f6f94d691",
+  "source_type": "SYNTHETIC",
+  "feature_definition": "report_text only; word (1,2) and character-within-word (3,5) TF-IDF",
+  "excluded_features": [
+    "id",
+    "report_type",
+    "activity",
+    "hazard",
+    "barrier",
+    "barrier_status",
+    "barrier_failure",
+    "sif_level",
+    "life_saving_rule",
+    "source_type"
+  ],
+  "preprocessing_version": "synthetic_text_v1",
+  "class_mapping": {
+    "0": "False",
+    "1": "True"
+  },
+  "random_seed": 20260909,
+  "train_size": 7437,
+  "validation_size": 1250,
+  "test_size": 1313,
+  "evaluation_metrics": {
+    "threshold": 0.05,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "roc_auc": 1.0,
+    "pr_auc": 1.0,
+    "brier_score": 7.5394377786841805e-06,
+    "review_volume": 0.43564356435643564,
+    "confusion_matrix": [
+      [
+        741,
+        0
+      ],
+      [
+        0,
+        572
+      ]
+    ],
+    "calibration_curve": {
+      "mean_predicted_probability": [
+        0.0003169280064974624,
+        0.000614717122670748,
+        0.0009337083749982088,
+        0.0014286962116532975,
+        0.002146059991871598,
+        0.35930614910650227,
+        0.9962095153322441,
+        0.9978004643147846,
+        0.998815119690571,
+        0.9994843028195548
+      ],
+      "fraction_positive": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.35877862595419846,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    }
+  },
+  "synthetic_data_warning": "TECHNICAL PROTOTYPE ONLY. Synthetic-data metrics are not real-world SIF validation.",
+  "intended_use": "Pipeline verification and controlled backend-integration testing with human review.",
+  "known_limitations": [
+    "Training labels and text were generated synthetically.",
+    "Synthetic templates create learnable artifacts and inflated held-out performance.",
+    "No real-world generalization, fairness, drift, or safety performance has been established.",
+    "Predictions must not replace deterministic safety logic or human review."
+  ],
+  "library_versions": {
+    "python": "3.13.7",
+    "scikit-learn": "1.6.1",
+    "numpy": "2.3.2",
+    "pandas": "2.3.2",
+    "scipy": "1.16.2",
+    "joblib": "1.5.2"
+  },
+  "training_timestamp": "2026-09-10T05:07:09.064755+00:00"
+}

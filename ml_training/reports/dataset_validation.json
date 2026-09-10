@@ -1,0 +1,180 @@
+{
+  "dataset_path": "data\\raw\\safety_reports.csv",
+  "dataset_sha256": "3225b279a2b0809ba3a6c8e44ee50b5821e21f6f9d9c91c216ade67f6f94d691",
+  "rows": 10000,
+  "columns": 12,
+  "column_names": [
+    "id",
+    "report_type",
+    "report_text",
+    "activity",
+    "hazard",
+    "barrier",
+    "barrier_status",
+    "barrier_failure",
+    "sif_potential",
+    "sif_level",
+    "life_saving_rule",
+    "source_type"
+  ],
+  "dtypes": {
+    "id": "object",
+    "report_type": "object",
+    "report_text": "object",
+    "activity": "object",
+    "hazard": "object",
+    "barrier": "object",
+    "barrier_status": "object",
+    "barrier_failure": "object",
+    "sif_potential": "bool",
+    "sif_level": "object",
+    "life_saving_rule": "object",
+    "source_type": "object"
+  },
+  "missing_values": {
+    "id": 0,
+    "report_type": 0,
+    "report_text": 0,
+    "activity": 0,
+    "hazard": 1997,
+    "barrier": 3651,
+    "barrier_status": 0,
+    "barrier_failure": 5000,
+    "sif_potential": 0,
+    "sif_level": 0,
+    "life_saving_rule": 3651,
+    "source_type": 0
+  },
+  "duplicate_rows": 0,
+  "duplicate_ids": 0,
+  "unique_values": {
+    "id": 10000,
+    "report_type": 2,
+    "report_text": 8648,
+    "activity": 9,
+    "hazard": 12,
+    "barrier": 9,
+    "barrier_status": 3,
+    "barrier_failure": 6,
+    "sif_potential": 2,
+    "sif_level": 4,
+    "life_saving_rule": 7,
+    "source_type": 1
+  },
+  "categorical_distributions": {
+    "report_type": {
+      "UNSAFE_CONDITION": 8433,
+      "NEAR_MISS": 1567
+    },
+    "activity": {
+      "Operations": 3651,
+      "Maintenance": 1112,
+      "Work at Height": 1009,
+      "Confined Space Work": 994,
+      "Lifting": 980,
+      "Driving": 583,
+      "Hot Work": 561,
+      "Excavation": 559,
+      "Electrical Work": 551
+    },
+    "hazard": {
+      "<MISSING>": 1997,
+      "Slip/Trip": 1370,
+      "Fall Hazard": 1009,
+      "Toxic Atmosphere": 994,
+      "Suspended Load": 980,
+      "Moving Machinery": 701,
+      "Stored Energy": 572,
+      "Fire": 561,
+      "Engulfment": 559,
+      "Electrical Energy": 551,
+      "Line of Fire": 422,
+      "Ergonomic": 284
+    },
+    "barrier": {
+      "<MISSING>": 3651,
+      "Energy Isolation": 1091,
+      "Line of Fire": 1019,
+      "Fall Protection": 1009,
+      "Gas Testing": 994,
+      "LOTO": 572,
+      "Fire Watch": 561,
+      "Shoring": 559,
+      "Safe Mechanical Lifting": 544
+    },
+    "barrier_status": {
+      "FAILED": 5000,
+      "UNKNOWN": 3651,
+      "EFFECTIVE": 1349
+    },
+    "barrier_failure": {
+      "<MISSING>": 5000,
+      "not performed": 1624,
+      "bypassed": 1265,
+      "not verified": 1261,
+      "not used": 430,
+      "expired": 420
+    },
+    "sif_potential": {
+      "True": 5000,
+      "False": 5000
+    },
+    "sif_level": {
+      "NON_SIF": 3651,
+      "HIGH": 2878,
+      "MEDIUM": 2122,
+      "LOW": 1349
+    },
+    "life_saving_rule": {
+      "<MISSING>": 3651,
+      "Energy Isolation": 1663,
+      "Line of Fire": 1578,
+      "Working at Height": 1009,
+      "Confined Space": 994,
+      "Hot Work": 561,
+      "Safe Mechanical Lifting": 544
+    },
+    "source_type": {
+      "SYNTHETIC": 10000
+    }
+  },
+  "label_distribution": {
+    "True": 5000,
+    "False": 5000
+  },
+  "text_character_length": {
+    "count": 10000.0,
+    "mean": 135.9479,
+    "std": 27.105295705738566,
+    "min": 68.0,
+    "1%": 82.0,
+    "5%": 93.0,
+    "25%": 116.0,
+    "50%": 135.0,
+    "75%": 154.0,
+    "95%": 183.0,
+    "99%": 200.0,
+    "max": 231.0
+  },
+  "text_word_length": {
+    "count": 10000.0,
+    "mean": 23.2345,
+    "std": 4.663805834132233,
+    "min": 11.0,
+    "1%": 14.0,
+    "5%": 16.0,
+    "25%": 20.0,
+    "50%": 23.0,
+    "75%": 26.0,
+    "95%": 31.0,
+    "99%": 35.0,
+    "max": 39.0
+  },
+  "synthetic_data_warning": "Prototype-only synthetic labels. Metrics do not estimate real-world SIF performance.",
+  "duplicate_report_text": 1352,
+  "unexpected_values": {
+    "source_type": [],
+    "sif_potential": [],
+    "barrier_status": []
+  }
+}

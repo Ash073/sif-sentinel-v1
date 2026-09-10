@@ -1,0 +1,3937 @@
+{
+  "structured_column_leakage_by_target": {
+    "sif_potential": {
+      "report_type": {
+        "unique_values": 2,
+        "weighted_majority_accuracy": 0.6131,
+        "conditional_entropy_bits": 0.9235132709381125,
+        "mutual_information_bits": 0.07648672906188747,
+        "all_values_deterministic": false,
+        "deterministic_values": [],
+        "cross_tab": {
+          "NEAR_MISS": {
+            "False": 1349,
+            "True": 218
+          },
+          "UNSAFE_CONDITION": {
+            "False": 3651,
+            "True": 4782
+          }
+        }
+      },
+      "activity": {
+        "unique_values": 9,
+        "weighted_majority_accuracy": 0.8651,
+        "conditional_entropy_bits": 0.46033136477376224,
+        "mutual_information_bits": 0.5396686352262378,
+        "all_values_deterministic": false,
+        "deterministic_values": [
+          "Operations"
+        ],
+        "cross_tab": {
+          "Confined Space Work": {
+            "False": 132,
+            "True": 862
+          },
+          "Driving": {
+            "False": 161,
+            "True": 422
+          },
+          "Electrical Work": {
+            "False": 134,
+            "True": 417
+          },
+          "Excavation": {
+            "False": 179,
+            "True": 380
+          },
+          "Hot Work": {
+            "False": 165,
+            "True": 396
+          },
+          "Lifting": {
+            "False": 132,
+            "True": 848
+          },
+          "Maintenance": {
+            "False": 287,
+            "True": 825
+          },
+          "Operations": {
+            "False": 3651,
+            "True": 0
+          },
+          "Work at Height": {
+            "False": 159,
+            "True": 850
+          }
+        }
+      },
+      "hazard": {
+        "unique_values": 12,
+        "weighted_majority_accuracy": 0.8651,
+        "conditional_entropy_bits": 0.43600292008184804,
+        "mutual_information_bits": 0.563997079918152,
+        "all_values_deterministic": false,
+        "deterministic_values": [
+          "<MISSING>",
+          "Ergonomic",
+          "Line of Fire",
+          "Slip/Trip"
+        ],
+        "cross_tab": {
+          "<MISSING>": {
+            "False": 1997,
+            "True": 0
+          },
+          "Electrical Energy": {
+            "False": 134,
+            "True": 417
+          },
+          "Engulfment": {
+            "False": 179,
+            "True": 380
+          },
+          "Ergonomic": {
+            "False": 284,
+            "True": 0
+          },
+          "Fall Hazard": {
+            "False": 159,
+            "True": 850
+          },
+          "Fire": {
+            "False": 165,
+            "True": 396
+          },
+          "Line of Fire": {
+            "False": 0,
+            "True": 422
+          },
+          "Moving Machinery": {
+            "False": 294,
+            "True": 407
+          },
+          "Slip/Trip": {
+            "False": 1370,
+            "True": 0
+          },
+          "Stored Energy": {
+            "False": 154,
+            "True": 418
+          },
+          "Suspended Load": {
+            "False": 132,
+            "True": 848
+          },
+          "Toxic Atmosphere": {
+            "False": 132,
+            "True": 862
+          }
+        }
+      },
+      "barrier": {
+        "unique_values": 9,
+        "weighted_majority_accuracy": 0.8651,
+        "conditional_entropy_bits": 0.46247003043895263,
+        "mutual_information_bits": 0.5375299695610474,
+        "all_values_deterministic": false,
+        "deterministic_values": [
+          "<MISSING>"
+        ],
+        "cross_tab": {
+          "<MISSING>": {
+            "False": 3651,
+            "True": 0
+          },
+          "Energy Isolation": {
+            "False": 267,
+            "True": 824
+          },
+          "Fall Protection": {
+            "False": 159,
+            "True": 850
+          },
+          "Fire Watch": {
+            "False": 165,
+            "True": 396
+          },
+          "Gas Testing": {
+            "False": 132,
+            "True": 862
+          },
+          "LOTO": {
+            "False": 154,
+            "True": 418
+          },
+          "Line of Fire": {
+            "False": 161,
+            "True": 858
+          },
+          "Safe Mechanical Lifting": {
+            "False": 132,
+            "True": 412
+          },
+          "Shoring": {
+            "False": 179,
+            "True": 380
+          }
+        }
+      },
+      "barrier_status": {
+        "unique_values": 3,
+        "weighted_majority_accuracy": 1.0,
+        "conditional_entropy_bits": 0.0,
+        "mutual_information_bits": 1.0,
+        "all_values_deterministic": true,
+        "deterministic_values": [
+          "EFFECTIVE",
+          "FAILED",
+          "UNKNOWN"
+        ],
+        "cross_tab": {
+          "EFFECTIVE": {
+            "False": 1349,
+            "True": 0
+          },
+          "FAILED": {
+            "False": 0,
+            "True": 5000
+          },
+          "UNKNOWN": {
+            "False": 3651,
+            "True": 0
+          }
+        }
+      },
+      "barrier_failure": {
+        "unique_values": 6,
+        "weighted_majority_accuracy": 1.0,
+        "conditional_entropy_bits": 0.0,
+        "mutual_information_bits": 1.0,
+        "all_values_deterministic": true,
+        "deterministic_values": [
+          "<MISSING>",
+          "bypassed",
+          "expired",
+          "not performed",
+          "not used",
+          "not verified"
+        ],
+        "cross_tab": {
+          "<MISSING>": {
+            "False": 5000,
+            "True": 0
+          },
+          "bypassed": {
+            "False": 0,
+            "True": 1265
+          },
+          "expired": {
+            "False": 0,
+            "True": 420
+          },
+          "not performed": {
+            "False": 0,
+            "True": 1624
+          },
+          "not used": {
+            "False": 0,
+            "True": 430
+          },
+          "not verified": {
+            "False": 0,
+            "True": 1261
+          }
+        }
+      },
+      "sif_level": {
+        "unique_values": 4,
+        "weighted_majority_accuracy": 1.0,
+        "conditional_entropy_bits": 0.0,
+        "mutual_information_bits": 1.0,
+        "all_values_deterministic": true,
+        "deterministic_values": [
+          "HIGH",
+          "LOW",
+          "MEDIUM",
+          "NON_SIF"
+        ],
+        "cross_tab": {
+          "HIGH": {
+            "False": 0,
+            "True": 2878
+          },
+          "LOW": {
+            "False": 1349,
+            "True": 0
+          },
+          "MEDIUM": {
+            "False": 0,
+            "True": 2122
+          },
+          "NON_SIF": {
+            "False": 3651,
+            "True": 0
+          }
+        }
+      },
+      "life_saving_rule": {
+        "unique_values": 7,
+        "weighted_majority_accuracy": 0.8651,
+        "conditional_entropy_bits": 0.4664748736007519,
+        "mutual_information_bits": 0.5335251263992481,
+        "all_values_deterministic": false,
+        "deterministic_values": [
+          "<MISSING>"
+        ],
+        "cross_tab": {
+          "<MISSING>": {
+            "False": 3651,
+            "True": 0
+          },
+          "Confined Space": {
+            "False": 132,
+            "True": 862
+          },
+          "Energy Isolation": {
+            "False": 421,
+            "True": 1242
+          },
+          "Hot Work": {
+            "False": 165,
+            "True": 396
+          },
+          "Line of Fire": {
+            "False": 340,
+            "True": 1238
+          },
+          "Safe Mechanical Lifting": {
+            "False": 132,
+            "True": 412
+          },
+          "Working at Height": {
+            "False": 159,
+            "True": 850
+          }
+        }
+      },
+      "source_type": {
+        "unique_values": 1,
+        "weighted_majority_accuracy": 0.5,
+        "conditional_entropy_bits": 1.0,
+        "mutual_information_bits": 0.0,
+        "all_values_deterministic": false,
+        "deterministic_values": [],
+        "cross_tab": {
+          "SYNTHETIC": {
+            "False": 5000,
+            "True": 5000
+          }
+        }
+      }
+    },
+    "activity": {
+      "report_type": {
+        "unique_values": 2,
+        "weighted_majority_accuracy": 0.403,
+        "conditional_entropy_bits": 2.6505109725938434,
+        "mutual_information_bits": 0.16113754258035318,
+        "all_values_deterministic": false,
+        "deterministic_values": [],
+        "cross_tab": {
+          "NEAR_MISS": {
+            "Confined Space Work": 132,
+            "Driving": 379,
+            "Electrical Work": 134,
+            "Excavation": 179,
+            "Hot Work": 165,
+            "Lifting": 132,
+            "Maintenance": 287,
+            "Operations": 0,
+            "Work at Height": 159
+          },
+          "UNSAFE_CONDITION": {
+            "Confined Space Work": 862,
+            "Driving": 204,
+            "Electrical Work": 417,
+            "Excavation": 380,
+            "Hot Work": 396,
+            "Lifting": 848,
+            "Maintenance": 825,
+            "Operations": 3651,
+            "Work at Height": 850
+          }
+        }
+      },
+      "hazard": {
+        "unique_values": 12,
+        "weighted_majority_accuracy": 0.9839,
+        "conditional_entropy_bits": 0.05449846746575447,
+        "mutual_information_bits": 2.7571500477084423,
+        "all_values_deterministic": false,
+        "deterministic_values": [
+          "<MISSING>",
+          "Electrical Energy",
+          "Engulfment",
+          "Ergonomic",
+          "Fall Hazard",
+          "Fire",
+          "Line of Fire",
+          "Slip/Trip",
+          "Stored Energy",
+          "Suspended Load",
+          "Toxic Atmosphere"
+        ],
+        "cross_tab": {
+          "<MISSING>": {
+            "Confined Space Work": 0,
+            "Driving": 0,
+            "Electrical Work": 0,
+            "Excavation": 0,
+            "Hot Work": 0,
+            "Lifting": 0,
+            "Maintenance": 0,
+            "Operations": 1997,
+            "Work at Height": 0
+          },
+          "Electrical Energy": {
+            "Confined Space Work": 0,
+            "Driving": 0,
+            "Electrical Work": 551,
+            "Excavation": 0,
+            "Hot Work": 0,
+            "Lifting": 0,
+            "Maintenance": 0,
+            "Operations": 0,
+            "Work at Height": 0
+          },
+          "Engulfment": {
+            "Confined Space Work": 0,
+            "Driving": 0,
+            "Electrical Work": 0,
+            "Excavation": 559,
+            "Hot Work": 0,
+            "Lifting": 0,
+            "Maintenance": 0,
+            "Operations": 0,
+            "Work at Height": 0
+          },
+          "Ergonomic": {
+            "Confined Space Work": 0,
+            "Driving": 0,
+            "Electrical Work": 0,
+            "Excavation": 0,
+            "Hot Work": 0,
+            "Lifting": 0,
+            "Maintenance": 0,
+            "Operations": 284,
+            "Work at Height": 0
+          },
+          "Fall Hazard": {
+            "Confined Space Work": 0,
+            "Driving": 0,
+            "Electrical Work": 0,
+            "Excavation": 0,
+            "Hot Work": 0,
+            "Lifting": 0,
+            "Maintenance": 0,
+            "Operations": 0,
+            "Work at Height": 1009
+          },
+          "Fire": {
+            "Confined Space Work": 0,
+            "Driving": 0,
+            "Electrical Work": 0,
+            "Excavation": 0,
+            "Hot Work": 561,
+            "Lifting": 0,
+            "Maintenance": 0,
+            "Operations": 0,
+            "Work at Height": 0
+          },
+          "Line of Fire": {
+            "Confined Space Work": 0,
+            "Driving": 422,
+            "Electrical Work": 0,
+            "Excavation": 0,
+            "Hot Work": 0,
+            "Lifting": 0,
+            "Maintenance": 0,
+            "Operations": 0,
+            "Work at Height": 0
+          },
+          "Moving Machinery": {
+            "Confined Space Work": 0,
+            "Driving": 161,
+            "Electrical Work": 0,
+            "Excavation": 0,
+            "Hot Work": 0,
+            "Lifting": 0,
+            "Maintenance": 540,
+            "Operations": 0,
+            "Work at Height": 0
+          },
+          "Slip/Trip": {
+            "Confined Space Work": 0,
+            "Driving": 0,
+            "Electrical Work": 0,
+            "Excavation": 0,
+            "Hot Work": 0,
+            "Lifting": 0,
+            "Maintenance": 0,
+            "Operations": 1370,
+            "Work at Height": 0
+          },
+          "Stored Energy": {
+            "Confined Space Work": 0,
+            "Driving": 0,
+            "Electrical Work": 0,
+            "Excavation": 0,
+            "Hot Work": 0,
+            "Lifting": 0,
+            "Maintenance": 572,
+            "Operations": 0,
+            "Work at Height": 0
+          },
+          "Suspended Load": {
+            "Confined Space Work": 0,
+            "Driving": 0,
+            "Electrical Work": 0,
+            "Excavation": 0,
+            "Hot Work": 0,
+            "Lifting": 980,
+            "Maintenance": 0,
+            "Operations": 0,
+            "Work at Height": 0
+          },
+          "Toxic Atmosphere": {
+            "Confined Space Work": 994,
+            "Driving": 0,
+            "Electrical Work": 0,
+            "Excavation": 0,
+            "Hot Work": 0,
+            "Lifting": 0,
+            "Maintenance": 0,
+            "Operations": 0,
+            "Work at Height": 0
+          }
+        }
+      },
+      "barrier": {
+        "unique_values": 9,
+        "weighted_majority_accuracy": 0.9024,
+        "conditional_entropy_bits": 0.20945695361232342,
+        "mutual_information_bits": 2.602191561561873,
+        "all_values_deterministic": false,
+        "deterministic_values": [
+          "<MISSING>",
+          "Fall Protection",
+          "Fire Watch",
+          "Gas Testing",
+          "LOTO",
+          "Safe Mechanical Lifting",
+          "Shoring"
+        ],
+        "cross_tab": {
+          "<MISSING>": {
+            "Confined Space Work": 0,
+            "Driving": 0,
+            "Electrical Work": 0,
+            "Excavation": 0,
+            "Hot Work": 0,
+            "Lifting": 0,
+            "Maintenance": 0,
+            "Operations": 3651,
+            "Work at Height": 0
+          },
+          "Energy Isolation": {
+            "Confined Space Work": 0,
+            "Driving": 0,
+            "Electrical Work": 551,
+            "Excavation": 0,
+            "Hot Work": 0,
+            "Lifting": 0,
+            "Maintenance": 540,
+            "Operations": 0,
+            "Work at Height": 0
+          },
+          "Fall Protection": {
+            "Confined Space Work": 0,
+            "Driving": 0,
+            "Electrical Work": 0,
+            "Excavation": 0,
+            "Hot Work": 0,
+            "Lifting": 0,
+            "Maintenance": 0,
+            "Operations": 0,
+            "Work at Height": 1009
+          },
+          "Fire Watch": {
+            "Confined Space Work": 0,
+            "Driving": 0,
+            "Electrical Work": 0,
+            "Excavation": 0,
+            "Hot Work": 561,
+            "Lifting": 0,
+            "Maintenance": 0,
+            "Operations": 0,
+            "Work at Height": 0
+          },
+          "Gas Testing": {
+            "Confined Space Work": 994,
+            "Driving": 0,
+            "Electrical Work": 0,
+            "Excavation": 0,
+            "Hot Work": 0,
+            "Lifting": 0,
+            "Maintenance": 0,
+            "Operations": 0,
+            "Work at Height": 0
+          },
+          "LOTO": {
+            "Confined Space Work": 0,
+            "Driving": 0,
+            "Electrical Work": 0,
+            "Excavation": 0,
+            "Hot Work": 0,
+            "Lifting": 0,
+            "Maintenance": 572,
+            "Operations": 0,
+            "Work at Height": 0
+          },
+          "Line of Fire": {
+            "Confined Space Work": 0,
+            "Driving": 583,
+            "Electrical Work": 0,
+            "Excavation": 0,
+            "Hot Work": 0,
+            "Lifting": 436,
+            "Maintenance": 0,
+            "Operations": 0,
+            "Work at Height": 0
+          },
+          "Safe Mechanical Lifting": {
+            "Confined Space Work": 0,
+            "Driving": 0,
+            "Electrical Work": 0,
+            "Excavation": 0,
+            "Hot Work": 0,
+            "Lifting": 544,
+            "Maintenance": 0,
+            "Operations": 0,
+            "Work at Height": 0
+          },
+          "Shoring": {
+            "Confined Space Work": 0,
+            "Driving": 0,
+            "Electrical Work": 0,
+            "Excavation": 559,
+            "Hot Work": 0,
+            "Lifting": 0,
+            "Maintenance": 0,
+            "Operations": 0,
+            "Work at Height": 0
+          }
+        }
+      },
+      "barrier_status": {
+        "unique_values": 3,
+        "weighted_majority_accuracy": 0.48,
+        "conditional_entropy_bits": 1.8513911287570322,
+        "mutual_information_bits": 0.9602573864171644,
+        "all_values_deterministic": false,
+        "deterministic_values": [
+          "UNKNOWN"
+        ],
+        "cross_tab": {
+          "EFFECTIVE": {
+            "Confined Space Work": 132,
+            "Driving": 161,
+            "Electrical Work": 134,
+            "Excavation": 179,
+            "Hot Work": 165,
+            "Lifting": 132,
+            "Maintenance": 287,
+            "Operations": 0,
+            "Work at Height": 159
+          },
+          "FAILED": {
+            "Confined Space Work": 862,
+            "Driving": 422,
+            "Electrical Work": 417,
+            "Excavation": 380,
+            "Hot Work": 396,
+            "Lifting": 848,
+            "Maintenance": 825,
+            "Operations": 0,
+            "Work at Height": 850
+          },
+          "UNKNOWN": {
+            "Confined Space Work": 0,
+            "Driving": 0,
+            "Electrical Work": 0,
+            "Excavation": 0,
+            "Hot Work": 0,
+            "Lifting": 0,
+            "Maintenance": 0,
+            "Operations": 3651,
+            "Work at Height": 0
+          }
+        }
+      },
+      "barrier_failure": {
+        "unique_values": 6,
+        "weighted_majority_accuracy": 0.5799,
+        "conditional_entropy_bits": 1.5432154575219,
+        "mutual_information_bits": 1.2684330576522966,
+        "all_values_deterministic": false,
+        "deterministic_values": [
+          "expired",
+          "not used"
+        ],
+        "cross_tab": {
+          "<MISSING>": {
+            "Confined Space Work": 132,
+            "Driving": 161,
+            "Electrical Work": 134,
+            "Excavation": 179,
+            "Hot Work": 165,
+            "Lifting": 132,
+            "Maintenance": 287,
+            "Operations": 3651,
+            "Work at Height": 159
+          },
+          "bypassed": {
+            "Confined Space Work": 0,
+            "Driving": 422,
+            "Electrical Work": 0,
+            "Excavation": 0,
+            "Hot Work": 0,
+            "Lifting": 436,
+            "Maintenance": 407,
+            "Operations": 0,
+            "Work at Height": 0
+          },
+          "expired": {
+            "Confined Space Work": 0,
+            "Driving": 0,
+            "Electrical Work": 0,
+            "Excavation": 0,
+            "Hot Work": 0,
+            "Lifting": 0,
+            "Maintenance": 0,
+            "Operations": 0,
+            "Work at Height": 420
+          },
+          "not performed": {
+            "Confined Space Work": 436,
+            "Driving": 0,
+            "Electrical Work": 0,
+            "Excavation": 380,
+            "Hot Work": 396,
+            "Lifting": 412,
+            "Maintenance": 0,
+            "Operations": 0,
+            "Work at Height": 0
+          },
+          "not used": {
+            "Confined Space Work": 0,
+            "Driving": 0,
+            "Electrical Work": 0,
+            "Excavation": 0,
+            "Hot Work": 0,
+            "Lifting": 0,
+            "Maintenance": 0,
+            "Operations": 0,
+            "Work at Height": 430
+          },
+          "not verified": {
+            "Confined Space Work": 426,
+            "Driving": 0,
+            "Electrical Work": 417,
+            "Excavation": 0,
+            "Hot Work": 0,
+            "Lifting": 0,
+            "Maintenance": 418,
+            "Operations": 0,
+            "Work at Height": 0
+          }
+        }
+      },
+      "sif_level": {
+        "unique_values": 4,
+        "weighted_majority_accuracy": 0.481,
+        "conditional_entropy_bits": 1.698091919634277,
+        "mutual_information_bits": 1.1135565955399196,
+        "all_values_deterministic": false,
+        "deterministic_values": [
+          "NON_SIF"
+        ],
+        "cross_tab": {
+          "HIGH": {
+            "Confined Space Work": 436,
+            "Driving": 0,
+            "Electrical Work": 417,
+            "Excavation": 380,
+            "Hot Work": 396,
+            "Lifting": 412,
+            "Maintenance": 407,
+            "Operations": 0,
+            "Work at Height": 430
+          },
+          "LOW": {
+            "Confined Space Work": 132,
+            "Driving": 161,
+            "Electrical Work": 134,
+            "Excavation": 179,
+            "Hot Work": 165,
+            "Lifting": 132,
+            "Maintenance": 287,
+            "Operations": 0,
+            "Work at Height": 159
+          },
+          "MEDIUM": {
+            "Confined Space Work": 426,
+            "Driving": 422,
+            "Electrical Work": 0,
+            "Excavation": 0,
+            "Hot Work": 0,
+            "Lifting": 436,
+            "Maintenance": 418,
+            "Operations": 0,
+            "Work at Height": 420
+          },
+          "NON_SIF": {
+            "Confined Space Work": 0,
+            "Driving": 0,
+            "Electrical Work": 0,
+            "Excavation": 0,
+            "Hot Work": 0,
+            "Lifting": 0,
+            "Maintenance": 0,
+            "Operations": 3651,
+            "Work at Height": 0
+          }
+        }
+      },
+      "life_saving_rule": {
+        "unique_values": 7,
+        "weighted_majority_accuracy": 0.8454,
+        "conditional_entropy_bits": 0.40072734953687456,
+        "mutual_information_bits": 2.410921165637322,
+        "all_values_deterministic": false,
+        "deterministic_values": [
+          "<MISSING>",
+          "Confined Space",
+          "Hot Work",
+          "Safe Mechanical Lifting",
+          "Working at Height"
+        ],
+        "cross_tab": {
+          "<MISSING>": {
+            "Confined Space Work": 0,
+            "Driving": 0,
+            "Electrical Work": 0,
+            "Excavation": 0,
+            "Hot Work": 0,
+            "Lifting": 0,
+            "Maintenance": 0,
+            "Operations": 3651,
+            "Work at Height": 0
+          },
+          "Confined Space": {
+            "Confined Space Work": 994,
+            "Driving": 0,
+            "Electrical Work": 0,
+            "Excavation": 0,
+            "Hot Work": 0,
+            "Lifting": 0,
+            "Maintenance": 0,
+            "Operations": 0,
+            "Work at Height": 0
+          },
+          "Energy Isolation": {
+            "Confined Space Work": 0,
+            "Driving": 0,
+            "Electrical Work": 551,
+            "Excavation": 0,
+            "Hot Work": 0,
+            "Lifting": 0,
+            "Maintenance": 1112,
+            "Operations": 0,
+            "Work at Height": 0
+          },
+          "Hot Work": {
+            "Confined Space Work": 0,
+            "Driving": 0,
+            "Electrical Work": 0,
+            "Excavation": 0,
+            "Hot Work": 561,
+            "Lifting": 0,
+            "Maintenance": 0,
+            "Operations": 0,
+            "Work at Height": 0
+          },
+          "Line of Fire": {
+            "Confined Space Work": 0,
+            "Driving": 583,
+            "Electrical Work": 0,
+            "Excavation": 559,
+            "Hot Work": 0,
+            "Lifting": 436,
+            "Maintenance": 0,
+            "Operations": 0,
+            "Work at Height": 0
+          },
+          "Safe Mechanical Lifting": {
+            "Confined Space Work": 0,
+            "Driving": 0,
+            "Electrical Work": 0,
+            "Excavation": 0,
+            "Hot Work": 0,
+            "Lifting": 544,
+            "Maintenance": 0,
+            "Operations": 0,
+            "Work at Height": 0
+          },
+          "Working at Height": {
+            "Confined Space Work": 0,
+            "Driving": 0,
+            "Electrical Work": 0,
+            "Excavation": 0,
+            "Hot Work": 0,
+            "Lifting": 0,
+            "Maintenance": 0,
+            "Operations": 0,
+            "Work at Height": 1009
+          }
+        }
+      },
+      "source_type": {
+        "unique_values": 1,
+        "weighted_majority_accuracy": 0.3651,
+        "conditional_entropy_bits": 2.8116485151741966,
+        "mutual_information_bits": 0.0,
+        "all_values_deterministic": false,
+        "deterministic_values": [],
+        "cross_tab": {
+          "SYNTHETIC": {
+            "Confined Space Work": 994,
+            "Driving": 583,
+            "Electrical Work": 551,
+            "Excavation": 559,
+            "Hot Work": 561,
+            "Lifting": 980,
+            "Maintenance": 1112,
+            "Operations": 3651,
+            "Work at Height": 1009
+          }
+        }
+      }
+    },
+    "hazard": {
+      "report_type": {
+        "unique_values": 2,
+        "weighted_majority_accuracy": 0.2291,
+        "conditional_entropy_bits": 3.2418605015503834,
+        "mutual_information_bits": 0.14818671924336657,
+        "all_values_deterministic": false,
+        "deterministic_values": [],
+        "cross_tab": {
+          "NEAR_MISS": {
+            "<MISSING>": 0,
+            "Electrical Energy": 134,
+            "Engulfment": 179,
+            "Ergonomic": 0,
+            "Fall Hazard": 159,
+            "Fire": 165,
+            "Line of Fire": 218,
+            "Moving Machinery": 294,
+            "Slip/Trip": 0,
+            "Stored Energy": 154,
+            "Suspended Load": 132,
+            "Toxic Atmosphere": 132
+          },
+          "UNSAFE_CONDITION": {
+            "<MISSING>": 1997,
+            "Electrical Energy": 417,
+            "Engulfment": 380,
+            "Ergonomic": 284,
+            "Fall Hazard": 850,
+            "Fire": 396,
+            "Line of Fire": 204,
+            "Moving Machinery": 407,
+            "Slip/Trip": 1370,
+            "Stored Energy": 418,
+            "Suspended Load": 848,
+            "Toxic Atmosphere": 862
+          }
+        }
+      },
+      "activity": {
+        "unique_values": 9,
+        "weighted_majority_accuracy": 0.7645,
+        "conditional_entropy_bits": 0.6328971730853069,
+        "mutual_information_bits": 2.757150047708443,
+        "all_values_deterministic": false,
+        "deterministic_values": [
+          "Confined Space Work",
+          "Electrical Work",
+          "Excavation",
+          "Hot Work",
+          "Lifting",
+          "Work at Height"
+        ],
+        "cross_tab": {
+          "Confined Space Work": {
+            "<MISSING>": 0,
+            "Electrical Energy": 0,
+            "Engulfment": 0,
+            "Ergonomic": 0,
+            "Fall Hazard": 0,
+            "Fire": 0,
+            "Line of Fire": 0,
+            "Moving Machinery": 0,
+            "Slip/Trip": 0,
+            "Stored Energy": 0,
+            "Suspended Load": 0,
+            "Toxic Atmosphere": 994
+          },
+          "Driving": {
+            "<MISSING>": 0,
+            "Electrical Energy": 0,
+            "Engulfment": 0,
+            "Ergonomic": 0,
+            "Fall Hazard": 0,
+            "Fire": 0,
+            "Line of Fire": 422,
+            "Moving Machinery": 161,
+            "Slip/Trip": 0,
+            "Stored Energy": 0,
+            "Suspended Load": 0,
+            "Toxic Atmosphere": 0
+          },
+          "Electrical Work": {
+            "<MISSING>": 0,
+            "Electrical Energy": 551,
+            "Engulfment": 0,
+            "Ergonomic": 0,
+            "Fall Hazard": 0,
+            "Fire": 0,
+            "Line of Fire": 0,
+            "Moving Machinery": 0,
+            "Slip/Trip": 0,
+            "Stored Energy": 0,
+            "Suspended Load": 0,
+            "Toxic Atmosphere": 0
+          },
+          "Excavation": {
+            "<MISSING>": 0,
+            "Electrical Energy": 0,
+            "Engulfment": 559,
+            "Ergonomic": 0,
+            "Fall Hazard": 0,
+            "Fire": 0,
+            "Line of Fire": 0,
+            "Moving Machinery": 0,
+            "Slip/Trip": 0,
+            "Stored Energy": 0,
+            "Suspended Load": 0,
+            "Toxic Atmosphere": 0
+          },
+          "Hot Work": {
+            "<MISSING>": 0,
+            "Electrical Energy": 0,
+            "Engulfment": 0,
+            "Ergonomic": 0,
+            "Fall Hazard": 0,
+            "Fire": 561,
+            "Line of Fire": 0,
+            "Moving Machinery": 0,
+            "Slip/Trip": 0,
+            "Stored Energy": 0,
+            "Suspended Load": 0,
+            "Toxic Atmosphere": 0
+          },
+          "Lifting": {
+            "<MISSING>": 0,
+            "Electrical Energy": 0,
+            "Engulfment": 0,
+            "Ergonomic": 0,
+            "Fall Hazard": 0,
+            "Fire": 0,
+            "Line of Fire": 0,
+            "Moving Machinery": 0,
+            "Slip/Trip": 0,
+            "Stored Energy": 0,
+            "Suspended Load": 980,
+            "Toxic Atmosphere": 0
+          },
+          "Maintenance": {
+            "<MISSING>": 0,
+            "Electrical Energy": 0,
+            "Engulfment": 0,
+            "Ergonomic": 0,
+            "Fall Hazard": 0,
+            "Fire": 0,
+            "Line of Fire": 0,
+            "Moving Machinery": 540,
+            "Slip/Trip": 0,
+            "Stored Energy": 572,
+            "Suspended Load": 0,
+            "Toxic Atmosphere": 0
+          },
+          "Operations": {
+            "<MISSING>": 1997,
+            "Electrical Energy": 0,
+            "Engulfment": 0,
+            "Ergonomic": 284,
+            "Fall Hazard": 0,
+            "Fire": 0,
+            "Line of Fire": 0,
+            "Moving Machinery": 0,
+            "Slip/Trip": 1370,
+            "Stored Energy": 0,
+            "Suspended Load": 0,
+            "Toxic Atmosphere": 0
+          },
+          "Work at Height": {
+            "<MISSING>": 0,
+            "Electrical Energy": 0,
+            "Engulfment": 0,
+            "Ergonomic": 0,
+            "Fall Hazard": 1009,
+            "Fire": 0,
+            "Line of Fire": 0,
+            "Moving Machinery": 0,
+            "Slip/Trip": 0,
+            "Stored Energy": 0,
+            "Suspended Load": 0,
+            "Toxic Atmosphere": 0
+          }
+        }
+      },
+      "barrier": {
+        "unique_values": 9,
+        "weighted_majority_accuracy": 0.7223,
+        "conditional_entropy_bits": 0.731220562115245,
+        "mutual_information_bits": 2.658826658678505,
+        "all_values_deterministic": false,
+        "deterministic_values": [
+          "Fall Protection",
+          "Fire Watch",
+          "Gas Testing",
+          "LOTO",
+          "Safe Mechanical Lifting",
+          "Shoring"
+        ],
+        "cross_tab": {
+          "<MISSING>": {
+            "<MISSING>": 1997,
+            "Electrical Energy": 0,
+            "Engulfment": 0,
+            "Ergonomic": 284,
+            "Fall Hazard": 0,
+            "Fire": 0,
+            "Line of Fire": 0,
+            "Moving Machinery": 0,
+            "Slip/Trip": 1370,
+            "Stored Energy": 0,
+            "Suspended Load": 0,
+            "Toxic Atmosphere": 0
+          },
+          "Energy Isolation": {
+            "<MISSING>": 0,
+            "Electrical Energy": 551,
+            "Engulfment": 0,
+            "Ergonomic": 0,
+            "Fall Hazard": 0,
+            "Fire": 0,
+            "Line of Fire": 0,
+            "Moving Machinery": 540,
+            "Slip/Trip": 0,
+            "Stored Energy": 0,
+            "Suspended Load": 0,
+            "Toxic Atmosphere": 0
+          },
+          "Fall Protection": {
+            "<MISSING>": 0,
+            "Electrical Energy": 0,
+            "Engulfment": 0,
+            "Ergonomic": 0,
+            "Fall Hazard": 1009,
+            "Fire": 0,
+            "Line of Fire": 0,
+            "Moving Machinery": 0,
+            "Slip/Trip": 0,
+            "Stored Energy": 0,
+            "Suspended Load": 0,
+            "Toxic Atmosphere": 0
+          },
+          "Fire Watch": {
+            "<MISSING>": 0,
+            "Electrical Energy": 0,
+            "Engulfment": 0,
+            "Ergonomic": 0,
+            "Fall Hazard": 0,
+            "Fire": 561,
+            "Line of Fire": 0,
+            "Moving Machinery": 0,
+            "Slip/Trip": 0,
+            "Stored Energy": 0,
+            "Suspended Load": 0,
+            "Toxic Atmosphere": 0
+          },
+          "Gas Testing": {
+            "<MISSING>": 0,
+            "Electrical Energy": 0,
+            "Engulfment": 0,
+            "Ergonomic": 0,
+            "Fall Hazard": 0,
+            "Fire": 0,
+            "Line of Fire": 0,
+            "Moving Machinery": 0,
+            "Slip/Trip": 0,
+            "Stored Energy": 0,
+            "Suspended Load": 0,
+            "Toxic Atmosphere": 994
+          },
+          "LOTO": {
+            "<MISSING>": 0,
+            "Electrical Energy": 0,
+            "Engulfment": 0,
+            "Ergonomic": 0,
+            "Fall Hazard": 0,
+            "Fire": 0,
+            "Line of Fire": 0,
+            "Moving Machinery": 0,
+            "Slip/Trip": 0,
+            "Stored Energy": 572,
+            "Suspended Load": 0,
+            "Toxic Atmosphere": 0
+          },
+          "Line of Fire": {
+            "<MISSING>": 0,
+            "Electrical Energy": 0,
+            "Engulfment": 0,
+            "Ergonomic": 0,
+            "Fall Hazard": 0,
+            "Fire": 0,
+            "Line of Fire": 422,
+            "Moving Machinery": 161,
+            "Slip/Trip": 0,
+            "Stored Energy": 0,
+            "Suspended Load": 436,
+            "Toxic Atmosphere": 0
+          },
+          "Safe Mechanical Lifting": {
+            "<MISSING>": 0,
+            "Electrical Energy": 0,
+            "Engulfment": 0,
+            "Ergonomic": 0,
+            "Fall Hazard": 0,
+            "Fire": 0,
+            "Line of Fire": 0,
+            "Moving Machinery": 0,
+            "Slip/Trip": 0,
+            "Stored Energy": 0,
+            "Suspended Load": 544,
+            "Toxic Atmosphere": 0
+          },
+          "Shoring": {
+            "<MISSING>": 0,
+            "Electrical Energy": 0,
+            "Engulfment": 559,
+            "Ergonomic": 0,
+            "Fall Hazard": 0,
+            "Fire": 0,
+            "Line of Fire": 0,
+            "Moving Machinery": 0,
+            "Slip/Trip": 0,
+            "Stored Energy": 0,
+            "Suspended Load": 0,
+            "Toxic Atmosphere": 0
+          }
+        }
+      },
+      "barrier_status": {
+        "unique_values": 3,
+        "weighted_majority_accuracy": 0.3153,
+        "conditional_entropy_bits": 2.40546138968467,
+        "mutual_information_bits": 0.9845858311090798,
+        "all_values_deterministic": false,
+        "deterministic_values": [],
+        "cross_tab": {
+          "EFFECTIVE": {
+            "<MISSING>": 0,
+            "Electrical Energy": 134,
+            "Engulfment": 179,
+            "Ergonomic": 0,
+            "Fall Hazard": 159,
+            "Fire": 165,
+            "Line of Fire": 0,
+            "Moving Machinery": 294,
+            "Slip/Trip": 0,
+            "Stored Energy": 154,
+            "Suspended Load": 132,
+            "Toxic Atmosphere": 132
+          },
+          "FAILED": {
+            "<MISSING>": 0,
+            "Electrical Energy": 417,
+            "Engulfment": 380,
+            "Ergonomic": 0,
+            "Fall Hazard": 850,
+            "Fire": 396,
+            "Line of Fire": 422,
+            "Moving Machinery": 407,
+            "Slip/Trip": 0,
+            "Stored Energy": 418,
+            "Suspended Load": 848,
+            "Toxic Atmosphere": 862
+          },
+          "UNKNOWN": {
+            "<MISSING>": 1997,
+            "Electrical Energy": 0,
+            "Engulfment": 0,
+            "Ergonomic": 284,
+            "Fall Hazard": 0,
+            "Fire": 0,
+            "Line of Fire": 0,
+            "Moving Machinery": 0,
+            "Slip/Trip": 1370,
+            "Stored Energy": 0,
+            "Suspended Load": 0,
+            "Toxic Atmosphere": 0
+          }
+        }
+      },
+      "barrier_failure": {
+        "unique_values": 6,
+        "weighted_majority_accuracy": 0.4145,
+        "conditional_entropy_bits": 2.0147962985266683,
+        "mutual_information_bits": 1.3752509222670817,
+        "all_values_deterministic": false,
+        "deterministic_values": [
+          "expired",
+          "not used"
+        ],
+        "cross_tab": {
+          "<MISSING>": {
+            "<MISSING>": 1997,
+            "Electrical Energy": 134,
+            "Engulfment": 179,
+            "Ergonomic": 284,
+            "Fall Hazard": 159,
+            "Fire": 165,
+            "Line of Fire": 0,
+            "Moving Machinery": 294,
+            "Slip/Trip": 1370,
+            "Stored Energy": 154,
+            "Suspended Load": 132,
+            "Toxic Atmosphere": 132
+          },
+          "bypassed": {
+            "<MISSING>": 0,
+            "Electrical Energy": 0,
+            "Engulfment": 0,
+            "Ergonomic": 0,
+            "Fall Hazard": 0,
+            "Fire": 0,
+            "Line of Fire": 422,
+            "Moving Machinery": 407,
+            "Slip/Trip": 0,
+            "Stored Energy": 0,
+            "Suspended Load": 436,
+            "Toxic Atmosphere": 0
+          },
+          "expired": {
+            "<MISSING>": 0,
+            "Electrical Energy": 0,
+            "Engulfment": 0,
+            "Ergonomic": 0,
+            "Fall Hazard": 420,
+            "Fire": 0,
+            "Line of Fire": 0,
+            "Moving Machinery": 0,
+            "Slip/Trip": 0,
+            "Stored Energy": 0,
+            "Suspended Load": 0,
+            "Toxic Atmosphere": 0
+          },
+          "not performed": {
+            "<MISSING>": 0,
+            "Electrical Energy": 0,
+            "Engulfment": 380,
+            "Ergonomic": 0,
+            "Fall Hazard": 0,
+            "Fire": 396,
+            "Line of Fire": 0,
+            "Moving Machinery": 0,
+            "Slip/Trip": 0,
+            "Stored Energy": 0,
+            "Suspended Load": 412,
+            "Toxic Atmosphere": 436
+          },
+          "not used": {
+            "<MISSING>": 0,
+            "Electrical Energy": 0,
+            "Engulfment": 0,
+            "Ergonomic": 0,
+            "Fall Hazard": 430,
+            "Fire": 0,
+            "Line of Fire": 0,
+            "Moving Machinery": 0,
+            "Slip/Trip": 0,
+            "Stored Energy": 0,
+            "Suspended Load": 0,
+            "Toxic Atmosphere": 0
+          },
+          "not verified": {
+            "<MISSING>": 0,
+            "Electrical Energy": 417,
+            "Engulfment": 0,
+            "Ergonomic": 0,
+            "Fall Hazard": 0,
+            "Fire": 0,
+            "Line of Fire": 0,
+            "Moving Machinery": 0,
+            "Slip/Trip": 0,
+            "Stored Energy": 418,
+            "Suspended Load": 0,
+            "Toxic Atmosphere": 426
+          }
+        }
+      },
+      "sif_level": {
+        "unique_values": 4,
+        "weighted_majority_accuracy": 0.3163,
+        "conditional_entropy_bits": 2.1696727606390454,
+        "mutual_information_bits": 1.2203744601547046,
+        "all_values_deterministic": false,
+        "deterministic_values": [],
+        "cross_tab": {
+          "HIGH": {
+            "<MISSING>": 0,
+            "Electrical Energy": 417,
+            "Engulfment": 380,
+            "Ergonomic": 0,
+            "Fall Hazard": 430,
+            "Fire": 396,
+            "Line of Fire": 0,
+            "Moving Machinery": 407,
+            "Slip/Trip": 0,
+            "Stored Energy": 0,
+            "Suspended Load": 412,
+            "Toxic Atmosphere": 436
+          },
+          "LOW": {
+            "<MISSING>": 0,
+            "Electrical Energy": 134,
+            "Engulfment": 179,
+            "Ergonomic": 0,
+            "Fall Hazard": 159,
+            "Fire": 165,
+            "Line of Fire": 0,
+            "Moving Machinery": 294,
+            "Slip/Trip": 0,
+            "Stored Energy": 154,
+            "Suspended Load": 132,
+            "Toxic Atmosphere": 132
+          },
+          "MEDIUM": {
+            "<MISSING>": 0,
+            "Electrical Energy": 0,
+            "Engulfment": 0,
+            "Ergonomic": 0,
+            "Fall Hazard": 420,
+            "Fire": 0,
+            "Line of Fire": 422,
+            "Moving Machinery": 0,
+            "Slip/Trip": 0,
+            "Stored Energy": 418,
+            "Suspended Load": 436,
+            "Toxic Atmosphere": 426
+          },
+          "NON_SIF": {
+            "<MISSING>": 1997,
+            "Electrical Energy": 0,
+            "Engulfment": 0,
+            "Ergonomic": 284,
+            "Fall Hazard": 0,
+            "Fire": 0,
+            "Line of Fire": 0,
+            "Moving Machinery": 0,
+            "Slip/Trip": 1370,
+            "Stored Energy": 0,
+            "Suspended Load": 0,
+            "Toxic Atmosphere": 0
+          }
+        }
+      },
+      "life_saving_rule": {
+        "unique_values": 7,
+        "weighted_majority_accuracy": 0.6236,
+        "conditional_entropy_bits": 1.0336245226221814,
+        "mutual_information_bits": 2.356422698171569,
+        "all_values_deterministic": false,
+        "deterministic_values": [
+          "Confined Space",
+          "Hot Work",
+          "Safe Mechanical Lifting",
+          "Working at Height"
+        ],
+        "cross_tab": {
+          "<MISSING>": {
+            "<MISSING>": 1997,
+            "Electrical Energy": 0,
+            "Engulfment": 0,
+            "Ergonomic": 284,
+            "Fall Hazard": 0,
+            "Fire": 0,
+            "Line of Fire": 0,
+            "Moving Machinery": 0,
+            "Slip/Trip": 1370,
+            "Stored Energy": 0,
+            "Suspended Load": 0,
+            "Toxic Atmosphere": 0
+          },
+          "Confined Space": {
+            "<MISSING>": 0,
+            "Electrical Energy": 0,
+            "Engulfment": 0,
+            "Ergonomic": 0,
+            "Fall Hazard": 0,
+            "Fire": 0,
+            "Line of Fire": 0,
+            "Moving Machinery": 0,
+            "Slip/Trip": 0,
+            "Stored Energy": 0,
+            "Suspended Load": 0,
+            "Toxic Atmosphere": 994
+          },
+          "Energy Isolation": {
+            "<MISSING>": 0,
+            "Electrical Energy": 551,
+            "Engulfment": 0,
+            "Ergonomic": 0,
+            "Fall Hazard": 0,
+            "Fire": 0,
+            "Line of Fire": 0,
+            "Moving Machinery": 540,
+            "Slip/Trip": 0,
+            "Stored Energy": 572,
+            "Suspended Load": 0,
+            "Toxic Atmosphere": 0
+          },
+          "Hot Work": {
+            "<MISSING>": 0,
+            "Electrical Energy": 0,
+            "Engulfment": 0,
+            "Ergonomic": 0,
+            "Fall Hazard": 0,
+            "Fire": 561,
+            "Line of Fire": 0,
+            "Moving Machinery": 0,
+            "Slip/Trip": 0,
+            "Stored Energy": 0,
+            "Suspended Load": 0,
+            "Toxic Atmosphere": 0
+          },
+          "Line of Fire": {
+            "<MISSING>": 0,
+            "Electrical Energy": 0,
+            "Engulfment": 559,
+            "Ergonomic": 0,
+            "Fall Hazard": 0,
+            "Fire": 0,
+            "Line of Fire": 422,
+            "Moving Machinery": 161,
+            "Slip/Trip": 0,
+            "Stored Energy": 0,
+            "Suspended Load": 436,
+            "Toxic Atmosphere": 0
+          },
+          "Safe Mechanical Lifting": {
+            "<MISSING>": 0,
+            "Electrical Energy": 0,
+            "Engulfment": 0,
+            "Ergonomic": 0,
+            "Fall Hazard": 0,
+            "Fire": 0,
+            "Line of Fire": 0,
+            "Moving Machinery": 0,
+            "Slip/Trip": 0,
+            "Stored Energy": 0,
+            "Suspended Load": 544,
+            "Toxic Atmosphere": 0
+          },
+          "Working at Height": {
+            "<MISSING>": 0,
+            "Electrical Energy": 0,
+            "Engulfment": 0,
+            "Ergonomic": 0,
+            "Fall Hazard": 1009,
+            "Fire": 0,
+            "Line of Fire": 0,
+            "Moving Machinery": 0,
+            "Slip/Trip": 0,
+            "Stored Energy": 0,
+            "Suspended Load": 0,
+            "Toxic Atmosphere": 0
+          }
+        }
+      },
+      "source_type": {
+        "unique_values": 1,
+        "weighted_majority_accuracy": 0.1997,
+        "conditional_entropy_bits": 3.39004722079375,
+        "mutual_information_bits": 0.0,
+        "all_values_deterministic": false,
+        "deterministic_values": [],
+        "cross_tab": {
+          "SYNTHETIC": {
+            "<MISSING>": 1997,
+            "Electrical Energy": 551,
+            "Engulfment": 559,
+            "Ergonomic": 284,
+            "Fall Hazard": 1009,
+            "Fire": 561,
+            "Line of Fire": 422,
+            "Moving Machinery": 701,
+            "Slip/Trip": 1370,
+            "Stored Energy": 572,
+            "Suspended Load": 980,
+            "Toxic Atmosphere": 994
+          }
+        }
+      }
+    },
+    "barrier": {
+      "report_type": {
+        "unique_values": 2,
+        "weighted_majority_accuracy": 0.403,
+        "conditional_entropy_bits": 2.6794563885245,
+        "mutual_information_bits": 0.13100844051771832,
+        "all_values_deterministic": false,
+        "deterministic_values": [],
+        "cross_tab": {
+          "NEAR_MISS": {
+            "<MISSING>": 0,
+            "Energy Isolation": 267,
+            "Fall Protection": 159,
+            "Fire Watch": 165,
+            "Gas Testing": 132,
+            "LOTO": 154,
+            "Line of Fire": 379,
+            "Safe Mechanical Lifting": 132,
+            "Shoring": 179
+          },
+          "UNSAFE_CONDITION": {
+            "<MISSING>": 3651,
+            "Energy Isolation": 824,
+            "Fall Protection": 850,
+            "Fire Watch": 396,
+            "Gas Testing": 862,
+            "LOTO": 418,
+            "Line of Fire": 640,
+            "Safe Mechanical Lifting": 412,
+            "Shoring": 380
+          }
+        }
+      },
+      "activity": {
+        "unique_values": 9,
+        "weighted_majority_accuracy": 0.9024,
+        "conditional_entropy_bits": 0.20827326748034475,
+        "mutual_information_bits": 2.602191561561874,
+        "all_values_deterministic": false,
+        "deterministic_values": [
+          "Confined Space Work",
+          "Driving",
+          "Electrical Work",
+          "Excavation",
+          "Hot Work",
+          "Operations",
+          "Work at Height"
+        ],
+        "cross_tab": {
+          "Confined Space Work": {
+            "<MISSING>": 0,
+            "Energy Isolation": 0,
+            "Fall Protection": 0,
+            "Fire Watch": 0,
+            "Gas Testing": 994,
+            "LOTO": 0,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 0,
+            "Shoring": 0
+          },
+          "Driving": {
+            "<MISSING>": 0,
+            "Energy Isolation": 0,
+            "Fall Protection": 0,
+            "Fire Watch": 0,
+            "Gas Testing": 0,
+            "LOTO": 0,
+            "Line of Fire": 583,
+            "Safe Mechanical Lifting": 0,
+            "Shoring": 0
+          },
+          "Electrical Work": {
+            "<MISSING>": 0,
+            "Energy Isolation": 551,
+            "Fall Protection": 0,
+            "Fire Watch": 0,
+            "Gas Testing": 0,
+            "LOTO": 0,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 0,
+            "Shoring": 0
+          },
+          "Excavation": {
+            "<MISSING>": 0,
+            "Energy Isolation": 0,
+            "Fall Protection": 0,
+            "Fire Watch": 0,
+            "Gas Testing": 0,
+            "LOTO": 0,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 0,
+            "Shoring": 559
+          },
+          "Hot Work": {
+            "<MISSING>": 0,
+            "Energy Isolation": 0,
+            "Fall Protection": 0,
+            "Fire Watch": 561,
+            "Gas Testing": 0,
+            "LOTO": 0,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 0,
+            "Shoring": 0
+          },
+          "Lifting": {
+            "<MISSING>": 0,
+            "Energy Isolation": 0,
+            "Fall Protection": 0,
+            "Fire Watch": 0,
+            "Gas Testing": 0,
+            "LOTO": 0,
+            "Line of Fire": 436,
+            "Safe Mechanical Lifting": 544,
+            "Shoring": 0
+          },
+          "Maintenance": {
+            "<MISSING>": 0,
+            "Energy Isolation": 540,
+            "Fall Protection": 0,
+            "Fire Watch": 0,
+            "Gas Testing": 0,
+            "LOTO": 572,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 0,
+            "Shoring": 0
+          },
+          "Operations": {
+            "<MISSING>": 3651,
+            "Energy Isolation": 0,
+            "Fall Protection": 0,
+            "Fire Watch": 0,
+            "Gas Testing": 0,
+            "LOTO": 0,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 0,
+            "Shoring": 0
+          },
+          "Work at Height": {
+            "<MISSING>": 0,
+            "Energy Isolation": 0,
+            "Fall Protection": 1009,
+            "Fire Watch": 0,
+            "Gas Testing": 0,
+            "LOTO": 0,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 0,
+            "Shoring": 0
+          }
+        }
+      },
+      "hazard": {
+        "unique_values": 12,
+        "weighted_majority_accuracy": 0.9403,
+        "conditional_entropy_bits": 0.15163817036371394,
+        "mutual_information_bits": 2.6588266586785045,
+        "all_values_deterministic": false,
+        "deterministic_values": [
+          "<MISSING>",
+          "Electrical Energy",
+          "Engulfment",
+          "Ergonomic",
+          "Fall Hazard",
+          "Fire",
+          "Line of Fire",
+          "Slip/Trip",
+          "Stored Energy",
+          "Toxic Atmosphere"
+        ],
+        "cross_tab": {
+          "<MISSING>": {
+            "<MISSING>": 1997,
+            "Energy Isolation": 0,
+            "Fall Protection": 0,
+            "Fire Watch": 0,
+            "Gas Testing": 0,
+            "LOTO": 0,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 0,
+            "Shoring": 0
+          },
+          "Electrical Energy": {
+            "<MISSING>": 0,
+            "Energy Isolation": 551,
+            "Fall Protection": 0,
+            "Fire Watch": 0,
+            "Gas Testing": 0,
+            "LOTO": 0,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 0,
+            "Shoring": 0
+          },
+          "Engulfment": {
+            "<MISSING>": 0,
+            "Energy Isolation": 0,
+            "Fall Protection": 0,
+            "Fire Watch": 0,
+            "Gas Testing": 0,
+            "LOTO": 0,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 0,
+            "Shoring": 559
+          },
+          "Ergonomic": {
+            "<MISSING>": 284,
+            "Energy Isolation": 0,
+            "Fall Protection": 0,
+            "Fire Watch": 0,
+            "Gas Testing": 0,
+            "LOTO": 0,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 0,
+            "Shoring": 0
+          },
+          "Fall Hazard": {
+            "<MISSING>": 0,
+            "Energy Isolation": 0,
+            "Fall Protection": 1009,
+            "Fire Watch": 0,
+            "Gas Testing": 0,
+            "LOTO": 0,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 0,
+            "Shoring": 0
+          },
+          "Fire": {
+            "<MISSING>": 0,
+            "Energy Isolation": 0,
+            "Fall Protection": 0,
+            "Fire Watch": 561,
+            "Gas Testing": 0,
+            "LOTO": 0,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 0,
+            "Shoring": 0
+          },
+          "Line of Fire": {
+            "<MISSING>": 0,
+            "Energy Isolation": 0,
+            "Fall Protection": 0,
+            "Fire Watch": 0,
+            "Gas Testing": 0,
+            "LOTO": 0,
+            "Line of Fire": 422,
+            "Safe Mechanical Lifting": 0,
+            "Shoring": 0
+          },
+          "Moving Machinery": {
+            "<MISSING>": 0,
+            "Energy Isolation": 540,
+            "Fall Protection": 0,
+            "Fire Watch": 0,
+            "Gas Testing": 0,
+            "LOTO": 0,
+            "Line of Fire": 161,
+            "Safe Mechanical Lifting": 0,
+            "Shoring": 0
+          },
+          "Slip/Trip": {
+            "<MISSING>": 1370,
+            "Energy Isolation": 0,
+            "Fall Protection": 0,
+            "Fire Watch": 0,
+            "Gas Testing": 0,
+            "LOTO": 0,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 0,
+            "Shoring": 0
+          },
+          "Stored Energy": {
+            "<MISSING>": 0,
+            "Energy Isolation": 0,
+            "Fall Protection": 0,
+            "Fire Watch": 0,
+            "Gas Testing": 0,
+            "LOTO": 572,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 0,
+            "Shoring": 0
+          },
+          "Suspended Load": {
+            "<MISSING>": 0,
+            "Energy Isolation": 0,
+            "Fall Protection": 0,
+            "Fire Watch": 0,
+            "Gas Testing": 0,
+            "LOTO": 0,
+            "Line of Fire": 436,
+            "Safe Mechanical Lifting": 544,
+            "Shoring": 0
+          },
+          "Toxic Atmosphere": {
+            "<MISSING>": 0,
+            "Energy Isolation": 0,
+            "Fall Protection": 0,
+            "Fire Watch": 0,
+            "Gas Testing": 994,
+            "LOTO": 0,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 0,
+            "Shoring": 0
+          }
+        }
+      },
+      "barrier_status": {
+        "unique_values": 3,
+        "weighted_majority_accuracy": 0.478,
+        "conditional_entropy_bits": 1.8523461082902437,
+        "mutual_information_bits": 0.9581187207519748,
+        "all_values_deterministic": false,
+        "deterministic_values": [
+          "UNKNOWN"
+        ],
+        "cross_tab": {
+          "EFFECTIVE": {
+            "<MISSING>": 0,
+            "Energy Isolation": 267,
+            "Fall Protection": 159,
+            "Fire Watch": 165,
+            "Gas Testing": 132,
+            "LOTO": 154,
+            "Line of Fire": 161,
+            "Safe Mechanical Lifting": 132,
+            "Shoring": 179
+          },
+          "FAILED": {
+            "<MISSING>": 0,
+            "Energy Isolation": 824,
+            "Fall Protection": 850,
+            "Fire Watch": 396,
+            "Gas Testing": 862,
+            "LOTO": 418,
+            "Line of Fire": 858,
+            "Safe Mechanical Lifting": 412,
+            "Shoring": 380
+          },
+          "UNKNOWN": {
+            "<MISSING>": 3651,
+            "Energy Isolation": 0,
+            "Fall Protection": 0,
+            "Fire Watch": 0,
+            "Gas Testing": 0,
+            "LOTO": 0,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 0,
+            "Shoring": 0
+          }
+        }
+      },
+      "barrier_failure": {
+        "unique_values": 6,
+        "weighted_majority_accuracy": 0.6221,
+        "conditional_entropy_bits": 1.4593212664331234,
+        "mutual_information_bits": 1.351143562609095,
+        "all_values_deterministic": false,
+        "deterministic_values": [
+          "expired",
+          "not used"
+        ],
+        "cross_tab": {
+          "<MISSING>": {
+            "<MISSING>": 3651,
+            "Energy Isolation": 267,
+            "Fall Protection": 159,
+            "Fire Watch": 165,
+            "Gas Testing": 132,
+            "LOTO": 154,
+            "Line of Fire": 161,
+            "Safe Mechanical Lifting": 132,
+            "Shoring": 179
+          },
+          "bypassed": {
+            "<MISSING>": 0,
+            "Energy Isolation": 407,
+            "Fall Protection": 0,
+            "Fire Watch": 0,
+            "Gas Testing": 0,
+            "LOTO": 0,
+            "Line of Fire": 858,
+            "Safe Mechanical Lifting": 0,
+            "Shoring": 0
+          },
+          "expired": {
+            "<MISSING>": 0,
+            "Energy Isolation": 0,
+            "Fall Protection": 420,
+            "Fire Watch": 0,
+            "Gas Testing": 0,
+            "LOTO": 0,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 0,
+            "Shoring": 0
+          },
+          "not performed": {
+            "<MISSING>": 0,
+            "Energy Isolation": 0,
+            "Fall Protection": 0,
+            "Fire Watch": 396,
+            "Gas Testing": 436,
+            "LOTO": 0,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 412,
+            "Shoring": 380
+          },
+          "not used": {
+            "<MISSING>": 0,
+            "Energy Isolation": 0,
+            "Fall Protection": 430,
+            "Fire Watch": 0,
+            "Gas Testing": 0,
+            "LOTO": 0,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 0,
+            "Shoring": 0
+          },
+          "not verified": {
+            "<MISSING>": 0,
+            "Energy Isolation": 417,
+            "Fall Protection": 0,
+            "Fire Watch": 0,
+            "Gas Testing": 426,
+            "LOTO": 418,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 0,
+            "Shoring": 0
+          }
+        }
+      },
+      "sif_level": {
+        "unique_values": 4,
+        "weighted_majority_accuracy": 0.56,
+        "conditional_entropy_bits": 1.5318064829778821,
+        "mutual_information_bits": 1.2786583460643364,
+        "all_values_deterministic": false,
+        "deterministic_values": [
+          "NON_SIF"
+        ],
+        "cross_tab": {
+          "HIGH": {
+            "<MISSING>": 0,
+            "Energy Isolation": 824,
+            "Fall Protection": 430,
+            "Fire Watch": 396,
+            "Gas Testing": 436,
+            "LOTO": 0,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 412,
+            "Shoring": 380
+          },
+          "LOW": {
+            "<MISSING>": 0,
+            "Energy Isolation": 267,
+            "Fall Protection": 159,
+            "Fire Watch": 165,
+            "Gas Testing": 132,
+            "LOTO": 154,
+            "Line of Fire": 161,
+            "Safe Mechanical Lifting": 132,
+            "Shoring": 179
+          },
+          "MEDIUM": {
+            "<MISSING>": 0,
+            "Energy Isolation": 0,
+            "Fall Protection": 420,
+            "Fire Watch": 0,
+            "Gas Testing": 426,
+            "LOTO": 418,
+            "Line of Fire": 858,
+            "Safe Mechanical Lifting": 0,
+            "Shoring": 0
+          },
+          "NON_SIF": {
+            "<MISSING>": 3651,
+            "Energy Isolation": 0,
+            "Fall Protection": 0,
+            "Fire Watch": 0,
+            "Gas Testing": 0,
+            "LOTO": 0,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 0,
+            "Shoring": 0
+          }
+        }
+      },
+      "life_saving_rule": {
+        "unique_values": 7,
+        "weighted_majority_accuracy": 0.8869,
+        "conditional_entropy_bits": 0.30240396050693646,
+        "mutual_information_bits": 2.508060868535282,
+        "all_values_deterministic": false,
+        "deterministic_values": [
+          "<MISSING>",
+          "Confined Space",
+          "Hot Work",
+          "Safe Mechanical Lifting",
+          "Working at Height"
+        ],
+        "cross_tab": {
+          "<MISSING>": {
+            "<MISSING>": 3651,
+            "Energy Isolation": 0,
+            "Fall Protection": 0,
+            "Fire Watch": 0,
+            "Gas Testing": 0,
+            "LOTO": 0,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 0,
+            "Shoring": 0
+          },
+          "Confined Space": {
+            "<MISSING>": 0,
+            "Energy Isolation": 0,
+            "Fall Protection": 0,
+            "Fire Watch": 0,
+            "Gas Testing": 994,
+            "LOTO": 0,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 0,
+            "Shoring": 0
+          },
+          "Energy Isolation": {
+            "<MISSING>": 0,
+            "Energy Isolation": 1091,
+            "Fall Protection": 0,
+            "Fire Watch": 0,
+            "Gas Testing": 0,
+            "LOTO": 572,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 0,
+            "Shoring": 0
+          },
+          "Hot Work": {
+            "<MISSING>": 0,
+            "Energy Isolation": 0,
+            "Fall Protection": 0,
+            "Fire Watch": 561,
+            "Gas Testing": 0,
+            "LOTO": 0,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 0,
+            "Shoring": 0
+          },
+          "Line of Fire": {
+            "<MISSING>": 0,
+            "Energy Isolation": 0,
+            "Fall Protection": 0,
+            "Fire Watch": 0,
+            "Gas Testing": 0,
+            "LOTO": 0,
+            "Line of Fire": 1019,
+            "Safe Mechanical Lifting": 0,
+            "Shoring": 559
+          },
+          "Safe Mechanical Lifting": {
+            "<MISSING>": 0,
+            "Energy Isolation": 0,
+            "Fall Protection": 0,
+            "Fire Watch": 0,
+            "Gas Testing": 0,
+            "LOTO": 0,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 544,
+            "Shoring": 0
+          },
+          "Working at Height": {
+            "<MISSING>": 0,
+            "Energy Isolation": 0,
+            "Fall Protection": 1009,
+            "Fire Watch": 0,
+            "Gas Testing": 0,
+            "LOTO": 0,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 0,
+            "Shoring": 0
+          }
+        }
+      },
+      "source_type": {
+        "unique_values": 1,
+        "weighted_majority_accuracy": 0.3651,
+        "conditional_entropy_bits": 2.8104648290422185,
+        "mutual_information_bits": 0.0,
+        "all_values_deterministic": false,
+        "deterministic_values": [],
+        "cross_tab": {
+          "SYNTHETIC": {
+            "<MISSING>": 3651,
+            "Energy Isolation": 1091,
+            "Fall Protection": 1009,
+            "Fire Watch": 561,
+            "Gas Testing": 994,
+            "LOTO": 572,
+            "Line of Fire": 1019,
+            "Safe Mechanical Lifting": 544,
+            "Shoring": 559
+          }
+        }
+      }
+    },
+    "barrier_status": {
+      "report_type": {
+        "unique_values": 2,
+        "weighted_majority_accuracy": 0.6131,
+        "conditional_entropy_bits": 0.9235132709381125,
+        "mutual_information_bits": 0.49707548025281445,
+        "all_values_deterministic": false,
+        "deterministic_values": [],
+        "cross_tab": {
+          "NEAR_MISS": {
+            "EFFECTIVE": 1349,
+            "FAILED": 218,
+            "UNKNOWN": 0
+          },
+          "UNSAFE_CONDITION": {
+            "EFFECTIVE": 0,
+            "FAILED": 4782,
+            "UNKNOWN": 3651
+          }
+        }
+      },
+      "activity": {
+        "unique_values": 9,
+        "weighted_majority_accuracy": 0.8651,
+        "conditional_entropy_bits": 0.46033136477376224,
+        "mutual_information_bits": 0.9602573864171647,
+        "all_values_deterministic": false,
+        "deterministic_values": [
+          "Operations"
+        ],
+        "cross_tab": {
+          "Confined Space Work": {
+            "EFFECTIVE": 132,
+            "FAILED": 862,
+            "UNKNOWN": 0
+          },
+          "Driving": {
+            "EFFECTIVE": 161,
+            "FAILED": 422,
+            "UNKNOWN": 0
+          },
+          "Electrical Work": {
+            "EFFECTIVE": 134,
+            "FAILED": 417,
+            "UNKNOWN": 0
+          },
+          "Excavation": {
+            "EFFECTIVE": 179,
+            "FAILED": 380,
+            "UNKNOWN": 0
+          },
+          "Hot Work": {
+            "EFFECTIVE": 165,
+            "FAILED": 396,
+            "UNKNOWN": 0
+          },
+          "Lifting": {
+            "EFFECTIVE": 132,
+            "FAILED": 848,
+            "UNKNOWN": 0
+          },
+          "Maintenance": {
+            "EFFECTIVE": 287,
+            "FAILED": 825,
+            "UNKNOWN": 0
+          },
+          "Operations": {
+            "EFFECTIVE": 0,
+            "FAILED": 0,
+            "UNKNOWN": 3651
+          },
+          "Work at Height": {
+            "EFFECTIVE": 159,
+            "FAILED": 850,
+            "UNKNOWN": 0
+          }
+        }
+      },
+      "hazard": {
+        "unique_values": 12,
+        "weighted_majority_accuracy": 0.8651,
+        "conditional_entropy_bits": 0.43600292008184804,
+        "mutual_information_bits": 0.9845858311090789,
+        "all_values_deterministic": false,
+        "deterministic_values": [
+          "<MISSING>",
+          "Ergonomic",
+          "Line of Fire",
+          "Slip/Trip"
+        ],
+        "cross_tab": {
+          "<MISSING>": {
+            "EFFECTIVE": 0,
+            "FAILED": 0,
+            "UNKNOWN": 1997
+          },
+          "Electrical Energy": {
+            "EFFECTIVE": 134,
+            "FAILED": 417,
+            "UNKNOWN": 0
+          },
+          "Engulfment": {
+            "EFFECTIVE": 179,
+            "FAILED": 380,
+            "UNKNOWN": 0
+          },
+          "Ergonomic": {
+            "EFFECTIVE": 0,
+            "FAILED": 0,
+            "UNKNOWN": 284
+          },
+          "Fall Hazard": {
+            "EFFECTIVE": 159,
+            "FAILED": 850,
+            "UNKNOWN": 0
+          },
+          "Fire": {
+            "EFFECTIVE": 165,
+            "FAILED": 396,
+            "UNKNOWN": 0
+          },
+          "Line of Fire": {
+            "EFFECTIVE": 0,
+            "FAILED": 422,
+            "UNKNOWN": 0
+          },
+          "Moving Machinery": {
+            "EFFECTIVE": 294,
+            "FAILED": 407,
+            "UNKNOWN": 0
+          },
+          "Slip/Trip": {
+            "EFFECTIVE": 0,
+            "FAILED": 0,
+            "UNKNOWN": 1370
+          },
+          "Stored Energy": {
+            "EFFECTIVE": 154,
+            "FAILED": 418,
+            "UNKNOWN": 0
+          },
+          "Suspended Load": {
+            "EFFECTIVE": 132,
+            "FAILED": 848,
+            "UNKNOWN": 0
+          },
+          "Toxic Atmosphere": {
+            "EFFECTIVE": 132,
+            "FAILED": 862,
+            "UNKNOWN": 0
+          }
+        }
+      },
+      "barrier": {
+        "unique_values": 9,
+        "weighted_majority_accuracy": 0.8651,
+        "conditional_entropy_bits": 0.46247003043895263,
+        "mutual_information_bits": 0.9581187207519744,
+        "all_values_deterministic": false,
+        "deterministic_values": [
+          "<MISSING>"
+        ],
+        "cross_tab": {
+          "<MISSING>": {
+            "EFFECTIVE": 0,
+            "FAILED": 0,
+            "UNKNOWN": 3651
+          },
+          "Energy Isolation": {
+            "EFFECTIVE": 267,
+            "FAILED": 824,
+            "UNKNOWN": 0
+          },
+          "Fall Protection": {
+            "EFFECTIVE": 159,
+            "FAILED": 850,
+            "UNKNOWN": 0
+          },
+          "Fire Watch": {
+            "EFFECTIVE": 165,
+            "FAILED": 396,
+            "UNKNOWN": 0
+          },
+          "Gas Testing": {
+            "EFFECTIVE": 132,
+            "FAILED": 862,
+            "UNKNOWN": 0
+          },
+          "LOTO": {
+            "EFFECTIVE": 154,
+            "FAILED": 418,
+            "UNKNOWN": 0
+          },
+          "Line of Fire": {
+            "EFFECTIVE": 161,
+            "FAILED": 858,
+            "UNKNOWN": 0
+          },
+          "Safe Mechanical Lifting": {
+            "EFFECTIVE": 132,
+            "FAILED": 412,
+            "UNKNOWN": 0
+          },
+          "Shoring": {
+            "EFFECTIVE": 179,
+            "FAILED": 380,
+            "UNKNOWN": 0
+          }
+        }
+      },
+      "barrier_failure": {
+        "unique_values": 6,
+        "weighted_majority_accuracy": 0.8651,
+        "conditional_entropy_bits": 0.4205887511909271,
+        "mutual_information_bits": 0.9999999999999999,
+        "all_values_deterministic": false,
+        "deterministic_values": [
+          "bypassed",
+          "expired",
+          "not performed",
+          "not used",
+          "not verified"
+        ],
+        "cross_tab": {
+          "<MISSING>": {
+            "EFFECTIVE": 1349,
+            "FAILED": 0,
+            "UNKNOWN": 3651
+          },
+          "bypassed": {
+            "EFFECTIVE": 0,
+            "FAILED": 1265,
+            "UNKNOWN": 0
+          },
+          "expired": {
+            "EFFECTIVE": 0,
+            "FAILED": 420,
+            "UNKNOWN": 0
+          },
+          "not performed": {
+            "EFFECTIVE": 0,
+            "FAILED": 1624,
+            "UNKNOWN": 0
+          },
+          "not used": {
+            "EFFECTIVE": 0,
+            "FAILED": 430,
+            "UNKNOWN": 0
+          },
+          "not verified": {
+            "EFFECTIVE": 0,
+            "FAILED": 1261,
+            "UNKNOWN": 0
+          }
+        }
+      },
+      "sif_level": {
+        "unique_values": 4,
+        "weighted_majority_accuracy": 1.0,
+        "conditional_entropy_bits": 0.0,
+        "mutual_information_bits": 1.420588751190927,
+        "all_values_deterministic": true,
+        "deterministic_values": [
+          "HIGH",
+          "LOW",
+          "MEDIUM",
+          "NON_SIF"
+        ],
+        "cross_tab": {
+          "HIGH": {
+            "EFFECTIVE": 0,
+            "FAILED": 2878,
+            "UNKNOWN": 0
+          },
+          "LOW": {
+            "EFFECTIVE": 1349,
+            "FAILED": 0,
+            "UNKNOWN": 0
+          },
+          "MEDIUM": {
+            "EFFECTIVE": 0,
+            "FAILED": 2122,
+            "UNKNOWN": 0
+          },
+          "NON_SIF": {
+            "EFFECTIVE": 0,
+            "FAILED": 0,
+            "UNKNOWN": 3651
+          }
+        }
+      },
+      "life_saving_rule": {
+        "unique_values": 7,
+        "weighted_majority_accuracy": 0.8651,
+        "conditional_entropy_bits": 0.4664748736007519,
+        "mutual_information_bits": 0.9541138775901751,
+        "all_values_deterministic": false,
+        "deterministic_values": [
+          "<MISSING>"
+        ],
+        "cross_tab": {
+          "<MISSING>": {
+            "EFFECTIVE": 0,
+            "FAILED": 0,
+            "UNKNOWN": 3651
+          },
+          "Confined Space": {
+            "EFFECTIVE": 132,
+            "FAILED": 862,
+            "UNKNOWN": 0
+          },
+          "Energy Isolation": {
+            "EFFECTIVE": 421,
+            "FAILED": 1242,
+            "UNKNOWN": 0
+          },
+          "Hot Work": {
+            "EFFECTIVE": 165,
+            "FAILED": 396,
+            "UNKNOWN": 0
+          },
+          "Line of Fire": {
+            "EFFECTIVE": 340,
+            "FAILED": 1238,
+            "UNKNOWN": 0
+          },
+          "Safe Mechanical Lifting": {
+            "EFFECTIVE": 132,
+            "FAILED": 412,
+            "UNKNOWN": 0
+          },
+          "Working at Height": {
+            "EFFECTIVE": 159,
+            "FAILED": 850,
+            "UNKNOWN": 0
+          }
+        }
+      },
+      "source_type": {
+        "unique_values": 1,
+        "weighted_majority_accuracy": 0.5,
+        "conditional_entropy_bits": 1.420588751190927,
+        "mutual_information_bits": 0.0,
+        "all_values_deterministic": false,
+        "deterministic_values": [],
+        "cross_tab": {
+          "SYNTHETIC": {
+            "EFFECTIVE": 1349,
+            "FAILED": 5000,
+            "UNKNOWN": 3651
+          }
+        }
+      }
+    },
+    "barrier_failure": {
+      "report_type": {
+        "unique_values": 2,
+        "weighted_majority_accuracy": 0.5,
+        "conditional_entropy_bits": 1.9452915901609726,
+        "mutual_information_bits": 0.1218963933290853,
+        "all_values_deterministic": false,
+        "deterministic_values": [],
+        "cross_tab": {
+          "NEAR_MISS": {
+            "<MISSING>": 1349,
+            "bypassed": 218,
+            "expired": 0,
+            "not performed": 0,
+            "not used": 0,
+            "not verified": 0
+          },
+          "UNSAFE_CONDITION": {
+            "<MISSING>": 3651,
+            "bypassed": 1047,
+            "expired": 420,
+            "not performed": 1624,
+            "not used": 430,
+            "not verified": 1261
+          }
+        }
+      },
+      "activity": {
+        "unique_values": 9,
+        "weighted_majority_accuracy": 0.6986,
+        "conditional_entropy_bits": 0.7987549258377611,
+        "mutual_information_bits": 1.2684330576522969,
+        "all_values_deterministic": false,
+        "deterministic_values": [
+          "Operations"
+        ],
+        "cross_tab": {
+          "Confined Space Work": {
+            "<MISSING>": 132,
+            "bypassed": 0,
+            "expired": 0,
+            "not performed": 436,
+            "not used": 0,
+            "not verified": 426
+          },
+          "Driving": {
+            "<MISSING>": 161,
+            "bypassed": 422,
+            "expired": 0,
+            "not performed": 0,
+            "not used": 0,
+            "not verified": 0
+          },
+          "Electrical Work": {
+            "<MISSING>": 134,
+            "bypassed": 0,
+            "expired": 0,
+            "not performed": 0,
+            "not used": 0,
+            "not verified": 417
+          },
+          "Excavation": {
+            "<MISSING>": 179,
+            "bypassed": 0,
+            "expired": 0,
+            "not performed": 380,
+            "not used": 0,
+            "not verified": 0
+          },
+          "Hot Work": {
+            "<MISSING>": 165,
+            "bypassed": 0,
+            "expired": 0,
+            "not performed": 396,
+            "not used": 0,
+            "not verified": 0
+          },
+          "Lifting": {
+            "<MISSING>": 132,
+            "bypassed": 436,
+            "expired": 0,
+            "not performed": 412,
+            "not used": 0,
+            "not verified": 0
+          },
+          "Maintenance": {
+            "<MISSING>": 287,
+            "bypassed": 407,
+            "expired": 0,
+            "not performed": 0,
+            "not used": 0,
+            "not verified": 418
+          },
+          "Operations": {
+            "<MISSING>": 3651,
+            "bypassed": 0,
+            "expired": 0,
+            "not performed": 0,
+            "not used": 0,
+            "not verified": 0
+          },
+          "Work at Height": {
+            "<MISSING>": 159,
+            "bypassed": 0,
+            "expired": 420,
+            "not performed": 0,
+            "not used": 430,
+            "not verified": 0
+          }
+        }
+      },
+      "hazard": {
+        "unique_values": 12,
+        "weighted_majority_accuracy": 0.7393,
+        "conditional_entropy_bits": 0.6919370612229768,
+        "mutual_information_bits": 1.3752509222670812,
+        "all_values_deterministic": false,
+        "deterministic_values": [
+          "<MISSING>",
+          "Ergonomic",
+          "Line of Fire",
+          "Slip/Trip"
+        ],
+        "cross_tab": {
+          "<MISSING>": {
+            "<MISSING>": 1997,
+            "bypassed": 0,
+            "expired": 0,
+            "not performed": 0,
+            "not used": 0,
+            "not verified": 0
+          },
+          "Electrical Energy": {
+            "<MISSING>": 134,
+            "bypassed": 0,
+            "expired": 0,
+            "not performed": 0,
+            "not used": 0,
+            "not verified": 417
+          },
+          "Engulfment": {
+            "<MISSING>": 179,
+            "bypassed": 0,
+            "expired": 0,
+            "not performed": 380,
+            "not used": 0,
+            "not verified": 0
+          },
+          "Ergonomic": {
+            "<MISSING>": 284,
+            "bypassed": 0,
+            "expired": 0,
+            "not performed": 0,
+            "not used": 0,
+            "not verified": 0
+          },
+          "Fall Hazard": {
+            "<MISSING>": 159,
+            "bypassed": 0,
+            "expired": 420,
+            "not performed": 0,
+            "not used": 430,
+            "not verified": 0
+          },
+          "Fire": {
+            "<MISSING>": 165,
+            "bypassed": 0,
+            "expired": 0,
+            "not performed": 396,
+            "not used": 0,
+            "not verified": 0
+          },
+          "Line of Fire": {
+            "<MISSING>": 0,
+            "bypassed": 422,
+            "expired": 0,
+            "not performed": 0,
+            "not used": 0,
+            "not verified": 0
+          },
+          "Moving Machinery": {
+            "<MISSING>": 294,
+            "bypassed": 407,
+            "expired": 0,
+            "not performed": 0,
+            "not used": 0,
+            "not verified": 0
+          },
+          "Slip/Trip": {
+            "<MISSING>": 1370,
+            "bypassed": 0,
+            "expired": 0,
+            "not performed": 0,
+            "not used": 0,
+            "not verified": 0
+          },
+          "Stored Energy": {
+            "<MISSING>": 154,
+            "bypassed": 0,
+            "expired": 0,
+            "not performed": 0,
+            "not used": 0,
+            "not verified": 418
+          },
+          "Suspended Load": {
+            "<MISSING>": 132,
+            "bypassed": 436,
+            "expired": 0,
+            "not performed": 412,
+            "not used": 0,
+            "not verified": 0
+          },
+          "Toxic Atmosphere": {
+            "<MISSING>": 132,
+            "bypassed": 0,
+            "expired": 0,
+            "not performed": 436,
+            "not used": 0,
+            "not verified": 426
+          }
+        }
+      },
+      "barrier": {
+        "unique_values": 9,
+        "weighted_majority_accuracy": 0.7398,
+        "conditional_entropy_bits": 0.7160444208809631,
+        "mutual_information_bits": 1.3511435626090949,
+        "all_values_deterministic": false,
+        "deterministic_values": [
+          "<MISSING>"
+        ],
+        "cross_tab": {
+          "<MISSING>": {
+            "<MISSING>": 3651,
+            "bypassed": 0,
+            "expired": 0,
+            "not performed": 0,
+            "not used": 0,
+            "not verified": 0
+          },
+          "Energy Isolation": {
+            "<MISSING>": 267,
+            "bypassed": 407,
+            "expired": 0,
+            "not performed": 0,
+            "not used": 0,
+            "not verified": 417
+          },
+          "Fall Protection": {
+            "<MISSING>": 159,
+            "bypassed": 0,
+            "expired": 420,
+            "not performed": 0,
+            "not used": 430,
+            "not verified": 0
+          },
+          "Fire Watch": {
+            "<MISSING>": 165,
+            "bypassed": 0,
+            "expired": 0,
+            "not performed": 396,
+            "not used": 0,
+            "not verified": 0
+          },
+          "Gas Testing": {
+            "<MISSING>": 132,
+            "bypassed": 0,
+            "expired": 0,
+            "not performed": 436,
+            "not used": 0,
+            "not verified": 426
+          },
+          "LOTO": {
+            "<MISSING>": 154,
+            "bypassed": 0,
+            "expired": 0,
+            "not performed": 0,
+            "not used": 0,
+            "not verified": 418
+          },
+          "Line of Fire": {
+            "<MISSING>": 161,
+            "bypassed": 858,
+            "expired": 0,
+            "not performed": 0,
+            "not used": 0,
+            "not verified": 0
+          },
+          "Safe Mechanical Lifting": {
+            "<MISSING>": 132,
+            "bypassed": 0,
+            "expired": 0,
+            "not performed": 412,
+            "not used": 0,
+            "not verified": 0
+          },
+          "Shoring": {
+            "<MISSING>": 179,
+            "bypassed": 0,
+            "expired": 0,
+            "not performed": 380,
+            "not used": 0,
+            "not verified": 0
+          }
+        }
+      },
+      "barrier_status": {
+        "unique_values": 3,
+        "weighted_majority_accuracy": 0.6624,
+        "conditional_entropy_bits": 1.067187983490058,
+        "mutual_information_bits": 1.0,
+        "all_values_deterministic": false,
+        "deterministic_values": [
+          "EFFECTIVE",
+          "UNKNOWN"
+        ],
+        "cross_tab": {
+          "EFFECTIVE": {
+            "<MISSING>": 1349,
+            "bypassed": 0,
+            "expired": 0,
+            "not performed": 0,
+            "not used": 0,
+            "not verified": 0
+          },
+          "FAILED": {
+            "<MISSING>": 0,
+            "bypassed": 1265,
+            "expired": 420,
+            "not performed": 1624,
+            "not used": 430,
+            "not verified": 1261
+          },
+          "UNKNOWN": {
+            "<MISSING>": 3651,
+            "bypassed": 0,
+            "expired": 0,
+            "not performed": 0,
+            "not used": 0,
+            "not verified": 0
+          }
+        }
+      },
+      "sif_level": {
+        "unique_values": 4,
+        "weighted_majority_accuracy": 0.7482,
+        "conditional_entropy_bits": 0.8055683497061481,
+        "mutual_information_bits": 1.2616196337839098,
+        "all_values_deterministic": false,
+        "deterministic_values": [
+          "LOW",
+          "NON_SIF"
+        ],
+        "cross_tab": {
+          "HIGH": {
+            "<MISSING>": 0,
+            "bypassed": 407,
+            "expired": 0,
+            "not performed": 1624,
+            "not used": 430,
+            "not verified": 417
+          },
+          "LOW": {
+            "<MISSING>": 1349,
+            "bypassed": 0,
+            "expired": 0,
+            "not performed": 0,
+            "not used": 0,
+            "not verified": 0
+          },
+          "MEDIUM": {
+            "<MISSING>": 0,
+            "bypassed": 858,
+            "expired": 420,
+            "not performed": 0,
+            "not used": 0,
+            "not verified": 844
+          },
+          "NON_SIF": {
+            "<MISSING>": 3651,
+            "bypassed": 0,
+            "expired": 0,
+            "not performed": 0,
+            "not used": 0,
+            "not verified": 0
+          }
+        }
+      },
+      "life_saving_rule": {
+        "unique_values": 7,
+        "weighted_majority_accuracy": 0.7018,
+        "conditional_entropy_bits": 0.8611321567905024,
+        "mutual_information_bits": 1.2060558266995556,
+        "all_values_deterministic": false,
+        "deterministic_values": [
+          "<MISSING>"
+        ],
+        "cross_tab": {
+          "<MISSING>": {
+            "<MISSING>": 3651,
+            "bypassed": 0,
+            "expired": 0,
+            "not performed": 0,
+            "not used": 0,
+            "not verified": 0
+          },
+          "Confined Space": {
+            "<MISSING>": 132,
+            "bypassed": 0,
+            "expired": 0,
+            "not performed": 436,
+            "not used": 0,
+            "not verified": 426
+          },
+          "Energy Isolation": {
+            "<MISSING>": 421,
+            "bypassed": 407,
+            "expired": 0,
+            "not performed": 0,
+            "not used": 0,
+            "not verified": 835
+          },
+          "Hot Work": {
+            "<MISSING>": 165,
+            "bypassed": 0,
+            "expired": 0,
+            "not performed": 396,
+            "not used": 0,
+            "not verified": 0
+          },
+          "Line of Fire": {
+            "<MISSING>": 340,
+            "bypassed": 858,
+            "expired": 0,
+            "not performed": 380,
+            "not used": 0,
+            "not verified": 0
+          },
+          "Safe Mechanical Lifting": {
+            "<MISSING>": 132,
+            "bypassed": 0,
+            "expired": 0,
+            "not performed": 412,
+            "not used": 0,
+            "not verified": 0
+          },
+          "Working at Height": {
+            "<MISSING>": 159,
+            "bypassed": 0,
+            "expired": 420,
+            "not performed": 0,
+            "not used": 430,
+            "not verified": 0
+          }
+        }
+      },
+      "source_type": {
+        "unique_values": 1,
+        "weighted_majority_accuracy": 0.5,
+        "conditional_entropy_bits": 2.067187983490058,
+        "mutual_information_bits": 0.0,
+        "all_values_deterministic": false,
+        "deterministic_values": [],
+        "cross_tab": {
+          "SYNTHETIC": {
+            "<MISSING>": 5000,
+            "bypassed": 1265,
+            "expired": 420,
+            "not performed": 1624,
+            "not used": 430,
+            "not verified": 1261
+          }
+        }
+      }
+    },
+    "life_saving_rule": {
+      "report_type": {
+        "unique_values": 2,
+        "weighted_majority_accuracy": 0.4209,
+        "conditional_entropy_bits": 2.377444779555468,
+        "mutual_information_bits": 0.13061608897981403,
+        "all_values_deterministic": false,
+        "deterministic_values": [],
+        "cross_tab": {
+          "NEAR_MISS": {
+            "<MISSING>": 0,
+            "Confined Space": 132,
+            "Energy Isolation": 421,
+            "Hot Work": 165,
+            "Line of Fire": 558,
+            "Safe Mechanical Lifting": 132,
+            "Working at Height": 159
+          },
+          "UNSAFE_CONDITION": {
+            "<MISSING>": 3651,
+            "Confined Space": 862,
+            "Energy Isolation": 1242,
+            "Hot Work": 396,
+            "Line of Fire": 1020,
+            "Safe Mechanical Lifting": 412,
+            "Working at Height": 850
+          }
+        }
+      },
+      "activity": {
+        "unique_values": 9,
+        "weighted_majority_accuracy": 0.9564,
+        "conditional_entropy_bits": 0.09713970289795947,
+        "mutual_information_bits": 2.4109211656373226,
+        "all_values_deterministic": false,
+        "deterministic_values": [
+          "Confined Space Work",
+          "Driving",
+          "Electrical Work",
+          "Excavation",
+          "Hot Work",
+          "Maintenance",
+          "Operations",
+          "Work at Height"
+        ],
+        "cross_tab": {
+          "Confined Space Work": {
+            "<MISSING>": 0,
+            "Confined Space": 994,
+            "Energy Isolation": 0,
+            "Hot Work": 0,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 0,
+            "Working at Height": 0
+          },
+          "Driving": {
+            "<MISSING>": 0,
+            "Confined Space": 0,
+            "Energy Isolation": 0,
+            "Hot Work": 0,
+            "Line of Fire": 583,
+            "Safe Mechanical Lifting": 0,
+            "Working at Height": 0
+          },
+          "Electrical Work": {
+            "<MISSING>": 0,
+            "Confined Space": 0,
+            "Energy Isolation": 551,
+            "Hot Work": 0,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 0,
+            "Working at Height": 0
+          },
+          "Excavation": {
+            "<MISSING>": 0,
+            "Confined Space": 0,
+            "Energy Isolation": 0,
+            "Hot Work": 0,
+            "Line of Fire": 559,
+            "Safe Mechanical Lifting": 0,
+            "Working at Height": 0
+          },
+          "Hot Work": {
+            "<MISSING>": 0,
+            "Confined Space": 0,
+            "Energy Isolation": 0,
+            "Hot Work": 561,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 0,
+            "Working at Height": 0
+          },
+          "Lifting": {
+            "<MISSING>": 0,
+            "Confined Space": 0,
+            "Energy Isolation": 0,
+            "Hot Work": 0,
+            "Line of Fire": 436,
+            "Safe Mechanical Lifting": 544,
+            "Working at Height": 0
+          },
+          "Maintenance": {
+            "<MISSING>": 0,
+            "Confined Space": 0,
+            "Energy Isolation": 1112,
+            "Hot Work": 0,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 0,
+            "Working at Height": 0
+          },
+          "Operations": {
+            "<MISSING>": 3651,
+            "Confined Space": 0,
+            "Energy Isolation": 0,
+            "Hot Work": 0,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 0,
+            "Working at Height": 0
+          },
+          "Work at Height": {
+            "<MISSING>": 0,
+            "Confined Space": 0,
+            "Energy Isolation": 0,
+            "Hot Work": 0,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 0,
+            "Working at Height": 1009
+          }
+        }
+      },
+      "hazard": {
+        "unique_values": 12,
+        "weighted_majority_accuracy": 0.9403,
+        "conditional_entropy_bits": 0.15163817036371394,
+        "mutual_information_bits": 2.356422698171568,
+        "all_values_deterministic": false,
+        "deterministic_values": [
+          "<MISSING>",
+          "Electrical Energy",
+          "Engulfment",
+          "Ergonomic",
+          "Fall Hazard",
+          "Fire",
+          "Line of Fire",
+          "Slip/Trip",
+          "Stored Energy",
+          "Toxic Atmosphere"
+        ],
+        "cross_tab": {
+          "<MISSING>": {
+            "<MISSING>": 1997,
+            "Confined Space": 0,
+            "Energy Isolation": 0,
+            "Hot Work": 0,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 0,
+            "Working at Height": 0
+          },
+          "Electrical Energy": {
+            "<MISSING>": 0,
+            "Confined Space": 0,
+            "Energy Isolation": 551,
+            "Hot Work": 0,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 0,
+            "Working at Height": 0
+          },
+          "Engulfment": {
+            "<MISSING>": 0,
+            "Confined Space": 0,
+            "Energy Isolation": 0,
+            "Hot Work": 0,
+            "Line of Fire": 559,
+            "Safe Mechanical Lifting": 0,
+            "Working at Height": 0
+          },
+          "Ergonomic": {
+            "<MISSING>": 284,
+            "Confined Space": 0,
+            "Energy Isolation": 0,
+            "Hot Work": 0,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 0,
+            "Working at Height": 0
+          },
+          "Fall Hazard": {
+            "<MISSING>": 0,
+            "Confined Space": 0,
+            "Energy Isolation": 0,
+            "Hot Work": 0,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 0,
+            "Working at Height": 1009
+          },
+          "Fire": {
+            "<MISSING>": 0,
+            "Confined Space": 0,
+            "Energy Isolation": 0,
+            "Hot Work": 561,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 0,
+            "Working at Height": 0
+          },
+          "Line of Fire": {
+            "<MISSING>": 0,
+            "Confined Space": 0,
+            "Energy Isolation": 0,
+            "Hot Work": 0,
+            "Line of Fire": 422,
+            "Safe Mechanical Lifting": 0,
+            "Working at Height": 0
+          },
+          "Moving Machinery": {
+            "<MISSING>": 0,
+            "Confined Space": 0,
+            "Energy Isolation": 540,
+            "Hot Work": 0,
+            "Line of Fire": 161,
+            "Safe Mechanical Lifting": 0,
+            "Working at Height": 0
+          },
+          "Slip/Trip": {
+            "<MISSING>": 1370,
+            "Confined Space": 0,
+            "Energy Isolation": 0,
+            "Hot Work": 0,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 0,
+            "Working at Height": 0
+          },
+          "Stored Energy": {
+            "<MISSING>": 0,
+            "Confined Space": 0,
+            "Energy Isolation": 572,
+            "Hot Work": 0,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 0,
+            "Working at Height": 0
+          },
+          "Suspended Load": {
+            "<MISSING>": 0,
+            "Confined Space": 0,
+            "Energy Isolation": 0,
+            "Hot Work": 0,
+            "Line of Fire": 436,
+            "Safe Mechanical Lifting": 544,
+            "Working at Height": 0
+          },
+          "Toxic Atmosphere": {
+            "<MISSING>": 0,
+            "Confined Space": 994,
+            "Energy Isolation": 0,
+            "Hot Work": 0,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 0,
+            "Working at Height": 0
+          }
+        }
+      },
+      "barrier": {
+        "unique_values": 9,
+        "weighted_majority_accuracy": 1.0,
+        "conditional_entropy_bits": 0.0,
+        "mutual_information_bits": 2.508060868535282,
+        "all_values_deterministic": true,
+        "deterministic_values": [
+          "<MISSING>",
+          "Energy Isolation",
+          "Fall Protection",
+          "Fire Watch",
+          "Gas Testing",
+          "LOTO",
+          "Line of Fire",
+          "Safe Mechanical Lifting",
+          "Shoring"
+        ],
+        "cross_tab": {
+          "<MISSING>": {
+            "<MISSING>": 3651,
+            "Confined Space": 0,
+            "Energy Isolation": 0,
+            "Hot Work": 0,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 0,
+            "Working at Height": 0
+          },
+          "Energy Isolation": {
+            "<MISSING>": 0,
+            "Confined Space": 0,
+            "Energy Isolation": 1091,
+            "Hot Work": 0,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 0,
+            "Working at Height": 0
+          },
+          "Fall Protection": {
+            "<MISSING>": 0,
+            "Confined Space": 0,
+            "Energy Isolation": 0,
+            "Hot Work": 0,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 0,
+            "Working at Height": 1009
+          },
+          "Fire Watch": {
+            "<MISSING>": 0,
+            "Confined Space": 0,
+            "Energy Isolation": 0,
+            "Hot Work": 561,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 0,
+            "Working at Height": 0
+          },
+          "Gas Testing": {
+            "<MISSING>": 0,
+            "Confined Space": 994,
+            "Energy Isolation": 0,
+            "Hot Work": 0,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 0,
+            "Working at Height": 0
+          },
+          "LOTO": {
+            "<MISSING>": 0,
+            "Confined Space": 0,
+            "Energy Isolation": 572,
+            "Hot Work": 0,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 0,
+            "Working at Height": 0
+          },
+          "Line of Fire": {
+            "<MISSING>": 0,
+            "Confined Space": 0,
+            "Energy Isolation": 0,
+            "Hot Work": 0,
+            "Line of Fire": 1019,
+            "Safe Mechanical Lifting": 0,
+            "Working at Height": 0
+          },
+          "Safe Mechanical Lifting": {
+            "<MISSING>": 0,
+            "Confined Space": 0,
+            "Energy Isolation": 0,
+            "Hot Work": 0,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 544,
+            "Working at Height": 0
+          },
+          "Shoring": {
+            "<MISSING>": 0,
+            "Confined Space": 0,
+            "Energy Isolation": 0,
+            "Hot Work": 0,
+            "Line of Fire": 559,
+            "Safe Mechanical Lifting": 0,
+            "Working at Height": 0
+          }
+        }
+      },
+      "barrier_status": {
+        "unique_values": 3,
+        "weighted_majority_accuracy": 0.5314,
+        "conditional_entropy_bits": 1.553946990945107,
+        "mutual_information_bits": 0.954113877590175,
+        "all_values_deterministic": false,
+        "deterministic_values": [
+          "UNKNOWN"
+        ],
+        "cross_tab": {
+          "EFFECTIVE": {
+            "<MISSING>": 0,
+            "Confined Space": 132,
+            "Energy Isolation": 421,
+            "Hot Work": 165,
+            "Line of Fire": 340,
+            "Safe Mechanical Lifting": 132,
+            "Working at Height": 159
+          },
+          "FAILED": {
+            "<MISSING>": 0,
+            "Confined Space": 862,
+            "Energy Isolation": 1242,
+            "Hot Work": 396,
+            "Line of Fire": 1238,
+            "Safe Mechanical Lifting": 412,
+            "Working at Height": 850
+          },
+          "UNKNOWN": {
+            "<MISSING>": 3651,
+            "Confined Space": 0,
+            "Energy Isolation": 0,
+            "Hot Work": 0,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 0,
+            "Working at Height": 0
+          }
+        }
+      },
+      "barrier_failure": {
+        "unique_values": 6,
+        "weighted_majority_accuracy": 0.663,
+        "conditional_entropy_bits": 1.3020050418357263,
+        "mutual_information_bits": 1.2060558266995556,
+        "all_values_deterministic": false,
+        "deterministic_values": [
+          "expired",
+          "not used"
+        ],
+        "cross_tab": {
+          "<MISSING>": {
+            "<MISSING>": 3651,
+            "Confined Space": 132,
+            "Energy Isolation": 421,
+            "Hot Work": 165,
+            "Line of Fire": 340,
+            "Safe Mechanical Lifting": 132,
+            "Working at Height": 159
+          },
+          "bypassed": {
+            "<MISSING>": 0,
+            "Confined Space": 0,
+            "Energy Isolation": 407,
+            "Hot Work": 0,
+            "Line of Fire": 858,
+            "Safe Mechanical Lifting": 0,
+            "Working at Height": 0
+          },
+          "expired": {
+            "<MISSING>": 0,
+            "Confined Space": 0,
+            "Energy Isolation": 0,
+            "Hot Work": 0,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 0,
+            "Working at Height": 420
+          },
+          "not performed": {
+            "<MISSING>": 0,
+            "Confined Space": 436,
+            "Energy Isolation": 0,
+            "Hot Work": 396,
+            "Line of Fire": 380,
+            "Safe Mechanical Lifting": 412,
+            "Working at Height": 0
+          },
+          "not used": {
+            "<MISSING>": 0,
+            "Confined Space": 0,
+            "Energy Isolation": 0,
+            "Hot Work": 0,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 0,
+            "Working at Height": 430
+          },
+          "not verified": {
+            "<MISSING>": 0,
+            "Confined Space": 426,
+            "Energy Isolation": 835,
+            "Hot Work": 0,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 0,
+            "Working at Height": 0
+          }
+        }
+      },
+      "sif_level": {
+        "unique_values": 4,
+        "weighted_majority_accuracy": 0.5754,
+        "conditional_entropy_bits": 1.4579901719915398,
+        "mutual_information_bits": 1.050070696543742,
+        "all_values_deterministic": false,
+        "deterministic_values": [
+          "NON_SIF"
+        ],
+        "cross_tab": {
+          "HIGH": {
+            "<MISSING>": 0,
+            "Confined Space": 436,
+            "Energy Isolation": 824,
+            "Hot Work": 396,
+            "Line of Fire": 380,
+            "Safe Mechanical Lifting": 412,
+            "Working at Height": 430
+          },
+          "LOW": {
+            "<MISSING>": 0,
+            "Confined Space": 132,
+            "Energy Isolation": 421,
+            "Hot Work": 165,
+            "Line of Fire": 340,
+            "Safe Mechanical Lifting": 132,
+            "Working at Height": 159
+          },
+          "MEDIUM": {
+            "<MISSING>": 0,
+            "Confined Space": 426,
+            "Energy Isolation": 418,
+            "Hot Work": 0,
+            "Line of Fire": 858,
+            "Safe Mechanical Lifting": 0,
+            "Working at Height": 420
+          },
+          "NON_SIF": {
+            "<MISSING>": 3651,
+            "Confined Space": 0,
+            "Energy Isolation": 0,
+            "Hot Work": 0,
+            "Line of Fire": 0,
+            "Safe Mechanical Lifting": 0,
+            "Working at Height": 0
+          }
+        }
+      },
+      "source_type": {
+        "unique_values": 1,
+        "weighted_majority_accuracy": 0.3651,
+        "conditional_entropy_bits": 2.508060868535282,
+        "mutual_information_bits": 0.0,
+        "all_values_deterministic": false,
+        "deterministic_values": [],
+        "cross_tab": {
+          "SYNTHETIC": {
+            "<MISSING>": 3651,
+            "Confined Space": 994,
+            "Energy Isolation": 1663,
+            "Hot Work": 561,
+            "Line of Fire": 1578,
+            "Safe Mechanical Lifting": 544,
+            "Working at Height": 1009
+          }
+        }
+      }
+    }
+  },
+  "text_template_leakage": {
+    "top_label_associated_ngrams": [
+      {
+        "ngram": "reported",
+        "mutual_information": 0.06891857059181203,
+        "positive_presence_rate": 0.0,
+        "negative_presence_rate": 0.1852
+      },
+      {
+        "ngram": "of",
+        "mutual_information": 0.06064600665153788,
+        "positive_presence_rate": 0.2612,
+        "negative_presence_rate": 0.0298
+      },
+      {
+        "ngram": "or",
+        "mutual_information": 0.04907896956082855,
+        "positive_presence_rate": 0.1346,
+        "negative_presence_rate": 0.0
+      },
+      {
+        "ngram": "inside",
+        "mutual_information": 0.0478516901816812,
+        "positive_presence_rate": 0.1314,
+        "negative_presence_rate": 0.0
+      },
+      {
+        "ngram": "had",
+        "mutual_information": 0.04035931010718289,
+        "positive_presence_rate": 0.1844,
+        "negative_presence_rate": 0.0218
+      },
+      {
+        "ngram": "tag",
+        "mutual_information": 0.03592008947039475,
+        "positive_presence_rate": 0.1364,
+        "negative_presence_rate": 0.0088
+      },
+      {
+        "ngram": "worked",
+        "mutual_information": 0.03492880093785705,
+        "positive_presence_rate": 0.0972,
+        "negative_presence_rate": 0.0
+      },
+      {
+        "ngram": "using",
+        "mutual_information": 0.03259098281109548,
+        "positive_presence_rate": 0.125,
+        "negative_presence_rate": 0.0082
+      },
+      {
+        "ngram": "load",
+        "mutual_information": 0.03204230070842549,
+        "positive_presence_rate": 0.1696,
+        "negative_presence_rate": 0.0264
+      },
+      {
+        "ngram": "without",
+        "mutual_information": 0.03126417547513576,
+        "positive_presence_rate": 0.1706,
+        "negative_presence_rate": 0.028
+      },
+      {
+        "ngram": "floor",
+        "mutual_information": 0.03055000921874937,
+        "positive_presence_rate": 0.0,
+        "negative_presence_rate": 0.0854
+      },
+      {
+        "ngram": "was",
+        "mutual_information": 0.02973508050284074,
+        "positive_presence_rate": 0.5852,
+        "negative_presence_rate": 0.3432
+      },
+      {
+        "ngram": "in the",
+        "mutual_information": 0.028191749907384128,
+        "positive_presence_rate": 0.0,
+        "negative_presence_rate": 0.079
+      },
+      {
+        "ngram": "out",
+        "mutual_information": 0.02759484711807011,
+        "positive_presence_rate": 0.1128,
+        "negative_presence_rate": 0.009
+      },
+      {
+        "ngram": "clear",
+        "mutual_information": 0.027408217287260055,
+        "positive_presence_rate": 0.1432,
+        "negative_presence_rate": 0.0212
+      },
+      {
+        "ngram": "walkway",
+        "mutual_information": 0.026503907955813227,
+        "positive_presence_rate": 0.0,
+        "negative_presence_rate": 0.0744
+      },
+      {
+        "ngram": "gas",
+        "mutual_information": 0.026290219369449752,
+        "positive_presence_rate": 0.1274,
+        "negative_presence_rate": 0.016
+      },
+      {
+        "ngram": "atmospheric monitoring",
+        "mutual_information": 0.02621097740316372,
+        "positive_presence_rate": 0.0736,
+        "negative_presence_rate": 0.0
+      },
+      {
+        "ngram": "than",
+        "mutual_information": 0.025991397173546912,
+        "positive_presence_rate": 0.073,
+        "negative_presence_rate": 0.0
+      },
+      {
+        "ngram": "breaker at",
+        "mutual_information": 0.025991397173546912,
+        "positive_presence_rate": 0.073,
+        "negative_presence_rate": 0.0
+      },
+      {
+        "ngram": "sling",
+        "mutual_information": 0.025918226160738148,
+        "positive_presence_rate": 0.0728,
+        "negative_presence_rate": 0.0
+      },
+      {
+        "ngram": "the sling",
+        "mutual_information": 0.025918226160738148,
+        "positive_presence_rate": 0.0728,
+        "negative_presence_rate": 0.0
+      },
+      {
+        "ngram": "as",
+        "mutual_information": 0.025260190282468162,
+        "positive_presence_rate": 0.0,
+        "negative_presence_rate": 0.071
+      },
+      {
+        "ngram": "gas test",
+        "mutual_information": 0.025260190282468162,
+        "positive_presence_rate": 0.071,
+        "negative_presence_rate": 0.0
+      },
+      {
+        "ngram": "instead of",
+        "mutual_information": 0.02482200207821733,
+        "positive_presence_rate": 0.0698,
+        "negative_presence_rate": 0.0
+      },
+      {
+        "ngram": "instead",
+        "mutual_information": 0.02482200207821733,
+        "positive_presence_rate": 0.0698,
+        "negative_presence_rate": 0.0
+      },
+      {
+        "ngram": "worn",
+        "mutual_information": 0.024749009718522785,
+        "positive_presence_rate": 0.0696,
+        "negative_presence_rate": 0.0
+      },
+      {
+        "ngram": "re",
+        "mutual_information": 0.024457151600128763,
+        "positive_presence_rate": 0.0688,
+        "negative_presence_rate": 0.0
+      },
+      {
+        "ngram": "entry",
+        "mutual_information": 0.024389394879780105,
+        "positive_presence_rate": 0.1446,
+        "negative_presence_rate": 0.0264
+      },
+      {
+        "ngram": "vessel",
+        "mutual_information": 0.02380112109144883,
+        "positive_presence_rate": 0.067,
+        "negative_presence_rate": 0.0
+      },
+      {
+        "ngram": "vessel at",
+        "mutual_information": 0.02380112109144883,
+        "positive_presence_rate": 0.067,
+        "negative_presence_rate": 0.0
+      },
+      {
+        "ngram": "arrest",
+        "mutual_information": 0.02380112109144883,
+        "positive_presence_rate": 0.067,
+        "negative_presence_rate": 0.0
+      },
+      {
+        "ngram": "fall arrest",
+        "mutual_information": 0.02380112109144883,
+        "positive_presence_rate": 0.067,
+        "negative_presence_rate": 0.0
+      },
+      {
+        "ngram": "reported by",
+        "mutual_information": 0.023728284307832845,
+        "positive_presence_rate": 0.0,
+        "negative_presence_rate": 0.0668
+      },
+      {
+        "ngram": "directly",
+        "mutual_information": 0.023655458610308974,
+        "positive_presence_rate": 0.0666,
+        "negative_presence_rate": 0.0
+      },
+      {
+        "ngram": "but never",
+        "mutual_information": 0.02343704799907992,
+        "positive_presence_rate": 0.066,
+        "negative_presence_rate": 0.0
+      },
+      {
+        "ngram": "never",
+        "mutual_information": 0.02343704799907992,
+        "positive_presence_rate": 0.066,
+        "negative_presence_rate": 0.0
+      },
+      {
+        "ngram": "was still",
+        "mutual_information": 0.02292781059617391,
+        "positive_presence_rate": 0.0646,
+        "negative_presence_rate": 0.0
+      },
+      {
+        "ngram": "still",
+        "mutual_information": 0.02292781059617391,
+        "positive_presence_rate": 0.0646,
+        "negative_presence_rate": 0.0
+      },
+      {
+        "ngram": "noted",
+        "mutual_information": 0.02278241367496331,
+        "positive_presence_rate": 0.0,
+        "negative_presence_rate": 0.0642
+      },
+      {
+        "ngram": "believed",
+        "mutual_information": 0.022491752289871658,
+        "positive_presence_rate": 0.0634,
+        "negative_presence_rate": 0.0
+      },
+      {
+        "ngram": "without testing",
+        "mutual_information": 0.022491752289871658,
+        "positive_presence_rate": 0.0634,
+        "negative_presence_rate": 0.0
+      },
+      {
+        "ngram": "was performed",
+        "mutual_information": 0.022201267328098642,
+        "positive_presence_rate": 0.0626,
+        "negative_presence_rate": 0.0
+      },
+      {
+        "ngram": "did",
+        "mutual_information": 0.022201267328098642,
+        "positive_presence_rate": 0.0626,
+        "negative_presence_rate": 0.0
+      },
+      {
+        "ngram": "breaker at the",
+        "mutual_information": 0.022201267328098642,
+        "positive_presence_rate": 0.0626,
+        "negative_presence_rate": 0.0
+      },
+      {
+        "ngram": "did not",
+        "mutual_information": 0.022201267328098642,
+        "positive_presence_rate": 0.0626,
+        "negative_presence_rate": 0.0
+      },
+      {
+        "ngram": "was found",
+        "mutual_information": 0.021330868751379226,
+        "positive_presence_rate": 0.0602,
+        "negative_presence_rate": 0.0
+      },
+      {
+        "ngram": "climbed",
+        "mutual_information": 0.021330868751379226,
+        "positive_presence_rate": 0.0602,
+        "negative_presence_rate": 0.0
+      },
+      {
+        "ngram": "but",
+        "mutual_information": 0.0207554415352341,
+        "positive_presence_rate": 0.1416,
+        "negative_presence_rate": 0.0312
+      },
+      {
+        "ngram": "first aid",
+        "mutual_information": 0.02075148106712557,
+        "positive_presence_rate": 0.0,
+        "negative_presence_rate": 0.0586
+      }
+    ],
+    "generator_suffix_distribution": {
+      "corrective action has been requested": {
+        "rows": 487,
+        "SIF": 262,
+        "NON_SIF": 225
+      },
+      "supervisor was notified on the spot": {
+        "rows": 487,
+        "SIF": 243,
+        "NON_SIF": 244
+      },
+      "work was stopped immediately": {
+        "rows": 461,
+        "SIF": 234,
+        "NON_SIF": 227
+      },
+      "area has since been addressed": {
+        "rows": 515,
+        "SIF": 262,
+        "NON_SIF": 253
+      },
+      "this has been flagged to the site hse team": {
+        "rows": 514,
+        "SIF": 262,
+        "NON_SIF": 252
+      },
+      "no injury occurred": {
+        "rows": 470,
+        "SIF": 229,
+        "NON_SIF": 241
+      }
+    },
+    "interpretation": "Strong n-gram association is expected in templated synthetic data and can inflate held-out metrics even after exact deduplication."
+  },
+  "duplicate_and_near_duplicate_audit": {
+    "normalization": "lowercase + non-alphanumeric collapse + whitespace trim",
+    "simhash": "64-bit unigram+bigram SimHash, Hamming <= 6, exhaustive 8x8-bit band candidates",
+    "exact_duplicate_row_count": 2582,
+    "exact_duplicate_group_count": 989,
+    "near_duplicate_pair_count": 18009,
+    "total_split_groups": 4578,
+    "multirow_split_groups": 928,
+    "largest_split_group": 198,
+    "groups_with_label_conflicts": 0
+  },
+  "excluded_model_features": [
+    "id",
+    "report_type",
+    "activity",
+    "hazard",
+    "barrier",
+    "barrier_status",
+    "barrier_failure",
+    "sif_level",
+    "life_saving_rule",
+    "source_type"
+  ],
+  "allowed_model_features": [
+    "report_text"
+  ],
+  "severity": "SEVERE",
+  "conclusion": "Across the seven targets, structured labels deterministically or strongly encode downstream targets, and report_text is generated from label-specific templates. Only report_text is permitted, duplicate groups must be isolated, and all performance is prototype-only."
+}

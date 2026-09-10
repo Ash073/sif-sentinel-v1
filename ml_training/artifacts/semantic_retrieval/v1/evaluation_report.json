@@ -1,0 +1,5 @@
+{
+  "evaluation_type": "functional retrieval prototype only",
+  "supervised_metrics": null,
+  "warning": "No relevance judgments exist; this is not a trained supervised precursor predictor."
+}

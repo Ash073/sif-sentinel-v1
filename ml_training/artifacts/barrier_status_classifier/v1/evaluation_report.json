@@ -1,0 +1,105 @@
+{
+  "validation_metrics": {
+    "accuracy": 1.0,
+    "macro_f1": 1.0,
+    "weighted_f1": 1.0,
+    "per_class": {
+      "EFFECTIVE": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 129
+      },
+      "FAILED": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 550
+      },
+      "UNKNOWN": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 571
+      }
+    },
+    "confusion_matrix": [
+      [
+        129,
+        0,
+        0
+      ],
+      [
+        0,
+        550,
+        0
+      ],
+      [
+        0,
+        0,
+        571
+      ]
+    ],
+    "class_order": [
+      "EFFECTIVE",
+      "FAILED",
+      "UNKNOWN"
+    ],
+    "top_k_accuracy": 1.0,
+    "top_k": 2
+  },
+  "test_metrics": {
+    "accuracy": 1.0,
+    "macro_f1": 1.0,
+    "weighted_f1": 1.0,
+    "per_class": {
+      "EFFECTIVE": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 144
+      },
+      "FAILED": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 572
+      },
+      "UNKNOWN": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 597
+      }
+    },
+    "confusion_matrix": [
+      [
+        144,
+        0,
+        0
+      ],
+      [
+        0,
+        572,
+        0
+      ],
+      [
+        0,
+        0,
+        597
+      ]
+    ],
+    "class_order": [
+      "EFFECTIVE",
+      "FAILED",
+      "UNKNOWN"
+    ],
+    "top_k_accuracy": 1.0,
+    "top_k": 2
+  },
+  "error_analysis": {
+    "error_count": 0,
+    "representative_errors": []
+  },
+  "template_artifact_warning": "Strong n-gram association is expected in templated synthetic data and can inflate held-out metrics even after exact deduplication."
+}

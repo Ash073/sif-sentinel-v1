@@ -1,0 +1,43 @@
+{
+  "model_name": "semantic_retrieval",
+  "model_version": "v1",
+  "task": "assistive TF-IDF cosine retrieval",
+  "dataset_name": "safety_reports.csv",
+  "dataset_sha256": "3225b279a2b0809ba3a6c8e44ee50b5821e21f6f9d9c91c216ade67f6f94d691",
+  "source_type": "SYNTHETIC",
+  "feature_definition": "report_text word (1,2) TF-IDF",
+  "excluded_features": [
+    "id",
+    "report_type",
+    "activity",
+    "hazard",
+    "barrier",
+    "barrier_status",
+    "barrier_failure",
+    "sif_level",
+    "life_saving_rule",
+    "source_type"
+  ],
+  "preprocessing_version": "synthetic_text_v1",
+  "class_mapping": {},
+  "library_versions": {
+    "python": "3.13.7",
+    "scikit-learn": "1.6.1",
+    "numpy": "2.3.2",
+    "pandas": "2.3.2",
+    "scipy": "1.16.2",
+    "joblib": "1.5.2"
+  },
+  "training_timestamp": "2026-09-10T05:09:05.473053+00:00",
+  "random_seed": 20260909,
+  "train_size": 10000,
+  "validation_size": 0,
+  "test_size": 0,
+  "evaluation_metrics": {},
+  "synthetic_data_warning": "Assistive retrieval over synthetic reports; not a supervised precursor predictor.",
+  "intended_use": "Return similar synthetic report IDs for analyst assistance.",
+  "known_limitations": [
+    "Lexical similarity is not semantic causality.",
+    "Corpus is synthetic."
+  ]
+}

@@ -1,7 +1,7 @@
 {
   "model_name": "sif-tfidf-logreg",
   "model_version": "sif-tfidf-logreg-v2",
-  "training_timestamp": "2026-09-03T18:12:07.031751+00:00",
+  "training_timestamp": "2026-09-10T04:07:06.837116+00:00",
   "training_dataset_identifier": "safety-reports-raw-10k",
   "dataset_filename": "safety_reports.csv",
   "dataset_hash": "3225b279a2b0809ba3a6c8e44ee50b5821e21f6f9d9c91c216ade67f6f94d691",
@@ -16,6 +16,10 @@
   "preprocessing_version": "phase2_canonical_normalization",
   "scikit_learn_version": "1.8.0",
   "vectorizer_configuration": {
+    "ngram_range": [
+      1,
+      2
+    ],
     "min_df": 2,
     "max_df": 0.95,
     "sublinear_tf": true,
@@ -36,12 +40,6 @@
     "NON_SIF",
     "SIF"
   ],
-  "best_params": {
-    "n_estimators": 200,
-    "min_samples_split": 2,
-    "min_samples_leaf": 2,
-    "max_depth": null
-  },
   "metrics": {
     "classification_report": {
       "NON_SIF": {

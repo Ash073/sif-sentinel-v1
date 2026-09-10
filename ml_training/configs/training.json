@@ -1,0 +1,11 @@
+{
+  "random_seed": 20260909,
+  "dataset": "data/raw/safety_reports.csv",
+  "splits": {"train": 0.70, "validation": 0.15, "test": 0.15},
+  "input_features": ["report_text"],
+  "word_ngram_range": [1, 2],
+  "character_ngram_range": [3, 5],
+  "classifier": "LogisticRegression",
+  "class_weight": "balanced",
+  "sif_threshold_objective": "maximum validation F1 with recall tie-break"
+}

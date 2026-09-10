@@ -1,0 +1,889 @@
+{
+  "validation_metrics": {
+    "threshold": 0.05,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "roc_auc": 1.0,
+    "pr_auc": 1.0,
+    "brier_score": 6.508184414849619e-06,
+    "review_volume": 0.44,
+    "confusion_matrix": [
+      [
+        700,
+        0
+      ],
+      [
+        0,
+        550
+      ]
+    ],
+    "calibration_curve": {
+      "mean_predicted_probability": [
+        0.0002987983614367849,
+        0.0005717617192486735,
+        0.0008594250311054995,
+        0.0012294746289812253,
+        0.0023108614498940673,
+        0.4077560296555448,
+        0.9971467061528326,
+        0.9980455055595381,
+        0.9987890239990138,
+        0.9994879133199929
+      ],
+      "fraction_positive": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.4065040650406504,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    }
+  },
+  "test_metrics": {
+    "threshold": 0.05,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "roc_auc": 1.0,
+    "pr_auc": 1.0,
+    "brier_score": 7.5394377786841805e-06,
+    "review_volume": 0.43564356435643564,
+    "confusion_matrix": [
+      [
+        741,
+        0
+      ],
+      [
+        0,
+        572
+      ]
+    ],
+    "calibration_curve": {
+      "mean_predicted_probability": [
+        0.0003169280064974624,
+        0.000614717122670748,
+        0.0009337083749982088,
+        0.0014286962116532975,
+        0.002146059991871598,
+        0.35930614910650227,
+        0.9962095153322441,
+        0.9978004643147846,
+        0.998815119690571,
+        0.9994843028195548
+      ],
+      "fraction_positive": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.35877862595419846,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    }
+  },
+  "calibration": {
+    "method_evaluated": "sigmoid/Platt scaling fitted on validation only",
+    "selected": "sigmoid",
+    "uncalibrated_validation_brier": 0.0012237171586031309,
+    "calibrated_validation_brier": 6.508184414849619e-06,
+    "test_set_used_for_decision": false
+  },
+  "threshold_analysis": [
+    {
+      "threshold": 0.05,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.06,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.07,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.08,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.09,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.09999999999999999,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.10999999999999999,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.12,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.13,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.13999999999999999,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.14999999999999997,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.15999999999999998,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.16999999999999998,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.18,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.19,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.19999999999999996,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.20999999999999996,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.21999999999999997,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.22999999999999998,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.24,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.24999999999999994,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.25999999999999995,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.26999999999999996,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.27999999999999997,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.29,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.3,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.30999999999999994,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.31999999999999995,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.32999999999999996,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.33999999999999997,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.3499999999999999,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.35999999999999993,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.36999999999999994,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.37999999999999995,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.38999999999999996,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.3999999999999999,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.4099999999999999,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.41999999999999993,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.42999999999999994,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.43999999999999995,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.4499999999999999,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.4599999999999999,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.4699999999999999,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.4799999999999999,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.48999999999999994,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.49999999999999994,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.5099999999999999,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.5199999999999999,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.5299999999999999,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.5399999999999999,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.5499999999999999,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.5599999999999999,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.57,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.58,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.59,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.6,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.61,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.62,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.63,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.6399999999999999,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.6499999999999999,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.6599999999999999,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.6699999999999999,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.6799999999999999,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.69,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.7,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.71,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.72,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.73,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.74,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.7499999999999999,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.7599999999999999,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.7699999999999999,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.7799999999999999,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.7899999999999999,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.7999999999999999,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.8099999999999999,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.82,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.83,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.84,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.8499999999999999,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.8599999999999999,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.8699999999999999,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.8799999999999999,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.8899999999999999,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.8999999999999999,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.9099999999999999,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.9199999999999999,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.9299999999999999,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.94,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    },
+    {
+      "threshold": 0.95,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "review_volume": 0.44
+    }
+  ],
+  "error_analysis": {
+    "false_positives": [],
+    "false_negatives": [],
+    "ambiguous_cases": [
+      {
+        "id": "SYN-08063",
+        "report_text": "Repetitive lifting at the east process area without mechanical assistance led a contractor to report shoulder discomfort, toward the end of the shift. Area has since been addressed.",
+        "true_label": false,
+        "probability": 0.017604068990966632,
+        "predicted_label": false
+      },
+      {
+        "id": "SYN-04428",
+        "report_text": "Repetitive lifting at the machine shop without mechanical assistance led two workers to report shoulder discomfort, just after the toolbox talk. Area has since been addressed.",
+        "true_label": false,
+        "probability": 0.01715559405514322,
+        "predicted_label": false
+      },
+      {
+        "id": "SYN-06924",
+        "report_text": "The conveyor at the substation was stopped, locked out, and verified de-energized before two workers accessed it to clear a jam.",
+        "true_label": false,
+        "probability": 0.016660928381741054,
+        "predicted_label": false
+      },
+      {
+        "id": "SYN-01900",
+        "report_text": "The conveyor at the admin block was stopped, locked out, and verified de-energized before a new hire accessed it to clear a jam. Area has since been addressed.",
+        "true_label": false,
+        "probability": 0.014686791112150686,
+        "predicted_label": false
+      },
+      {
+        "id": "SYN-09421",
+        "report_text": "The conveyor at Unit 3 was stopped, locked out, and verified de-energized before an electrician accessed it to clear a jam. Area has since been addressed.",
+        "true_label": false,
+        "probability": 0.014478195184326718,
+        "predicted_label": false
+      },
+      {
+        "id": "SYN-06927",
+        "report_text": "The conveyor at the workshop was stopped, locked out, and verified de-energized before a contractor accessed it to clear a jam. Corrective action has been requested.",
+        "true_label": false,
+        "probability": 0.014472186648082992,
+        "predicted_label": false
+      },
+      {
+        "id": "SYN-06486",
+        "report_text": "The conveyor at the site was stopped, locked out, and verified de-energized before an operator accessed it to clear a jam. Work was stopped immediately.",
+        "true_label": false,
+        "probability": 0.010848850742199797,
+        "predicted_label": false
+      },
+      {
+        "id": "SYN-07009",
+        "report_text": "The conveyor at the workshop was stopped, locked out, and verified de-energized before the crew lead accessed it to clear a jam.",
+        "true_label": false,
+        "probability": 0.010077141029748812,
+        "predicted_label": false
+      },
+      {
+        "id": "SYN-10853",
+        "report_text": "The conveyor at the workshop was stopped, locked out, and verified de-energized before the crew lead accessed it to clear a jam.",
+        "true_label": false,
+        "probability": 0.010077141029748812,
+        "predicted_label": false
+      },
+      {
+        "id": "SYN-07655",
+        "report_text": "The conveyor at the boiler room was stopped, locked out, and verified de-energized before the crew lead accessed it to clear a jam.",
+        "true_label": false,
+        "probability": 0.009069570442658999,
+        "predicted_label": false
+      }
+    ],
+    "highly_confident_cases": [
+      {
+        "id": "SYN-08069",
+        "report_text": "damaged floor tile near Unit 3 creating an uneven surface, reported by a coworker.",
+        "true_label": false,
+        "probability": 5.105136750236689e-05,
+        "predicted_label": false
+      },
+      {
+        "id": "SYN-04028",
+        "report_text": "boxes and loose packaging blocking the walkway at the rail siding were reported as a trip hazard by a coworker.",
+        "true_label": false,
+        "probability": 6.429292989649435e-05,
+        "predicted_label": false
+      },
+      {
+        "id": "SYN-06897",
+        "report_text": "Boxes and loose packaging blocking the walkway at Line 2 were reported as a trip hazard by a coworker.",
+        "true_label": false,
+        "probability": 7.781986520119577e-05,
+        "predicted_label": false
+      },
+      {
+        "id": "SYN-03652",
+        "report_text": "damaged floor tile near the tank farm creating an uneven surface, reported by a coworker. No injury occurred.",
+        "true_label": false,
+        "probability": 8.341997332257658e-05,
+        "predicted_label": false
+      },
+      {
+        "id": "SYN-03601",
+        "report_text": "damaged floor tile near the admin block creating an uneven surface, reported by a coworker.",
+        "true_label": false,
+        "probability": 9.40461756307361e-05,
+        "predicted_label": false
+      },
+      {
+        "id": "SYN-08915",
+        "report_text": "Loose handrail on the stairwell at the utility yard, reported by a coworker who felt it wobble. No injury occurred.",
+        "true_label": false,
+        "probability": 9.560398263984132e-05,
+        "predicted_label": false
+      },
+      {
+        "id": "SYN-02963",
+        "report_text": "Boxes and loose packaging blocking the walkway at the parking structure were reported as a trip hazard by a coworker.",
+        "true_label": false,
+        "probability": 0.00010323390832198266,
+        "predicted_label": false
+      },
+      {
+        "id": "SYN-10285",
+        "report_text": "Permit for tank entry at the south yard was signed but no continuous atmospheric monitoring was actually running once an operator was inside.",
+        "true_label": true,
+        "probability": 0.9998801407869107,
+        "predicted_label": true
+      },
+      {
+        "id": "SYN-05054",
+        "report_text": "Permit for tank entry at the south yard was signed but no continuous atmospheric monitoring was actually running once an operator was inside.",
+        "true_label": true,
+        "probability": 0.9998801407869107,
+        "predicted_label": true
+      },
+      {
+        "id": "SYN-01821",
+        "report_text": "Loose handrail on the stairwell at Dock 4, reported by a coworker who felt it wobble.",
+        "true_label": false,
+        "probability": 0.0001349222552090032,
+        "predicted_label": false
+      }
+    ]
+  },
+  "template_artifact_warning": "Strong n-gram association is expected in templated synthetic data and can inflate held-out metrics even after exact deduplication."
+}
