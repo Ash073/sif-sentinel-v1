@@ -26,7 +26,7 @@ export const NAVIGATION_ITEMS: NavItem[] = [
   { name: 'Risk', href: '/risk', icon: Activity, roles: ['ADMIN', 'HSE_MANAGER', 'HSE_ANALYST', 'REVIEWER', 'VIEWER'] },
   { name: 'Precursors', href: '/precursors', icon: Brain, roles: ['ADMIN', 'HSE_MANAGER', 'HSE_ANALYST', 'REVIEWER', 'VIEWER'] },
   { name: 'LSR', href: '/rules', icon: ShieldCheck, roles: ['ADMIN', 'HSE_MANAGER', 'HSE_ANALYST', 'REVIEWER', 'VIEWER'] },
-  { name: 'Interventions', href: '/interventions', icon: CheckSquare, roles: ['ADMIN', 'HSE_MANAGER', 'HSE_ANALYST'] },
+  { name: 'Interventions', href: '/interventions', icon: CheckSquare, roles: ['ADMIN', 'HSE_MANAGER', 'HSE_ANALYST', 'REVIEWER'] },
   { name: 'Models', href: '/models', icon: Box, roles: ['ADMIN', 'HSE_MANAGER', 'HSE_ANALYST'] },
   { name: 'Admin', href: '/admin', icon: Settings, roles: ['ADMIN'] },
 ];

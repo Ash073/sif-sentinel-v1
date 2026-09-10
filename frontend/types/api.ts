@@ -132,6 +132,48 @@ export interface ExplainabilityFactor {
   evidence?: string | null;
 }
 
+// Narrative sub-shape (lives inside AnalysisResponse.narrative)
+export interface NarrativePayload {
+  executive_summary: string;
+  incident_interpretation: string;
+  causal_explanation: string;
+  sif_explanation: string;
+  risk_explanation: string;
+  lsr_explanation: string | null;
+  key_findings: string[];
+  counterfactual_explanation: string | null;
+  confidence_statement: string;
+  limitations: string[];
+  validation_status: string;
+  provider_name: string;
+  model_name: string;
+  [key: string]: unknown;
+}
+
+// Causal chain node/edge shapes
+export interface CausalNode {
+  id: string;
+  label?: string;
+  node_type?: string;   // 'activity' | 'hazard' | 'barrier' | 'outcome'
+  type?: string;
+  status?: string;
+  [key: string]: unknown;
+}
+
+export interface CausalEdge {
+  source: string;
+  target: string;
+  label?: string;
+  [key: string]: unknown;
+}
+
+export interface CausalChain {
+  nodes?: CausalNode[];
+  edges?: CausalEdge[];
+  chain_id?: string;
+  [key: string]: unknown;
+}
+
 export interface AnalysisResponse {
   report_id: string | null;
   analysis_id: string | null;
@@ -155,9 +197,9 @@ export interface AnalysisResponse {
   risk: RiskDetail | null;
   explainability_factors: ExplainabilityFactor[];
   safety_graph: Record<string, unknown> | null;
-  causal_chains: Record<string, unknown>[] | null;
+  causal_chains: CausalChain[] | null;
   reasoning_summary: string | null;
-  narrative: Record<string, unknown> | null;
+  narrative: NarrativePayload | null;
   interventions: Record<string, unknown>[] | null;
   prevention_plan: Record<string, unknown> | null;
   reviewer_summary: string | null;

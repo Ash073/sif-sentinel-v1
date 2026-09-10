@@ -3,10 +3,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { reportsApi } from '@/lib/api/reports';
 import { ErrorState, Skeleton } from '@/components/ui/states';
 import {
-  ReportStatusBadge, SIFLevelBadge, BarrierStatusBadge, RiskLevelBadge
+  ReportStatusBadge, SIFLevelBadge, BarrierStatusBadge, RiskLevelBadge,
 } from '@/components/ui/status-badges';
 import { Button } from '@/components/ui/button';
 import {
@@ -15,7 +16,9 @@ import {
 } from '@/components/ui/alert-dialog';
 import { toast } from '@/components/ui/toast';
 import {
-  ArrowLeft, Play, Shield, AlertTriangle, BookOpen, BarChart3, CheckCircle, Info, Cpu
+  ArrowLeft, Play, Shield, AlertTriangle, BookOpen, BarChart3,
+  CheckCircle, Info, Cpu, Eye, EyeOff, ChevronDown, ChevronUp,
+  Zap, Brain, GitBranch, Sparkles,
 } from 'lucide-react';
 import Link from 'next/link';
 import { format } from 'date-fns';
@@ -25,234 +28,381 @@ import type { ApiErrorBody } from '@/types/api';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { cn } from '@/lib/utils';
 import { ExplainabilityChart } from '@/components/reports/explainability-chart';
+import { ShapTextHighlighter } from '@/components/reports/ShapTextHighlighter';
+import { CausalChainFlow } from '@/components/reports/CausalChainFlow';
+import { GeminiNarrativeCard } from '@/components/reports/GeminiNarrativeCard';
+import { CounterfactualPanel } from '@/components/reports/CounterfactualPanel';
 
-// ─── Evidence Section ─────────────────────────────────────────────
+// ─── Collapsible Section Wrapper ─────────────────────────────────────────────
 
-function EvidenceSection({ analysis }: { analysis: AnalysisResponse }) {
+function CollapseSection({
+  title, icon, badge, defaultOpen = true, children,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  badge?: React.ReactNode;
+  defaultOpen?: boolean;
+  children: React.ReactNode;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
   return (
-    <div className="glass-card p-6 space-y-4">
-      <h3 className="font-semibold text-foreground flex items-center gap-2">
-        <BookOpen className="h-4 w-4 text-primary" />
-        Evidence — Why the Model Reached This Result
-      </h3>
+    <div className="bg-slate-900/60 border border-white/10 rounded-2xl overflow-hidden">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="w-full flex items-center justify-between px-5 py-4 hover:bg-white/[0.02] transition-colors"
+      >
+        <span className="flex items-center gap-2 text-[14px] font-semibold text-white">
+          {icon} {title} {badge}
+        </span>
+        {open
+          ? <ChevronUp className="w-4 h-4 text-slate-500" />
+          : <ChevronDown className="w-4 h-4 text-slate-500" />}
+      </button>
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+            className="overflow-hidden"
+          >
+            <div className="px-5 pb-5 pt-1 border-t border-white/5">
+              {children}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
 
-      {analysis.evidence_span && (
-        <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg">
-          <p className="text-xs font-medium text-primary mb-1">Key Evidence Span</p>
-          <p className="text-sm text-foreground italic">&ldquo;{analysis.evidence_span}&rdquo;</p>
-        </div>
-      )}
+// ─── Section Label ────────────────────────────────────────────────────────────
 
-      {analysis.evidence_sentences.length > 0 && (
-        <div className="space-y-2">
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Evidence Sentences</p>
-          {analysis.evidence_sentences.map((s, i) => (
-            <div key={i} className="flex gap-2 text-sm">
-              <span className="text-primary font-mono text-xs pt-0.5">{i + 1}.</span>
-              <p className="text-foreground">{s}</p>
+function Label({ children }: { children: React.ReactNode }) {
+  return <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-1">{children}</p>;
+}
+function Value({ children, className }: { children: React.ReactNode; className?: string }) {
+  return <p className={cn('text-[13px] text-slate-200', className)}>{children}</p>;
+}
+
+// ─── Narrative + SHAP Section ────────────────────────────────────────────────
+
+function NarrativeSection({
+  reportText,
+  analysis,
+}: {
+  reportText: string;
+  analysis: AnalysisResponse | null;
+}) {
+  const [showHighlights, setShowHighlights] = useState(true);
+  const hasHighlights = analysis && (
+    (analysis.explainability_factors?.length ?? 0) > 0 ||
+    (analysis.evidence_terms?.length ?? 0) > 0
+  );
+
+  return (
+    <CollapseSection
+      title="Incident Narrative"
+      icon={<BookOpen className="w-4 h-4 text-emerald-400" />}
+      badge={
+        hasHighlights && (
+          <span className="ml-1 text-[10px] px-2 py-0.5 rounded-full bg-orange-500/15 border border-orange-500/25 text-orange-400 font-medium uppercase tracking-wide">
+            XAI Active
+          </span>
+        )
+      }
+    >
+      <div className="space-y-4 pt-2">
+        {/* Toggle bar — only shown when analysis available */}
+        {hasHighlights && (
+          <div className="flex items-center justify-between">
+            <p className="text-[12px] text-slate-500">
+              Hover over highlighted terms to see SHAP weights.
+            </p>
+            <button
+              onClick={() => setShowHighlights((s) => !s)}
+              className="flex items-center gap-1.5 text-[11px] font-medium text-slate-400 hover:text-white transition-colors px-2.5 py-1 rounded-lg border border-white/10 hover:border-white/20 bg-slate-900"
+            >
+              {showHighlights
+                ? <><EyeOff className="w-3.5 h-3.5" /> Plain text</>
+                : <><Eye className="w-3.5 h-3.5" /> Show highlights</>}
+            </button>
+          </div>
+        )}
+
+        {/* Text rendering */}
+        {showHighlights && analysis && hasHighlights ? (
+          <ShapTextHighlighter
+            text={reportText}
+            factors={analysis.explainability_factors ?? []}
+            evidenceTerms={analysis.evidence_terms ?? []}
+            evidenceSpan={analysis.evidence_span}
+          />
+        ) : (
+          <div className="p-5 bg-slate-950/60 rounded-xl border border-white/5 text-[14px] text-slate-300 leading-8 whitespace-pre-wrap font-mono">
+            {reportText}
+          </div>
+        )}
+      </div>
+    </CollapseSection>
+  );
+}
+
+// ─── Safety Intelligence Section ──────────────────────────────────────────────
+
+function SafetyIntelligenceSection({ analysis }: { analysis: AnalysisResponse }) {
+  return (
+    <CollapseSection
+      title="Safety Intelligence"
+      icon={<Shield className="w-4 h-4 text-emerald-400" />}
+      badge={
+        <span className="ml-1 flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-medium">
+          <CheckCircle className="w-3 h-3" /> Deterministic
+        </span>
+      }
+    >
+      <div className="space-y-5 pt-2">
+        {/* Top row — verdicts */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {[
+            {
+              label: 'SIF Level',
+              content: <SIFLevelBadge level={analysis.sif_level} />,
+            },
+            {
+              label: 'SIF Potential',
+              content: (
+                <span className={cn('text-[13px] font-semibold', analysis.sif_potential ? 'text-red-400' : 'text-emerald-400')}>
+                  {analysis.sif_potential ? '⚠ YES — SIF Detected' : '✓ None Detected'}
+                </span>
+              ),
+            },
+            {
+              label: 'Barrier Status',
+              content: <BarrierStatusBadge status={analysis.barrier_status} />,
+            },
+            {
+              label: 'Review Required',
+              content: (
+                <span className={cn('text-[13px] font-semibold', analysis.review_required ? 'text-amber-400' : 'text-emerald-400')}>
+                  {analysis.review_required ? 'Yes' : 'No'}
+                </span>
+              ),
+            },
+          ].map((item) => (
+            <div key={item.label} className="bg-slate-950/50 border border-white/5 rounded-xl p-3 space-y-1.5">
+              <Label>{item.label}</Label>
+              {item.content}
             </div>
           ))}
         </div>
-      )}
 
-      {analysis.evidence_terms.length > 0 && (
-        <div className="space-y-2">
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Evidence Terms</p>
-          <div className="flex flex-wrap gap-2">
-            {analysis.evidence_terms.map((t, i) => (
-              <span key={i} className="px-2 py-1 bg-primary/10 text-primary border border-primary/20 rounded text-xs font-mono">
-                {t}
+        {/* Causal chain row */}
+        {(analysis.activity || analysis.hazard || analysis.barrier) && (
+          <div className="space-y-2">
+            <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
+              <GitBranch className="w-3 h-3" /> Causal Chain
+            </p>
+            <div className="flex flex-wrap items-center gap-2">
+              {analysis.activity && (
+                <>
+                  <span className="px-3 py-1.5 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-300 text-[12px] font-medium">
+                    🔧 {analysis.activity}
+                  </span>
+                  <span className="text-slate-700 text-[10px]">→</span>
+                </>
+              )}
+              {analysis.hazard && (
+                <>
+                  <span className="px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-300 text-[12px] font-medium">
+                    ⚡ {analysis.hazard}
+                  </span>
+                  <span className="text-slate-700 text-[10px]">→</span>
+                </>
+              )}
+              {analysis.barrier && (
+                <>
+                  <span className={cn(
+                    'px-3 py-1.5 rounded-lg text-[12px] font-medium border',
+                    analysis.barrier_status === 'FAILED'
+                      ? 'bg-red-500/10 border-red-500/20 text-red-300'
+                      : analysis.barrier_status === 'EFFECTIVE'
+                      ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-300'
+                      : 'bg-slate-800 border-slate-700 text-slate-300',
+                  )}>
+                    🛡 {analysis.barrier}
+                  </span>
+                  <span className="text-slate-700 text-[10px]">→</span>
+                </>
+              )}
+              <span className={cn(
+                'px-3 py-1.5 rounded-lg text-[12px] font-bold border',
+                analysis.sif_potential
+                  ? 'bg-red-500/20 border-red-500/30 text-red-300'
+                  : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-300',
+              )}>
+                {analysis.sif_potential ? '💀 SIF Outcome' : '✓ Controlled'}
               </span>
-            ))}
+            </div>
           </div>
+        )}
+
+        {/* Life-saving rule */}
+        {analysis.life_saving_rule && (
+          <div className="flex items-start gap-3 p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/15">
+            <Shield className="w-4 h-4 text-emerald-400 mt-0.5 shrink-0" />
+            <div>
+              <Label>Life-Saving Rule Triggered</Label>
+              <Value className="text-emerald-300 font-medium">{analysis.life_saving_rule}</Value>
+            </div>
+          </div>
+        )}
+
+        {/* Explanation */}
+        <div className="p-3 rounded-xl bg-slate-950/50 border border-white/5">
+          <Label>Model Explanation</Label>
+          <p className="text-[13px] text-slate-300 leading-relaxed">{analysis.explanation}</p>
         </div>
-      )}
-    </div>
+      </div>
+    </CollapseSection>
   );
 }
 
-// ─── Analysis Section ─────────────────────────────────────────────
+// ─── Confidence Metrics Section ───────────────────────────────────────────────
 
-function AnalysisSection({ analysis }: { analysis: AnalysisResponse }) {
-  const isLlmAssisted = analysis.llm_used;
+function ConfidenceSection({ analysis }: { analysis: AnalysisResponse }) {
+  const metrics = [
+    { label: 'Model Probability', value: (analysis.model_probability * 100).toFixed(1) + '%' },
+    { label: 'Overall Confidence', value: (analysis.overall_confidence * 100).toFixed(1) + '%' },
+    { label: 'Rule Confidence', value: (analysis.rule_confidence * 100).toFixed(1) + '%' },
+    { label: 'Model Version', value: analysis.model_version, mono: true },
+  ];
 
   return (
-    <div className="space-y-4">
-      {/* Safety Outcome Header */}
-      <div className="glass-card p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold text-foreground flex items-center gap-2">
-            <Shield className="h-4 w-4 text-primary" />
-            Authoritative Safety Intelligence
-          </h3>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground border border-border rounded-md px-2 py-1">
-            <CheckCircle className="h-3 w-3 text-success" />
-            Deterministic — Backend Authoritative
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="space-y-1">
-            <p className="text-xs text-muted-foreground font-medium">SIF Level</p>
-            <SIFLevelBadge level={analysis.sif_level} />
-          </div>
-          <div className="space-y-1">
-            <p className="text-xs text-muted-foreground font-medium">SIF Potential</p>
-            <span className={cn(
-              'text-sm font-semibold',
-              analysis.sif_potential ? 'text-destructive' : 'text-success'
-            )}>
-              {analysis.sif_potential ? 'YES — SIF Potential Detected' : 'No SIF Potential'}
-            </span>
-          </div>
-          <div className="space-y-1">
-            <p className="text-xs text-muted-foreground font-medium">Barrier Status</p>
-            <BarrierStatusBadge status={analysis.barrier_status} />
-          </div>
-          <div className="space-y-1">
-            <p className="text-xs text-muted-foreground font-medium">Review Required</p>
-            <span className={cn(
-              'text-sm font-semibold',
-              analysis.review_required ? 'text-warning' : 'text-success'
-            )}>
-              {analysis.review_required ? 'Yes' : 'No'}
-            </span>
-          </div>
-        </div>
-
-        <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4 pt-4 border-t border-border/50">
-          {analysis.activity && (
-            <div>
-              <p className="text-xs text-muted-foreground font-medium">Activity</p>
-              <p className="text-sm text-foreground mt-0.5">{analysis.activity}</p>
-            </div>
-          )}
-          {analysis.hazard && (
-            <div>
-              <p className="text-xs text-muted-foreground font-medium">Hazard</p>
-              <p className="text-sm text-foreground mt-0.5">{analysis.hazard}</p>
-            </div>
-          )}
-          {analysis.barrier && (
-            <div>
-              <p className="text-xs text-muted-foreground font-medium">Barrier / Control</p>
-              <p className="text-sm text-foreground mt-0.5">{analysis.barrier}</p>
-            </div>
-          )}
-          {analysis.life_saving_rule && (
-            <div>
-              <p className="text-xs text-muted-foreground font-medium">Life-Saving Rule</p>
-              <p className="text-sm text-primary font-medium mt-0.5">{analysis.life_saving_rule}</p>
-            </div>
-          )}
-        </div>
-
-        <div className="mt-4 pt-4 border-t border-border/50">
-          <p className="text-xs text-muted-foreground font-medium mb-2">Model Explanation</p>
-          <p className="text-sm text-foreground leading-relaxed">{analysis.explanation}</p>
-        </div>
-      </div>
-
-      {/* Confidence Metrics */}
-      <div className="glass-card p-6">
-        <h3 className="font-semibold text-foreground flex items-center gap-2 mb-4">
-          <BarChart3 className="h-4 w-4 text-primary" />
-          Confidence & Model Metrics
-        </h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div>
-            <p className="text-xs text-muted-foreground font-medium">Model Probability</p>
-            <p className="text-lg font-bold text-foreground mt-0.5">
-              {(analysis.model_probability * 100).toFixed(1)}%
-            </p>
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground font-medium">Overall Confidence</p>
-            <p className="text-lg font-bold text-foreground mt-0.5">
-              {(analysis.overall_confidence * 100).toFixed(1)}%
-            </p>
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground font-medium">Rule Confidence</p>
-            <p className="text-lg font-bold text-foreground mt-0.5">
-              {(analysis.rule_confidence * 100).toFixed(1)}%
-            </p>
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground font-medium">Model Version</p>
-            <p className="text-sm font-mono text-muted-foreground mt-0.5">{analysis.model_version}</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Risk */}
-      {analysis.risk && (
-        <div className="glass-card p-6">
-          <h3 className="font-semibold text-foreground flex items-center gap-2 mb-4">
-            <AlertTriangle className="h-4 w-4 text-warning" />
-            Risk Assessment
-          </h3>
-          <div className="flex items-center gap-6 mb-4">
-            <div>
-              <p className="text-xs text-muted-foreground font-medium">Risk Score</p>
-              <p className="text-2xl font-bold text-foreground">{analysis.risk.score}</p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground font-medium">Priority</p>
-              <RiskLevelBadge level={analysis.risk.priority} />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Risk Components</p>
-            {analysis.risk.components.map((c, i) => (
-              <div key={i} className="flex items-start gap-3 p-3 bg-muted/20 rounded-lg text-sm">
-                <span className="font-semibold text-foreground min-w-24">{c.name}</span>
-                <span className="text-warning font-bold w-8">{c.score}</span>
-                <span className="text-muted-foreground">{c.reason}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Explainability Factors */}
-      {analysis.explainability_factors && analysis.explainability_factors.length > 0 && (
-        <ExplainabilityChart factors={analysis.explainability_factors} />
-      )}
-
-      {/* Evidence */}
-      <EvidenceSection analysis={analysis} />
-
-      {/* LLM Reviewer Assistance — clearly labeled */}
-      {(analysis.reviewer_summary || isLlmAssisted) && (
-        <div className="glass-card p-6 border-l-4 border-l-blue-500/50">
-          <div className="flex items-center gap-2 mb-3">
-            <Cpu className="h-4 w-4 text-blue-400" />
-            <h3 className="font-semibold text-foreground">Reviewer Assistance</h3>
-            <div className="ml-auto flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-blue-500/10 border border-blue-500/20 text-xs text-blue-400">
-              <Info className="h-3 w-3" />
-              AI-Generated — Not Authoritative
-            </div>
-          </div>
-          <p className="text-xs text-muted-foreground mb-3">
-            The following is generated by the LLM reviewer assistance module. It is advisory only.
-            All authoritative safety classifications are determined by the deterministic backend model above.
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      {metrics.map((m) => (
+        <div key={m.label} className="bg-slate-900/60 border border-white/10 rounded-xl p-4 text-center">
+          <p className="text-[10px] text-slate-500 uppercase tracking-widest mb-1">{m.label}</p>
+          <p className={cn('text-[20px] font-bold text-white', m.mono && 'text-[13px] font-mono text-slate-400')}>
+            {m.value}
           </p>
-          {analysis.reviewer_summary ? (
-            <p className="text-sm text-foreground leading-relaxed">{analysis.reviewer_summary}</p>
-          ) : (
-            <p className="text-sm text-muted-foreground">LLM reviewer assistance was attempted but no summary was generated.</p>
-          )}
-          {analysis.llm_provider && (
-            <p className="text-xs text-muted-foreground mt-2">Provider: {analysis.llm_provider} · Model: {analysis.llm_model_used}</p>
-          )}
         </div>
-      )}
+      ))}
     </div>
   );
 }
 
-// ─── Report Detail Page ───────────────────────────────────────────
+// ─── Risk Assessment Section ──────────────────────────────────────────────────
+
+function RiskSection({ analysis }: { analysis: AnalysisResponse }) {
+  if (!analysis.risk) return null;
+  const maxScore = Math.max(...analysis.risk.components.map((c) => c.score), 1);
+
+  return (
+    <CollapseSection
+      title="Risk Assessment"
+      icon={<AlertTriangle className="w-4 h-4 text-amber-400" />}
+      badge={
+        <span className="ml-1 text-[13px] font-bold text-amber-400 tabular-nums">
+          {analysis.risk.score}
+        </span>
+      }
+    >
+      <div className="space-y-4 pt-2">
+        <div className="flex items-center gap-4">
+          <div>
+            <Label>Risk Score</Label>
+            <p className="text-[32px] font-bold text-white tabular-nums leading-none">{analysis.risk.score}</p>
+          </div>
+          <div>
+            <Label>Priority</Label>
+            <RiskLevelBadge level={analysis.risk.priority} />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label>Risk Components</Label>
+          {analysis.risk.components.map((c, i) => (
+            <div key={i} className="space-y-1">
+              <div className="flex items-center justify-between text-[12px]">
+                <span className="text-slate-300 font-medium">{c.name}</span>
+                <span className="font-bold text-amber-400 tabular-nums">{c.score}</span>
+              </div>
+              <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                <motion.div
+                  initial={{ scaleX: 0 }}
+                  animate={{ scaleX: c.score / maxScore }}
+                  transition={{ duration: 0.6, delay: i * 0.08 }}
+                  className="h-full origin-left rounded-full bg-gradient-to-r from-amber-500 to-red-500"
+                />
+              </div>
+              <p className="text-[11px] text-slate-500">{c.reason}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </CollapseSection>
+  );
+}
+
+// ─── Causal Chain Section ────────────────────────────────────────────────────
+
+function CausalChainSection({ analysis }: { analysis: AnalysisResponse }) {
+  const hasChain = !!(analysis.causal_chains?.length || analysis.safety_graph ||
+    analysis.activity || analysis.hazard || analysis.barrier);
+  if (!hasChain) return null;
+  return (
+    <CollapseSection
+      title="Causal Chain — Forensic DAG"
+      icon={<GitBranch className="w-4 h-4 text-teal-400" />}
+      badge={
+        <span className="ml-1 text-[10px] px-2 py-0.5 rounded-full bg-teal-500/10 border border-teal-500/20 text-teal-400 font-medium">
+          React Flow
+        </span>
+      }
+    >
+      <div className="pt-2">
+        <CausalChainFlow analysis={analysis} />
+        {analysis.reasoning_summary && (
+          <div className="mt-3 p-3 rounded-xl bg-slate-950/50 border border-white/5">
+            <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-1">Reasoning Summary</p>
+            <p className="text-[12px] text-slate-400 leading-relaxed">{analysis.reasoning_summary}</p>
+          </div>
+        )}
+      </div>
+    </CollapseSection>
+  );
+}
+
+// ─── SHAP Explainability Section ──────────────────────────────────────────────
+
+function ExplainabilitySection({ analysis }: { analysis: AnalysisResponse }) {
+  if (!analysis.explainability_factors?.length) return null;
+  return (
+    <CollapseSection
+      title="SHAP Feature Importance"
+      icon={<BarChart3 className="w-4 h-4 text-purple-400" />}
+      badge={
+        <span className="ml-1 text-[10px] px-2 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 font-medium">
+          XAI
+        </span>
+      }
+    >
+      <div className="pt-2">
+        <ExplainabilityChart factors={analysis.explainability_factors} />
+      </div>
+    </CollapseSection>
+  );
+}
+
+// ─── Gemini Narrative Section ─────────────────────────────────────────────────
+
+// GeminiSection is now replaced by the GeminiNarrativeCard component (imported above)
+// Kept here as a no-op to avoid dead-code errors
+function _GeminiSectionLegacy() { return null; }
+
+// ─── Main Report Detail Page ──────────────────────────────────────────────────
 
 export default function ReportDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -298,7 +448,7 @@ export default function ReportDetailPage() {
   const canDelete = user && ['ADMIN', 'HSE_MANAGER'].includes(user.role);
 
   if (reportQ.isLoading) return (
-    <div className="space-y-4">
+    <div className="space-y-4 max-w-5xl">
       <Skeleton className="h-8 w-48" />
       <Skeleton className="h-48 w-full" />
       <Skeleton className="h-64 w-full" />
@@ -315,38 +465,48 @@ export default function ReportDetailPage() {
 
   if (!report) return null;
 
+  const activeAnalysis = analysis;
+  const hasAnalysis = !!activeAnalysis;
+
   return (
-    <div className="space-y-6 max-w-5xl">
-      {/* Breadcrumb + Actions */}
+    <div className="space-y-4 max-w-5xl">
+
+      {/* ── Breadcrumb + Action Bar ─────────────────────────────── */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
           <Link
             href="/reports"
-            className="inline-flex items-center justify-center size-8 rounded-lg hover:bg-muted/50 transition-colors text-muted-foreground"
+            className="w-8 h-8 rounded-lg border border-white/10 bg-slate-900/60 flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition-all"
           >
             <ArrowLeft className="h-4 w-4" />
           </Link>
           <div>
-            <h1 className="text-xl font-bold tracking-tight text-foreground font-mono">{report.report_id}</h1>
-            <p className="text-sm text-muted-foreground">{report.report_type.replace(/_/g, ' ')}</p>
+            <h1 className="text-[18px] font-bold text-white font-mono tracking-tight">{report.report_id}</h1>
+            <p className="text-[12px] text-slate-500 capitalize">{report.report_type.replace(/_/g, ' ')}</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+
+        <div className="flex items-center gap-2 flex-wrap">
           <ReportStatusBadge status={report.status} />
+
           {canAnalyze && (
             <Button
               onClick={() => analyzeMutation.mutate()}
               disabled={analyzeMutation.isPending}
-              className="gap-2"
               variant={report.status === 'NEW' ? 'default' : 'outline'}
+              className="h-8 gap-1.5 text-[12px]"
             >
-              <Play className="h-4 w-4" />
-              {analyzeMutation.isPending ? 'Running...' : 'Run Analysis'}
+              {analyzeMutation.isPending
+                ? <><Zap className="h-3.5 w-3.5 animate-pulse" /> Analysing…</>
+                : <><Play className="h-3.5 w-3.5" /> Run Analysis</>}
             </Button>
           )}
+
           {canDelete && (
             <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-              <Button variant="destructive" size="sm" onClick={() => setDeleteDialogOpen(true)}>Delete</Button>
+              <Button variant="destructive" size="sm" onClick={() => setDeleteDialogOpen(true)} className="h-8 text-[12px]">
+                Delete
+              </Button>
               <AlertDialogContent>
                 <AlertDialogHeader>
                   <AlertDialogTitle>Delete Report?</AlertDialogTitle>
@@ -357,7 +517,7 @@ export default function ReportDetailPage() {
                 <AlertDialogFooter>
                   <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
                   <Button variant="destructive" onClick={() => deleteMutation.mutate()} disabled={deleteMutation.isPending}>
-                    {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
+                    {deleteMutation.isPending ? 'Deleting…' : 'Delete'}
                   </Button>
                 </AlertDialogFooter>
               </AlertDialogContent>
@@ -366,68 +526,72 @@ export default function ReportDetailPage() {
         </div>
       </div>
 
-      {/* Original Report */}
-      <div className="glass-card p-6">
-        <h2 className="font-semibold text-foreground mb-4 flex items-center gap-2">
-          <BookOpen className="h-4 w-4 text-primary" />
-          Original Report
-        </h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
-          <div>
-            <p className="text-xs text-muted-foreground font-medium">Location</p>
-            <p className="text-sm text-foreground">{report.location}</p>
+      {/* ── Report Metadata strip ───────────────────────────────── */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        {[
+          { label: 'Location', value: report.location },
+          { label: 'Department', value: report.department },
+          { label: 'Source', value: report.source_type.replace(/_/g, ' ') },
+          { label: 'Activity', value: report.activity || '—' },
+          { label: 'Reported', value: (() => { try { return format(new Date(report.reported_at), 'dd MMM yyyy'); } catch { return report.reported_at; } })() },
+          { label: 'Created', value: (() => { try { return format(new Date(report.created_at), 'dd MMM yyyy'); } catch { return report.created_at; } })() },
+        ].map((item) => (
+          <div key={item.label} className="bg-slate-900/60 border border-white/10 rounded-xl px-3 py-2.5">
+            <Label>{item.label}</Label>
+            <Value className="capitalize">{item.value}</Value>
           </div>
-          <div>
-            <p className="text-xs text-muted-foreground font-medium">Department</p>
-            <p className="text-sm text-foreground">{report.department}</p>
-          </div>
-          {report.activity && (
-            <div>
-              <p className="text-xs text-muted-foreground font-medium">Activity</p>
-              <p className="text-sm text-foreground">{report.activity}</p>
-            </div>
-          )}
-          <div>
-            <p className="text-xs text-muted-foreground font-medium">Source Type</p>
-            <p className="text-sm text-foreground capitalize">{report.source_type.replace(/_/g, ' ')}</p>
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground font-medium">Reported At</p>
-            <p className="text-sm text-foreground">
-              {(() => { try { return format(new Date(report.reported_at), 'dd MMM yyyy HH:mm'); } catch { return report.reported_at; } })()}
-            </p>
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground font-medium">Created</p>
-            <p className="text-sm text-foreground">
-              {(() => { try { return format(new Date(report.created_at), 'dd MMM yyyy HH:mm'); } catch { return report.created_at; } })()}
-            </p>
-          </div>
-        </div>
-        <div>
-          <p className="text-xs text-muted-foreground font-medium mb-2">Report Narrative</p>
-          <div className="p-4 bg-muted/20 rounded-lg text-sm text-foreground leading-relaxed whitespace-pre-wrap border border-border/50">
-            {report.report_text}
-          </div>
-        </div>
+        ))}
       </div>
 
-      {/* Analysis Result */}
-      {(analysis || report.status !== 'NEW') && (
-        <>
-          {analysis ? (
-            <AnalysisSection analysis={analysis} />
-          ) : (
-            <div className="glass-card p-6 flex items-center gap-3 text-muted-foreground">
-              <Info className="h-5 w-5" />
-              <p className="text-sm">
-                This report has been analyzed (Status: <strong>{report.status}</strong>). 
-                Run analysis again to view the latest result.
-              </p>
-            </div>
-          )}
-        </>
+      {/* ── Narrative + XAI ────────────────────────────────────── */}
+      <NarrativeSection reportText={report.report_text} analysis={activeAnalysis} />
+
+      {/* ── Analysis pending state ──────────────────────────────── */}
+      {!hasAnalysis && report.status !== 'NEW' && (
+        <div className="bg-slate-900/60 border border-white/10 rounded-2xl p-4 flex items-center gap-3">
+          <Info className="h-4 w-4 text-slate-400 shrink-0" />
+          <p className="text-[13px] text-slate-400">
+            This report was previously analysed (Status: <strong className="text-slate-300">{report.status}</strong>). Run analysis again to load the latest result and activate the XAI highlights.
+          </p>
+        </div>
       )}
+
+      {/* ── Full Analysis block ─────────────────────────────────── */}
+      <AnimatePresence>
+        {hasAnalysis && (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4 }}
+            className="space-y-4"
+          >
+            {/* Confidence row — always visible at top */}
+            <ConfidenceSection analysis={activeAnalysis!} />
+
+            {/* Safety intelligence */}
+            <SafetyIntelligenceSection analysis={activeAnalysis!} />
+
+            {/* Causal chain DAG */}
+            <CausalChainSection analysis={activeAnalysis!} />
+
+            {/* Risk assessment */}
+            <RiskSection analysis={activeAnalysis!} />
+
+            {/* SHAP bar charts */}
+            <ExplainabilitySection analysis={activeAnalysis!} />
+
+            {/* Gemini AI narrative — full card with typewriter */}
+            {(activeAnalysis!.llm_attempted || activeAnalysis!.narrative) && (
+              <GeminiNarrativeCard analysis={activeAnalysis!} />
+            )}
+
+            {/* What-If counterfactual simulation */}
+            <CounterfactualPanel analysis={activeAnalysis!} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 }

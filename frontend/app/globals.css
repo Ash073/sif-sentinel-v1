@@ -149,3 +149,8 @@
 @utility chart-container {
   @apply h-[300px] w-full mt-4;
 }
+
+@keyframes shimmer {
+  0%   { transform: translateX(-150%); }
+  100% { transform: translateX(300%); }
+}

@@ -42,7 +42,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const userData = await authService.getMe();
       setUser(userData);
-      router.push('/');
     } catch (error) {
       localStorage.removeItem('sif_token');
       throw error;
