@@ -25,6 +25,8 @@ dependencies = [
   "redis>=8.1.0",
   "slowapi>=0.1.10",
   "prometheus-client>=0.26.0",
+  "torch>=2.0.0",
+  "transformers>=4.35.0",
 ]
 
 

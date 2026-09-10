@@ -329,6 +329,45 @@ def extract_entities(document: PreprocessedText) -> ExtractedEntities:
         )
         status = BarrierStatus.FAILED if failure else BarrierStatus.UNKNOWN
 
+    # Load and evaluate ML entity models if available
+    try:
+        import joblib
+        from pathlib import Path
+        _base_dir = Path(__file__).parents[4] / "artifacts" / "models" / "v2"
+        _vec_p = _base_dir / "entity_vectorizer.joblib"
+        _act_p = _base_dir / "activity_model.joblib"
+        _haz_p = _base_dir / "hazard_model.joblib"
+        _bar_p = _base_dir / "barrier_model.joblib"
+
+        if _vec_p.exists() and _act_p.exists() and _haz_p.exists() and _bar_p.exists():
+            _vec = joblib.load(_vec_p)
+            _feat = _vec.transform([document.normalized_text])
+
+            _act_m = joblib.load(_act_p)
+            _ml_act = _act_m.predict(_feat)[0]
+            if _ml_act != "NONE":
+                act_str = _ml_act
+                if _ml_act not in all_activities:
+                    all_activities.insert(0, _ml_act)
+
+            _haz_m = joblib.load(_haz_p)
+            _ml_haz = _haz_m.predict(_feat)[0]
+            if _ml_haz != "NONE":
+                haz_str = _ml_haz
+                if _ml_haz not in all_hazards:
+                    all_hazards.insert(0, _ml_haz)
+
+            _bar_m = joblib.load(_bar_p)
+            _ml_bar = _bar_m.predict(_feat)[0]
+            if _ml_bar != "NONE":
+                bar_str = _ml_bar
+                if _ml_bar not in all_barriers:
+                    all_barriers.insert(0, _ml_bar)
+                if status == BarrierStatus.UNKNOWN and failure:
+                    status = BarrierStatus.FAILED
+    except Exception:
+        pass
+
     terms = [item.original_span for item in structured.items] + ([failure] if failure else [])
     confidence = min(1.0, 0.18 * len(terms) + (0.18 if act_str and haz_str else 0.0))
 

@@ -1,6 +1,4 @@
 {
-  "runtime_available": false,
-  "runtime_unavailable_reason": "Tokenizer/configuration are retained for research provenance; trained model weights are not included in this repository.",
   "model_name": "sif-transformer-v4b",
   "model_version": "v4b",
   "architecture": "DistilBertForSequenceClassification",
@@ -136,10 +134,39 @@
     }
   },
   "training_summary": {
-    "status": "loaded_existing_checkpoint",
     "best_epoch": 3,
     "best_val_loss": 0.0002,
-    "best_val_f1": 1.0
+    "best_val_f1": 1.0,
+    "total_training_time_seconds": 5257.6,
+    "history": [
+      {
+        "epoch": 1,
+        "train_loss": 0.0922,
+        "val_loss": 0.0011,
+        "val_precision": 1.0,
+        "val_recall": 1.0,
+        "val_f1": 1.0,
+        "val_pr_auc": 1.0
+      },
+      {
+        "epoch": 2,
+        "train_loss": 0.0009,
+        "val_loss": 0.0004,
+        "val_precision": 1.0,
+        "val_recall": 1.0,
+        "val_f1": 1.0,
+        "val_pr_auc": 1.0
+      },
+      {
+        "epoch": 3,
+        "train_loss": 0.0004,
+        "val_loss": 0.0002,
+        "val_precision": 1.0,
+        "val_recall": 1.0,
+        "val_f1": 1.0,
+        "val_pr_auc": 1.0
+      }
+    ]
   },
   "operating_threshold": 0.49,
   "validation_metrics": {
@@ -192,5 +219,5 @@
     "pr_auc": 1.0,
     "brier_score": 0.0
   },
-  "timestamp": "2026-09-04T13:09:14.986032+00:00"
+  "timestamp": "2026-09-10T05:57:37.400279+00:00"
 }

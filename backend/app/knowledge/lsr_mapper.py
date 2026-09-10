@@ -1,7 +1,30 @@
+import joblib
 from dataclasses import dataclass
+from pathlib import Path
 
 from app.knowledge.taxonomy import life_saving_rules
 from app.services.nlp.evidence_model import EvidenceType, StructuredEvidence
+
+_LSR_MODEL = None
+_LSR_VEC = None
+_LSR_LOADED = False
+
+
+def _load_lsr_model():
+    global _LSR_MODEL, _LSR_VEC, _LSR_LOADED
+    if _LSR_LOADED:
+        return
+    _LSR_LOADED = True
+    base_dir = Path(__file__).parents[3] / "artifacts" / "models" / "v2"
+    model_path = base_dir / "lsr_model.joblib"
+    vec_path = base_dir / "lsr_vectorizer.joblib"
+    if model_path.exists() and vec_path.exists():
+        try:
+            _LSR_MODEL = joblib.load(model_path)
+            _LSR_VEC = joblib.load(vec_path)
+        except Exception:
+            _LSR_MODEL = None
+            _LSR_VEC = None
 
 
 @dataclass(frozen=True)
@@ -12,6 +35,19 @@ class RuleMatch:
 
 
 def map_to_life_saving_rule(activity: str | None, hazard: str | None, barrier: str | None, barrier_failure: str | None, text: str, structured_evidence: StructuredEvidence = None) -> RuleMatch:
+    _load_lsr_model()
+    if _LSR_MODEL is not None and _LSR_VEC is not None:
+        try:
+            vec_x = _LSR_VEC.transform([text])
+            probs = _LSR_MODEL.predict_proba(vec_x)[0]
+            max_idx = probs.argmax()
+            pred_class = _LSR_MODEL.classes_[max_idx]
+            max_prob = float(probs[max_idx])
+            if pred_class != "NONE" and max_prob >= 0.35:
+                return RuleMatch(pred_class, round(max_prob, 3), [f"ml_confidence:{max_prob:.3f}"])
+        except Exception:
+            pass
+
     normalized = text.lower()
     candidates: list[tuple[float, str, list[str]]] = []
     

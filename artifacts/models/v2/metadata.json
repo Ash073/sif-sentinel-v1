@@ -1,10 +1,47 @@
 {
-  "model_name": "sif-tfidf-logreg",
-  "model_version": "v2",
-  "training_timestamp": "2026-09-10T05:23:05.225562",
-  "operating_threshold": 0.5,
-  "class_labels": [
+  "model_id": "sif-sentinel-v2",
+  "version": "v2",
+  "training_date": "2026-09-10T13:40:44Z",
+  "framework": "scikit-learn",
+  "architecture": "TF-IDF(ngram=1-3, max=25k) + LogisticRegression(balanced)",
+  "training_samples": 43985,
+  "test_samples": 5498,
+  "uploaded_files": [
+    "January2015toNovember2025 (1).csv",
+    "safety_reports (1).csv"
+  ],
+  "schema_agnostic": true,
+  "augmentation": {
+    "noise_injection": true,
+    "sif_oversample": 2,
+    "aug_ratio": 0.4,
+    "types": [
+      "typos",
+      "acronyms",
+      "dropped_vowels",
+      "number_letter_subs",
+      "field_slang"
+    ]
+  },
+  "performance": {
+    "accuracy": 0.9996,
+    "f1_weighted": 0.9996,
+    "recall_sif": 1.0,
+    "precision_sif": 0.9996,
+    "roc_auc": 0.9999,
+    "cv_f1_mean": 0.9995,
+    "cv_f1_std": 0.0001
+  },
+  "threshold": 0.8225885057175697,
+  "classes": [
     "NON_SIF",
     "SIF"
-  ]
+  ],
+  "multitask_available": true,
+  "explainability": "SHAP LinearExplainer",
+  "deployment": {
+    "backend_path": "artifacts/models/v2/",
+    "env_var": "SIF_MODEL_BACKEND=v2",
+    "endpoint": "POST /api/v1/reports/{id}/analyze"
+  }
 }

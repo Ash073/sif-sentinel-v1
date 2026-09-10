@@ -1,6 +1,29 @@
 {
-  "selected_threshold": 0.49,
-  "default_threshold": 0.5,
-  "min_recall_constraint": 0.8,
-  "selection_strategy": "safety_first"
+  "version": "v2",
+  "selected_threshold": 0.8226,
+  "safety_philosophy": "safety_first",
+  "recall_floor": 0.97,
+  "ambiguity_band": [
+    0.42,
+    0.58
+  ],
+  "sif_level_map": {
+    "CRITICAL": [
+      0.85,
+      1.0
+    ],
+    "HIGH": [
+      0.7,
+      0.85
+    ],
+    "MEDIUM": [
+      0.55,
+      0.7
+    ],
+    "LOW": [
+      0.0,
+      0.55
+    ]
+  },
+  "generated_at": "2026-09-10T13:40:44Z"
 }

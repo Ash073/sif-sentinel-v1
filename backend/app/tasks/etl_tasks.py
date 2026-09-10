@@ -59,10 +59,40 @@ async def _process_csv_upload_async(content: str, user_id_str: str, ip_address: 
             if not report_type_str:
                 report_type_str = "INCIDENT"
                 
+            # Intelligently detect the narrative column from any company's CSV
+            possible_text_columns = [
+                "report_text", "final narrative", "description", "incident_description", 
+                "observation", "narrative", "event_description", "details", "comments",
+                "final_narrative", "text", "body", "content", "what happened"
+            ]
+            
+            text_content = ""
+            # Try to find a match in the row's keys (case-insensitive)
+            row_keys_lower = {str(k).lower().strip(): k for k in row.keys() if k}
+            
+            # Exact match first
+            found_col = False
+            for alias in possible_text_columns:
+                if alias in row_keys_lower:
+                    text_content = row[row_keys_lower[alias]]
+                    found_col = True
+                    break
+                    
+            # Partial match if not found exactly
+            if not found_col:
+                for alias in possible_text_columns:
+                    for k_low, k_orig in row_keys_lower.items():
+                        if alias in k_low or k_low in alias:
+                            text_content = row[k_orig]
+                            found_col = True
+                            break
+                    if found_col:
+                        break
+
             report = Report(
                 report_id=report_id,
                 report_type=ReportType(report_type_str),
-                report_text=row.get("report_text", ""),
+                report_text=text_content,
                 site_id=site.id,
                 location=row.get("location", "Imported Unit"),
                 department=row.get("department", "Operations"),
