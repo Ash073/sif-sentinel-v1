@@ -20,6 +20,19 @@ if not exist "backend\.venv\" (
 )
 
 echo.
+echo Checking ML Service dependencies...
+if not exist "ml_service\.venv\" (
+    echo .venv not found. Syncing ML service dependencies...
+    cd ml_service
+    call uv sync
+    cd ..
+)
+
+echo.
+echo Starting ML Microservice (FastAPI)...
+start "SIF ML Service" cmd /k "cd ml_service && uv run uvicorn app.main:app --host 0.0.0.0 --port 8001"
+
+echo.
 echo Starting Backend (FastAPI)...
 start "SIF Backend" cmd /k "cd backend && uv run uvicorn app.main:app --reload"
 
@@ -28,5 +41,5 @@ echo Starting Frontend (Next.js)...
 start "SIF Frontend" cmd /k "cd frontend && npm run dev"
 
 echo.
-echo Both servers are starting up in separate windows!
+echo All three servers are starting up in separate windows!
 echo Close those windows to stop the servers.

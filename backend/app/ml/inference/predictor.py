@@ -202,11 +202,14 @@ class SIFPredictor:
                     ARTIFACT_DIR / "vectorizer" / "tfidf.joblib"
                 )
 
-                self._vectorizer = (
-                    joblib.load(vectorizer_path)
-                    if vectorizer_path.exists()
-                    else None
-                )
+                import warnings
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore")
+                    self._vectorizer = (
+                        joblib.load(vectorizer_path)
+                        if vectorizer_path.exists()
+                        else None
+                    )
 
                 metadata_path = base_dir / "metadata.json"
                 threshold_path = base_dir / "threshold.json"

@@ -45,10 +45,13 @@ def _load_entity_models_once() -> None:
             _haz_p  = _base_dir / "hazard_model.joblib"
             _bar_p  = _base_dir / "barrier_model.joblib"
             if _vec_p.exists() and _act_p.exists() and _haz_p.exists() and _bar_p.exists():
-                _ENTITY_VEC   = joblib.load(_vec_p)
-                _ENTITY_ACT_M = joblib.load(_act_p)
-                _ENTITY_HAZ_M = joblib.load(_haz_p)
-                _ENTITY_BAR_M = joblib.load(_bar_p)
+                import warnings
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore")
+                    _ENTITY_VEC   = joblib.load(_vec_p)
+                    _ENTITY_ACT_M = joblib.load(_act_p)
+                    _ENTITY_HAZ_M = joblib.load(_haz_p)
+                    _ENTITY_BAR_M = joblib.load(_bar_p)
         except Exception:
             pass  # silently fall back to heuristic-only extraction
 

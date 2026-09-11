@@ -18,6 +18,7 @@ if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 os.environ["TESTING"] = "1"
+os.environ["LLM_ENABLED"] = "False"
 
 test_db_url = os.environ.get("TEST_DATABASE_URL", "").strip()
 is_postgres = test_db_url != ""

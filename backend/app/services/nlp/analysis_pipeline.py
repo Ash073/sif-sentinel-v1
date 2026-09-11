@@ -60,7 +60,11 @@ class AnalysisPipeline:
         if self.nlp_provider:
             entities = self.nlp_provider.extract_entities(document.normalized_text)
         else:
-            entities = extract_entities(document)
+            try:
+                from app.services.nlp.entity_extractor_v3 import extract_entities_v3
+                entities = extract_entities_v3(document)
+            except Exception:
+                entities = extract_entities(document)
     
         # Phase 5B Causal Safety Reasoning
         safety_graph_obj = SafetyCausalReasoningEngine.evaluate_causal_safety(
