@@ -14,7 +14,6 @@ from tenacity import retry, stop_after_attempt, wait_exponential
 from app.core.celery_app import celery_app
 from app.core.config import get_settings
 from app.core.constants import ReportStatus, ReportType, SourceType
-from app.db.session import SessionLocal
 from app.models.report import Report
 from app.models.site import Site
 from app.services.analysis.analysis_service import AnalysisService
@@ -30,12 +29,12 @@ def process_csv_upload(self, content: str, user_id_str: str, ip_address: str | N
 async def _process_csv_upload_async(content: str, user_id_str: str, ip_address: str | None, task_id: str):
     user_id = uuid.UUID(user_id_str)
     reader = list(csv.DictReader(io.StringIO(content)))
-    total_rows = min(len(reader), 100) # limit to 100
+    total_rows = len(reader)
     if total_rows == 0:
         return
 
     processed_count = 0
-    # Issue 4 Fix: Tolerate Redis being unavailable — imports must proceed even
+    # Issue 4 Fix: Tolerate Redis being unavailable ?" imports must proceed even
     # if the real-time progress channel is offline (e.g. local dev without Redis).
     try:
         redis_client = Redis.from_url(settings.celery_broker_url, socket_connect_timeout=2)
@@ -69,7 +68,7 @@ async def _process_csv_upload_async(content: str, user_id_str: str, ip_address: 
             db.add(site)
             await db.flush()
             
-        for row in reader[:100]:
+        for row in reader:
             report_id = f"IMP-{datetime.now().strftime('%Y%m%d%H%M%S')}-{processed_count:04d}"
             report_type_str = row.get("report_type", "INCIDENT")
             if not report_type_str:

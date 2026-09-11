@@ -328,13 +328,16 @@ class SIFPredictor:
                 }
                 return
 
-            self._model = joblib.load(model_path)
+            import warnings
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                self._model = joblib.load(model_path)
 
-            self._vectorizer = (
-                joblib.load(vectorizer_path)
-                if vectorizer_path.exists()
-                else None
-            )
+                self._vectorizer = (
+                    joblib.load(vectorizer_path)
+                    if vectorizer_path.exists()
+                    else None
+                )
 
             self._metadata = json.loads(
                 metadata_path.read_text(encoding="utf-8")
