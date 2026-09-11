@@ -54,12 +54,18 @@ async def _process_csv_upload_async(content: str, user_id_str: str, ip_address: 
         except Exception:
             pass  # Never let a Redis failure abort the import
 
+    from app.db.session import _build_engine
+    from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
+    # Create a fresh engine inside the new event loop to prevent TLS handshake timeouts
+    local_engine = _build_engine()
+    LocalSession = async_sessionmaker(local_engine, expire_on_commit=False, class_=AsyncSession)
+
     report_progress(0, "Starting import...")
     
-    async with SessionLocal() as db:
+    async with LocalSession() as db:
         site = await db.scalar(select(Site).limit(1))
         if not site:
-            site = Site(name="Demo Plant Alpha", region="North America", timezone="UTC")
+            site = Site(name="Demo Plant Alpha", code="DPA-01", location="Virtual Environment", region="North America")
             db.add(site)
             await db.flush()
             

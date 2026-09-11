@@ -12,7 +12,7 @@ export interface InterventionListParams {
 
 export const interventionsApi = {
   list: (params: InterventionListParams = {}): Promise<InterventionRead[]> =>
-    apiClient.get('/interventions', { params }).then((r) => r.data),
+    apiClient.get('/interventions', { params }).then((r) => r.data.items),
 
   getSummary: (): Promise<InterventionSummary> =>
     apiClient.get('/interventions/summary').then((r) => r.data),
