@@ -1,231 +1,237 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { reportsApi } from '@/lib/api/reports';
-import { analysisApi } from '@/lib/api/analysis';
-import { sitesApi } from '@/lib/api/sites';
-import { ErrorState, TableSkeleton, EmptyState } from '@/components/ui/states';
+import { ErrorState, EmptyState } from '@/components/ui/states';
 import { ReportStatusBadge } from '@/components/ui/status-badges';
-import { DatasetUploadDialog } from '@/components/reports/dataset-upload-dialog';
 import { Button } from '@/components/ui/button';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import {
-  Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,
-} from '@/components/ui/dialog';
-import { FilePlus, Search, ChevronLeft, ChevronRight, FileText, Zap, Shield, CheckCircle } from 'lucide-react';
-import type { ReportType, ReportStatus, AnalysisResponse } from '@/types/api';
-import { useMutation } from '@tanstack/react-query';
-import { toast } from '@/components/ui/toast';
+import { FilePlus, Search, ChevronLeft, ChevronRight, FileText, ChevronRightIcon } from 'lucide-react';
+import type { ReportStatus, SIFLevel, ReportRead } from '@/types/api';
 import { format } from 'date-fns';
 
-const REPORT_TYPE_OPTIONS: { label: string; value: ReportType }[] = [
-  { label: 'Unsafe Act', value: 'UNSAFE_ACT' },
-  { label: 'Unsafe Condition', value: 'UNSAFE_CONDITION' },
-  { label: 'Near Miss', value: 'NEAR_MISS' },
-  { label: 'Incident', value: 'INCIDENT' },
-];
+// Custom Debounce Hook
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+  return debouncedValue;
+}
 
 const REPORT_STATUS_OPTIONS: { label: string; value: ReportStatus }[] = [
   { label: 'New', value: 'NEW' },
   { label: 'Analyzed', value: 'ANALYZED' },
-  { label: 'Review Required', value: 'REVIEW_REQUIRED' },
   { label: 'Reviewed', value: 'REVIEWED' },
-  { label: 'Closed', value: 'CLOSED' },
 ];
 
+const SIF_LEVEL_OPTIONS: { label: string; value: SIFLevel }[] = [
+  { label: 'HIGH', value: 'HIGH' },
+  { label: 'MEDIUM', value: 'MEDIUM' },
+  { label: 'LOW', value: 'LOW' },
+  { label: 'NON-SIF', value: 'NON_SIF' },
+];
+
+// Helper to safely render SIF Level Badges
+function SifBadge({ level }: { level?: string | null }) {
+  if (!level) return <span className="text-slate-500 text-xs">—</span>;
+  const l = level.toUpperCase();
+  if (l === 'HIGH' || l === 'CRITICAL') {
+    return <span className="px-2.5 py-1 text-[10px] font-bold rounded-full bg-red-500/20 text-red-400 border border-red-500/30 tracking-wider">HIGH</span>;
+  }
+  if (l === 'MEDIUM') {
+    return <span className="px-2.5 py-1 text-[10px] font-bold rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30 tracking-wider">MEDIUM</span>;
+  }
+  if (l === 'LOW') {
+    return <span className="px-2.5 py-1 text-[10px] font-bold rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30 tracking-wider">LOW</span>;
+  }
+  return <span className="px-2.5 py-1 text-[10px] font-bold rounded-full bg-slate-800 text-slate-400 border border-slate-700 tracking-wider">NON-SIF</span>;
+}
+
+// Table Skeleton
+function TableSkeleton() {
+  return (
+    <div className="animate-pulse flex flex-col space-y-4 p-6">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div key={i} className="h-12 bg-slate-800/50 rounded-lg w-full" />
+      ))}
+    </div>
+  );
+}
+
 export default function ReportsPage() {
-  const [page, setPage] = useState(1);
-  const [search, setSearch] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [reportType, setReportType] = useState<ReportType | ''>('');
-  const [status, setStatus] = useState<ReportStatus | ''>('');
-  const [siteId, setSiteId] = useState('');
+  const router = useRouter();
   
-  const [analysisDialogOpen, setAnalysisDialogOpen] = useState(false);
-  const [analysisText, setAnalysisText] = useState('');
-  const [analysisResult, setAnalysisResult] = useState<AnalysisResponse | null>(null);
+  // States
+  const [page, setPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearch = useDebounce(searchTerm, 500);
+  
+  const [sifLevel, setSifLevel] = useState<SIFLevel | ''>('');
+  const [status, setStatus] = useState<ReportStatus | ''>('');
 
-  const analyzeTextMut = useMutation({
-    mutationFn: () => analysisApi.analyzeText({ text: analysisText }),
-    onSuccess: (data) => {
-      setAnalysisResult(data);
-      toast.add({ title: 'Analysis complete', type: 'success' });
-    },
-    onError: () => toast.add({ title: 'Analysis failed', type: 'error' }),
-  });
-
-  const sitesQ = useQuery({ queryKey: ['sites'], queryFn: sitesApi.list, staleTime: 5 * 60 * 1000 });
+  // Reset page when filters change
+  useEffect(() => { setPage(1); }, [debouncedSearch, sifLevel, status]);
 
   const reportsQ = useQuery({
-    queryKey: ['reports', 'list', { page, search: debouncedSearch, reportType, status, siteId }],
+    queryKey: ['reports', 'list', { page, search: debouncedSearch, sifLevel, status }],
     queryFn: () => reportsApi.list({
       page,
       page_size: 20,
       search: debouncedSearch || undefined,
-      report_type: reportType || undefined,
+      sif_level: sifLevel || undefined,
       status: status || undefined,
-      site_id: siteId || undefined,
     }),
     placeholderData: (prev) => prev,
   });
 
-  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      setDebouncedSearch(search);
-      setPage(1);
-    }
-  };
-
   const totalPages = reportsQ.data ? Math.ceil(reportsQ.data.total / 20) : 1;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 flex flex-col h-full pb-10">
+      
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Reports</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            {reportsQ.data ? `${reportsQ.data.total} total reports` : 'Loading...'}
+          <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-3">
+            <FileText className="h-6 w-6 text-blue-400" />
+            Safety Observation Ledger
+          </h1>
+          <p className="text-sm text-slate-400 mt-1">
+            Enterprise data grid for querying structured and unstructured safety reports.
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <DatasetUploadDialog />
-          <Button
-            variant="outline"
-            className="h-8 gap-2 text-sm font-medium"
-            onClick={() => setAnalysisDialogOpen(true)}
-          >
-            <Zap className="h-4 w-4 text-warning" />
-            Quick Analysis
-          </Button>
+        <div className="flex items-center gap-3">
           <Link
             href="/reports/new"
-            className="inline-flex items-center gap-2 h-8 px-3 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/80 transition-colors"
+            className="inline-flex items-center gap-2 h-9 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-[13px] font-semibold transition-all shadow-lg shadow-blue-900/20"
           >
             <FilePlus className="h-4 w-4" />
-            New Report
+            New Entry
           </Link>
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="glass-card p-4 flex flex-col sm:flex-row gap-3">
-        <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+      {/* Enterprise Filter Bar */}
+      <div className="bg-slate-900/60 border border-white/5 p-4 rounded-2xl flex flex-col sm:flex-row gap-4 items-center justify-between shadow-sm">
+        
+        {/* Search */}
+        <div className="relative flex-1 w-full max-w-md">
+          <Search className={`absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 transition-colors ${searchTerm !== debouncedSearch ? 'text-blue-400 animate-pulse' : 'text-slate-500'}`} />
           <Input
-            placeholder="Search reports... (press Enter)"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={handleSearchKeyDown}
-            className="pl-9"
+            placeholder="Search incident descriptions, locations, or IDs..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-9 h-10 bg-slate-950/50 border-white/10 text-sm focus-visible:ring-blue-500 rounded-xl w-full"
             aria-label="Search reports"
           />
+          {searchTerm !== debouncedSearch && (
+            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+              <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-ping" />
+            </div>
+          )}
         </div>
-        <Select value={reportType || 'all'} onValueChange={(v) => { setReportType((v ?? 'all') === 'all' ? '' : (v ?? '') as ReportType); setPage(1); }}>
-          <SelectTrigger className="w-[180px]" aria-label="Filter by type">
-            <SelectValue placeholder="Report type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Types</SelectItem>
-            {REPORT_TYPE_OPTIONS.map((o) => (
-              <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select value={status || 'all'} onValueChange={(v) => { setStatus((v ?? 'all') === 'all' ? '' : (v ?? '') as ReportStatus); setPage(1); }}>
-          <SelectTrigger className="w-[180px]" aria-label="Filter by status">
-            <SelectValue placeholder="Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Statuses</SelectItem>
-            {REPORT_STATUS_OPTIONS.map((o) => (
-              <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select value={siteId || 'all'} onValueChange={(v) => { setSiteId((v ?? 'all') === 'all' ? '' : (v ?? '')); setPage(1); }}>
-          <SelectTrigger className="w-[180px]" aria-label="Filter by site">
-            <SelectValue placeholder="Site" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Sites</SelectItem>
-            {(sitesQ.data ?? []).map((s) => (
-              <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+
+        {/* Dropdowns */}
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <Select value={sifLevel || 'ALL'} onValueChange={(v) => setSifLevel(v === 'ALL' ? '' : v as SIFLevel)}>
+            <SelectTrigger className="w-[160px] h-10 bg-slate-950/50 border-white/10 rounded-xl text-sm">
+              <SelectValue placeholder="SIF Level" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">All Risk Levels</SelectItem>
+              {SIF_LEVEL_OPTIONS.map((o) => (
+                <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={status || 'ALL'} onValueChange={(v) => setStatus(v === 'ALL' ? '' : v as ReportStatus)}>
+            <SelectTrigger className="w-[160px] h-10 bg-slate-950/50 border-white/10 rounded-xl text-sm">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">All Statuses</SelectItem>
+              {REPORT_STATUS_OPTIONS.map((o) => (
+                <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
-      {/* Table */}
-      <div className="glass-card overflow-hidden">
-        {reportsQ.isLoading && (
-          <div className="p-6">
-            <TableSkeleton rows={6} cols={5} />
-          </div>
-        )}
-        {reportsQ.isError && (
+      {/* Data Grid */}
+      <div className="bg-slate-900/40 border border-white/5 rounded-2xl overflow-hidden shadow-2xl flex-1 flex flex-col">
+        {reportsQ.isLoading || (searchTerm !== debouncedSearch) ? (
+          <TableSkeleton />
+        ) : reportsQ.isError ? (
           <ErrorState
             title="Could not load reports"
             message="Please try again or check the backend connection."
             onRetry={reportsQ.refetch}
           />
-        )}
-        {reportsQ.data && reportsQ.data.items.length === 0 && (
+        ) : reportsQ.data?.items.length === 0 ? (
           <EmptyState
-            title="No reports found"
-            description="Try adjusting your filters or submit a new safety report."
+            title="No reports match your filters"
+            description="Try broadening your search criteria."
             icon={<FileText className="h-7 w-7" />}
-            action={
-              <Link href="/reports/new" className="inline-flex items-center gap-2 h-7 px-2.5 rounded-lg bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/80 transition-colors">
-                Submit Report
-              </Link>
-            }
           />
-        )}
-        {reportsQ.data && reportsQ.data.items.length > 0 && (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm" role="table" aria-label="Reports list">
+        ) : (
+          <div className="overflow-x-auto flex-1">
+            <table className="w-full text-left border-collapse" role="grid">
               <thead>
-                <tr className="border-b border-border bg-muted/30">
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Report ID</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Type</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Status</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Department</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Reported At</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Actions</th>
+                <tr className="border-b border-white/5 bg-slate-950/40">
+                  <th className="px-6 py-4 text-[11px] font-semibold text-slate-500 uppercase tracking-widest whitespace-nowrap">Report ID</th>
+                  <th className="px-6 py-4 text-[11px] font-semibold text-slate-500 uppercase tracking-widest whitespace-nowrap">Date Reported</th>
+                  <th className="px-6 py-4 text-[11px] font-semibold text-slate-500 uppercase tracking-widest whitespace-nowrap">Hazard Category</th>
+                  <th className="px-6 py-4 text-[11px] font-semibold text-slate-500 uppercase tracking-widest whitespace-nowrap text-center">SIF Level</th>
+                  <th className="px-6 py-4 text-[11px] font-semibold text-slate-500 uppercase tracking-widest whitespace-nowrap text-center">Status</th>
+                  <th className="px-6 py-4 text-[11px] font-semibold text-slate-500 uppercase tracking-widest whitespace-nowrap text-right">Action</th>
                 </tr>
               </thead>
-              <tbody>
-                {reportsQ.data.items.map((report) => (
+              <tbody className="divide-y divide-white/5">
+                {reportsQ.data?.items.map((r: any) => (
                   <tr
-                    key={report.id}
-                    className="border-b border-border/50 hover:bg-muted/20 transition-colors"
+                    key={r.id}
+                    onClick={() => router.push(`/reports/${r.report_id}`)}
+                    className="group hover:bg-slate-800/50 cursor-pointer transition-colors"
                   >
-                    <td className="px-4 py-3 font-mono text-xs text-primary">{report.report_id}</td>
-                    <td className="px-4 py-3 text-muted-foreground capitalize">
-                      {report.report_type.replace(/_/g, ' ')}
+                    <td className="px-6 py-4">
+                      <div className="font-mono text-[13px] font-medium text-blue-400 group-hover:text-blue-300 transition-colors">
+                        {r.report_id}
+                      </div>
+                      <div className="text-[11px] text-slate-500 mt-0.5 max-w-[200px] truncate">
+                        {r.location}
+                      </div>
                     </td>
-                    <td className="px-4 py-3">
-                      <ReportStatusBadge status={report.status} />
+                    <td className="px-6 py-4 text-[13px] text-slate-300 whitespace-nowrap">
+                      {(() => { try { return format(new Date(r.reported_at), 'MMM dd, yyyy'); } catch { return r.reported_at; } })()}
+                      <div className="text-[11px] text-slate-500 mt-0.5">{(() => { try { return format(new Date(r.reported_at), 'HH:mm'); } catch { return ''; } })()}</div>
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground">{report.department}</td>
-                    <td className="px-4 py-3 text-muted-foreground text-xs">
-                      {(() => { try { return format(new Date(report.reported_at), 'dd MMM yyyy HH:mm'); } catch { return report.reported_at; } })()}
+                    <td className="px-6 py-4">
+                      <div className="text-[13px] font-medium text-slate-200 capitalize">
+                        {r.hazard_category || r.report_type?.replace(/_/g, ' ')}
+                      </div>
                     </td>
-                    <td className="px-4 py-3">
-                      <Link
-                        href={`/reports/${report.report_id}`}
-                        className="inline-flex items-center h-7 px-2.5 rounded-lg text-xs font-medium border border-border hover:bg-muted/50 transition-colors text-foreground"
-                      >
-                        View
-                      </Link>
+                    <td className="px-6 py-4 text-center">
+                      <SifBadge level={r.sif_level} />
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <ReportStatusBadge status={r.status} />
+                    </td>
+                    <td className="px-6 py-4 text-right text-slate-500 group-hover:text-blue-400 transition-colors">
+                      <div className="flex justify-end w-full">
+                        <ChevronRightIcon className="w-5 h-5" />
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -233,103 +239,36 @@ export default function ReportsPage() {
             </table>
           </div>
         )}
-      </div>
-
-      {/* Pagination */}
-      {reportsQ.data && reportsQ.data.total > 20 && (
-        <div className="flex items-center justify-between text-sm text-muted-foreground">
-          <span>
-            Page {page} of {totalPages} ({reportsQ.data.total} reports)
-          </span>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page === 1}
-              aria-label="Previous page"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              disabled={page === totalPages}
-              aria-label="Next page"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      )}
-
-      <Dialog open={analysisDialogOpen} onOpenChange={(open) => { setAnalysisDialogOpen(open); if (!open) setAnalysisResult(null); }}>
-        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2"><Zap className="h-5 w-5 text-warning" /> Quick Text Analysis</DialogTitle>
-            <DialogDescription>
-              Analyze any safety observation text directly without creating a report.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-2">
-            <div className="space-y-2">
-              <Label>Safety Observation Text</Label>
-              <Textarea 
-                value={analysisText} 
-                onChange={(e) => setAnalysisText(e.target.value)} 
-                placeholder="Paste safety observation or incident description here..." 
-                rows={5} 
-              />
+        
+        {/* Pagination Footer */}
+        {reportsQ.data && reportsQ.data.total > 0 && (
+          <div className="p-4 border-t border-white/5 bg-slate-950/20 flex items-center justify-between text-sm text-slate-400">
+            <span>
+              Showing <strong className="text-white">{(page - 1) * 20 + 1}</strong> to <strong className="text-white">{Math.min(page * 20, reportsQ.data.total)}</strong> of <strong className="text-white">{reportsQ.data.total}</strong> entries
+            </span>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 bg-slate-900 border-white/10 hover:bg-slate-800"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1}
+              >
+                <ChevronLeft className="h-4 w-4 mr-1" /> Prev
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 bg-slate-900 border-white/10 hover:bg-slate-800"
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages || totalPages === 0}
+              >
+                Next <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
             </div>
-            <Button 
-              onClick={() => analyzeTextMut.mutate()} 
-              disabled={analyzeTextMut.isPending || analysisText.trim().length < 10}
-              className="w-full gap-2"
-            >
-              <Shield className="h-4 w-4" />
-              {analyzeTextMut.isPending ? 'Analyzing...' : 'Run SIF Analysis'}
-            </Button>
-            
-            {analysisResult && (
-              <div className="mt-4 border border-border/50 rounded-lg bg-muted/20 p-4 space-y-4">
-                <div className="flex items-center justify-between border-b border-border/50 pb-3">
-                  <h3 className="font-semibold text-foreground flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-success" />
-                    Analysis Result
-                  </h3>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-xs text-muted-foreground font-medium">SIF Potential</p>
-                    <p className="text-sm font-semibold">{analysisResult.sif_potential ? 'Yes' : 'No'}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground font-medium">SIF Level</p>
-                    <p className="text-sm font-semibold">{analysisResult.sif_level || 'None'}</p>
-                  </div>
-                  <div className="col-span-2">
-                    <p className="text-xs text-muted-foreground font-medium">Explanation</p>
-                    <p className="text-sm mt-1">{analysisResult.explanation}</p>
-                  </div>
-                  {analysisResult.activity && (
-                    <div>
-                      <p className="text-xs text-muted-foreground font-medium">Activity</p>
-                      <p className="text-sm">{analysisResult.activity}</p>
-                    </div>
-                  )}
-                  {analysisResult.hazard && (
-                    <div>
-                      <p className="text-xs text-muted-foreground font-medium">Hazard</p>
-                      <p className="text-sm">{analysisResult.hazard}</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
           </div>
-        </DialogContent>
-      </Dialog>
+        )}
+      </div>
     </div>
   );
 }

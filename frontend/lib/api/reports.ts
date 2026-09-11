@@ -8,6 +8,7 @@ import type {
   ReportType,
   ReportStatus,
   SourceType,
+  SIFLevel,
 } from '@/types/api';
 
 export interface ReportListParams {
@@ -20,6 +21,7 @@ export interface ReportListParams {
   date_from?: string;
   date_to?: string;
   search?: string;
+  sif_level?: SIFLevel;
 }
 
 export const reportsApi = {
