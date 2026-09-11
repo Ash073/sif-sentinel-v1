@@ -51,7 +51,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = () => {
     localStorage.removeItem('sif_token');
     setUser(null);
-    router.push('/login');
+    router.push('/');
   };
 
   return (

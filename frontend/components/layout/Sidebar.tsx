@@ -28,7 +28,6 @@ export const NAVIGATION_ITEMS: NavItem[] = [
   { name: 'LSR', href: '/rules', icon: ShieldCheck, roles: ['ADMIN', 'HSE_MANAGER', 'HSE_ANALYST', 'REVIEWER', 'VIEWER'] },
   { name: 'Interventions', href: '/interventions', icon: CheckSquare, roles: ['ADMIN', 'HSE_MANAGER', 'HSE_ANALYST', 'REVIEWER'] },
   { name: 'Models', href: '/models', icon: Box, roles: ['ADMIN', 'HSE_MANAGER', 'HSE_ANALYST'] },
-  { name: 'Admin', href: '/admin', icon: Settings, roles: ['ADMIN'] },
 ];
 
 export function Sidebar() {

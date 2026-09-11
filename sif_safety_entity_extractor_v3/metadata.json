@@ -1,0 +1,84 @@
+{
+  "model_name": "sif-safety-entity-extractor",
+  "model_version": "v3.0.0",
+  "task": "safety_entity_extraction",
+  "architecture": {
+    "base_model": "distilbert-base-uncased",
+    "model_class": "DistilBertForTokenClassification",
+    "tokenizer_class": "BertTokenizer",
+    "framework": "PyTorch",
+    "library": "transformers"
+  },
+  "labels": [
+    "O",
+    "B-ACTIVITY",
+    "I-ACTIVITY",
+    "B-HAZARD",
+    "I-HAZARD",
+    "B-BARRIER",
+    "I-BARRIER"
+  ],
+  "entity_types": [
+    "ACTIVITY",
+    "HAZARD",
+    "BARRIER"
+  ],
+  "canonical_entity_types": [
+    "Activity taxonomy",
+    "Hazard taxonomy",
+    "Barrier taxonomy"
+  ],
+  "input_contract": {
+    "type": "str",
+    "description": "Raw safety report text",
+    "max_length_tokens": 512
+  },
+  "output_contract": {
+    "method": "extract(text)",
+    "fields": [
+      "text",
+      "label",
+      "canonical",
+      "start",
+      "end",
+      "confidence"
+    ]
+  },
+  "canonical_mapping": {
+    "enabled": true,
+    "mapping_layer": "V4 context-aware canonical linker"
+  },
+  "downstream_logic": {
+    "barrier_status": "deterministic_backend_layer",
+    "negation": "deterministic_backend_layer",
+    "temporal_status": "deterministic_backend_layer",
+    "structured_evidence": "deterministic_backend_layer"
+  },
+  "evaluation": {
+    "metric": "strict exact span + exact label",
+    "test_records": 71,
+    "overall_f1": 0.6703,
+    "activity_f1": 0.6667,
+    "hazard_f1": 0.6316,
+    "barrier_f1": 0.7273
+  },
+  "training": {
+    "training_records": 555,
+    "validation_records": 76,
+    "test_records": 71,
+    "selected_model": "V3",
+    "v5_experiment_rejected": true,
+    "v5_test_f1": 0.4918
+  },
+  "artifact": {
+    "format": "Hugging Face model + tokenizer + joblib runtime wrapper",
+    "wrapper_file": "entity_extractor.joblib",
+    "model_file": "model.safetensors",
+    "label_map_file": "label_map.json"
+  },
+  "runtime": {
+    "python": ">=3.11",
+    "device": "cuda when available, otherwise cpu"
+  },
+  "created_at_utc": "2026-09-10T18:09:54.766117+00:00"
+}

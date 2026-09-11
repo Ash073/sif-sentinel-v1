@@ -1,0 +1,20 @@
+{
+  "label2id": {
+    "O": 0,
+    "B-ACTIVITY": 1,
+    "I-ACTIVITY": 2,
+    "B-HAZARD": 3,
+    "I-HAZARD": 4,
+    "B-BARRIER": 5,
+    "I-BARRIER": 6
+  },
+  "id2label": {
+    "0": "O",
+    "1": "B-ACTIVITY",
+    "2": "I-ACTIVITY",
+    "3": "B-HAZARD",
+    "4": "I-HAZARD",
+    "5": "B-BARRIER",
+    "6": "I-BARRIER"
+  }
+}

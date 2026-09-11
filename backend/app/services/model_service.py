@@ -59,7 +59,8 @@ async def get_feedback(db: AsyncSession) -> dict:
 
 async def get_performance(db: AsyncSession) -> dict:
     """Combine offline model metrics with live human review feedback."""
+    metadata = current_model_metadata()
     return {
-        "offline_model_metrics": current_model_metadata()["metrics"],
+        "offline_model_metrics": metadata.get("metrics") or metadata.get("test_metrics_at_selected_threshold") or metadata.get("performance", {}),
         "human_review_metrics": await get_feedback(db),
     }
