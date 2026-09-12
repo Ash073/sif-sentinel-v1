@@ -30,4 +30,7 @@ export const dashboardApi = {
 
   exportCsv: (): Promise<Blob> =>
     apiClient.get('/dashboard/export/csv', { responseType: 'blob' }).then((r) => r.data),
+
+  resetDashboard: (): Promise<void> =>
+    apiClient.delete('/dashboard/reset').then((r) => r.data),
 };

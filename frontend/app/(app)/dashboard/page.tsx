@@ -13,8 +13,19 @@ import { motion } from 'framer-motion';
 import {
   AlertTriangle, ShieldAlert, ListTodo, ShieldCheck,
   Activity, Brain, TrendingUp, CheckSquare, FilePlus,
-  RefreshCw, BarChart3, Download,
+  RefreshCw, BarChart3, Download, DatabaseZap
 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { SifTrendChart } from '@/components/dashboard/SifTrendChart';
 import { HazardBarChart } from '@/components/dashboard/HazardBarChart';
 import { LsrDonutChart } from '@/components/dashboard/LsrDonutChart';
@@ -406,6 +417,42 @@ export default function DashboardPage() {
           >
             <RefreshCw className="w-4 h-4" />
           </button>
+
+          {isManagerOrAdmin && (
+            <AlertDialog>
+              <AlertDialogTrigger 
+                className="h-9 w-9 rounded-xl border border-red-500/20 bg-slate-900/60 flex items-center justify-center text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-all cursor-pointer"
+                title="Reset Database"
+              >
+                <DatabaseZap className="w-4 h-4" />
+              </AlertDialogTrigger>
+              <AlertDialogContent className="bg-slate-900 border-white/10 text-white">
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="text-red-400">Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogDescription className="text-slate-400">
+                    This action cannot be undone. This will permanently delete the entire dataset, 
+                    including all reports, precursors, analyses, and corrective actions from our servers.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel className="bg-slate-800 text-white border-white/10 hover:bg-slate-700 hover:text-white">Cancel</AlertDialogCancel>
+                  <AlertDialogAction 
+                    className="bg-red-600 text-white hover:bg-red-700"
+                    onClick={async () => {
+                      try {
+                        await dashboardApi.resetDashboard();
+                        window.location.reload();
+                      } catch (e) {
+                        console.error("Failed to reset dashboard:", e);
+                      }
+                    }}
+                  >
+                    Yes, reset everything
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
 
           {canExport && (
             <button

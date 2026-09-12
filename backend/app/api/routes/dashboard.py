@@ -57,6 +57,24 @@ async def barrier_failures(db: DBSession, _: User = Depends(require_roles(*_read
 
 
 from fastapi import Response
+from sqlalchemy import text
+
+@router.delete("/reset", summary="Reset all dashboard dataset data", status_code=204)
+async def reset_dashboard_data(db: DBSession, _: User = Depends(require_roles(UserRole.ADMIN))):
+    tables_to_truncate = [
+        "audit_logs",
+        "intervention_recommendations",
+        "corrective_actions",
+        "precursor_candidates",
+        "precursor_patterns",
+        "model_predictions",
+        "reviews",
+        "report_analyses",
+        "reports"
+    ]
+    await db.execute(text(f"TRUNCATE {', '.join(tables_to_truncate)} CASCADE"))
+    await db.commit()
+    return Response(status_code=204)
 
 @router.get("/export/csv", summary="Export dashboard metrics as CSV")
 async def export_csv(db: DBSession, _: User = Depends(require_roles(*_read_roles))):
