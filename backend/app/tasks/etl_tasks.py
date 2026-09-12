@@ -23,12 +23,29 @@ settings = get_settings()
 
 @celery_app.task(bind=True, name="process_csv_upload")
 def process_csv_upload(self, content: str, user_id_str: str, ip_address: str | None):
-    # Run the async code inside a synchronous wrapper
-    asyncio.run(_process_csv_upload_async(content, user_id_str, ip_address, self.request.id))
+    # Run the async code inside a new thread to avoid "asyncio.run() cannot be called from a running event loop"
+    # which happens when Celery is run with --pool=solo.
+    import threading
+    exc = []
+    def _runner():
+        try:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            loop.run_until_complete(_process_csv_upload_async(content, user_id_str, ip_address, self.request.id))
+            loop.close()
+        except Exception as e:
+            exc.append(e)
+
+    t = threading.Thread(target=_runner)
+    t.start()
+    t.join()
+    
+    if exc:
+        raise exc[0]
 
 async def _process_csv_upload_async(content: str, user_id_str: str, ip_address: str | None, task_id: str):
     user_id = uuid.UUID(user_id_str)
-    reader = list(csv.DictReader(io.StringIO(content)))
+    reader = list(csv.DictReader(io.StringIO(content)))[:100]
     total_rows = len(reader)
     if total_rows == 0:
         return

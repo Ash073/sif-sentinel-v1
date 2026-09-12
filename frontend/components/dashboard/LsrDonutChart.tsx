@@ -13,29 +13,29 @@ import {
 import { ShieldCheck } from 'lucide-react';
 
 const LSR_COLORS = [
-  '#f97316', '#ef4444', '#eab308', '#a855f7',
-  '#06b6d4', '#14b8a6', '#6366f1', '#ec4899',
-  '#84cc16', '#f59e0b',
+  'var(--color-warning)', 'var(--color-destructive)', 'var(--color-chart-3)', 'var(--color-chart-5)',
+  'var(--color-chart-1)', 'var(--color-primary)', 'var(--color-chart-4)', 'var(--color-chart-2)',
+  'var(--color-success)', 'var(--color-accent)',
 ];
 
 const CustomTooltip = ({ active, payload }: any) => {
   if (!active || !payload?.length) return null;
   const d = payload[0].payload;
   return (
-    <div className="bg-slate-900 border border-white/10 rounded-xl p-3 shadow-2xl text-xs">
-      <p className="font-semibold text-white mb-1.5 max-w-[180px] leading-tight">{d.name}</p>
+    <div className="bg-card border border-border rounded-xl p-3 shadow-2xl text-xs">
+      <p className="font-semibold text-foreground mb-1.5 max-w-[180px] leading-tight">{d.name}</p>
       <div className="space-y-1">
         <div className="flex justify-between gap-4">
-          <span className="text-slate-400">Violations</span>
-          <span className="text-white font-bold">{d.count}</span>
+          <span className="text-muted-foreground">Violations</span>
+          <span className="text-foreground font-bold">{d.count}</span>
         </div>
         <div className="flex justify-between gap-4">
-          <span className="text-slate-400">SIF Violations</span>
-          <span className="text-orange-400 font-bold">{d.sif_count}</span>
+          <span className="text-muted-foreground">SIF Violations</span>
+          <span className="text-warning font-bold">{d.sif_count}</span>
         </div>
         <div className="flex justify-between gap-4">
-          <span className="text-slate-400">Share</span>
-          <span className="text-emerald-400 font-bold">{d.percentage?.toFixed(1)}%</span>
+          <span className="text-muted-foreground">Share</span>
+          <span className="text-primary font-bold">{d.percentage?.toFixed(1)}%</span>
         </div>
       </div>
     </div>
@@ -49,7 +49,7 @@ const renderCustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent
   const x = cx + radius * Math.cos(-midAngle * RADIAN);
   const y = cy + radius * Math.sin(-midAngle * RADIAN);
   return (
-    <text x={x} y={y} fill="white" textAnchor="middle" dominantBaseline="central" fontSize={10} fontWeight={600}>
+    <text x={x} y={y} fill="var(--color-foreground)" textAnchor="middle" dominantBaseline="central" fontSize={10} fontWeight={600}>
       {`${(percent * 100).toFixed(0)}%`}
     </text>
   );
@@ -66,24 +66,24 @@ export function LsrDonutChart() {
   const sifTotal = chartData.reduce((sum, d) => sum + d.sif_count, 0);
 
   return (
-    <div className="bg-slate-900/60 border border-white/10 rounded-2xl p-5 flex flex-col gap-4">
+    <div className="bg-card/50 backdrop-blur-sm border border-border rounded-2xl p-5 flex flex-col gap-4">
       <div className="flex items-center gap-2">
-        <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
-          <ShieldCheck className="w-4 h-4 text-amber-400" />
+        <div className="w-8 h-8 rounded-lg bg-warning/10 border border-warning/20 flex items-center justify-center">
+          <ShieldCheck className="w-4 h-4 text-warning" />
         </div>
         <div>
-          <h3 className="text-[14px] font-semibold text-white">LSR Violations</h3>
-          <p className="text-[11px] text-slate-500">Life-Saving Rule distribution</p>
+          <h3 className="text-[14px] font-semibold text-foreground">LSR Violations</h3>
+          <p className="text-[11px] text-muted-foreground">Life-Saving Rule distribution</p>
         </div>
       </div>
 
       {isLoading ? (
         <div className="h-[220px] flex items-center justify-center">
-          <div className="w-8 h-8 border-2 border-amber-500/30 border-t-amber-400 rounded-full animate-spin" />
+          <div className="w-8 h-8 border-2 border-warning/30 border-t-warning rounded-full animate-spin" />
         </div>
       ) : !chartData.length ? (
         <div className="h-[220px] flex items-center justify-center">
-          <span className="text-sm text-slate-500">No LSR violation data available.</span>
+          <span className="text-sm text-muted-foreground">No LSR violation data available.</span>
         </div>
       ) : (
         <div className="flex items-center gap-4">
@@ -112,8 +112,8 @@ export function LsrDonutChart() {
             </ResponsiveContainer>
             {/* Center label */}
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <span className="text-[20px] font-bold text-white leading-none">{total}</span>
-              <span className="text-[9px] text-slate-500 uppercase tracking-wide mt-0.5">violations</span>
+              <span className="text-[20px] font-bold text-foreground leading-none">{total}</span>
+              <span className="text-[9px] text-muted-foreground uppercase tracking-wide mt-0.5">violations</span>
             </div>
           </div>
 
@@ -125,18 +125,18 @@ export function LsrDonutChart() {
                   className="w-2 h-2 rounded-full shrink-0"
                   style={{ backgroundColor: LSR_COLORS[idx % LSR_COLORS.length] }}
                 />
-                <span className="text-[11px] text-slate-300 truncate flex-1">{d.name}</span>
-                <span className="text-[11px] font-semibold text-slate-400 shrink-0">{d.count}</span>
+                <span className="text-[11px] text-muted-foreground truncate flex-1">{d.name}</span>
+                <span className="text-[11px] font-semibold text-muted-foreground shrink-0">{d.count}</span>
               </div>
             ))}
             {chartData.length > 6 && (
-              <p className="text-[10px] text-slate-600 pl-4">
+              <p className="text-[10px] text-muted-foreground pl-4">
                 +{chartData.length - 6} more rules
               </p>
             )}
-            <div className="pt-1.5 mt-1.5 border-t border-white/5 flex justify-between">
-              <span className="text-[11px] text-slate-500">SIF-linked</span>
-              <span className="text-[11px] font-bold text-orange-400">{sifTotal} violations</span>
+            <div className="pt-1.5 mt-1.5 border-t border-border flex justify-between">
+              <span className="text-[11px] text-muted-foreground">SIF-linked</span>
+              <span className="text-[11px] font-bold text-warning">{sifTotal} violations</span>
             </div>
           </div>
         </div>

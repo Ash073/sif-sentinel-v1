@@ -7,12 +7,18 @@ import { usePathname } from 'next/navigation';
 import { Bell, Search, ShieldAlert, HelpCircle, Sun, Moon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/components/providers/AuthProvider';
+import { useTheme } from 'next-themes';
 
 export function Header() {
   const { user, logout } = useAuth();
-  const [isDark, setIsDark] = useState(false);
+  const { theme, setTheme } = useTheme();
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -24,25 +30,8 @@ export function Header() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  useEffect(() => {
-    const saved = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    if (saved === 'dark' || (!saved && prefersDark)) {
-      setIsDark(true);
-      document.documentElement.classList.add('dark');
-    }
-  }, []);
-
   const toggleTheme = () => {
-    const newIsDark = !isDark;
-    setIsDark(newIsDark);
-    if (newIsDark) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
+    setTheme(theme === 'dark' ? 'light' : 'dark');
   };
 
   return (
@@ -81,7 +70,7 @@ export function Header() {
           <div className="h-4 w-px bg-slate-200 mx-1"></div>
           
           <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-8 w-8 rounded-full text-slate-500 hover:bg-white hover:shadow-sm transition-all">
-            {isDark ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+            {mounted && theme === 'dark' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
           </Button>
 
           <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-slate-500 hover:bg-white hover:shadow-sm transition-all">

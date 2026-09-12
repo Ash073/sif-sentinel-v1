@@ -16,5 +16,6 @@ celery_app.conf.update(
     result_serializer="json",
     timezone="UTC",
     enable_utc=True,
-    task_track_started=True
+    task_track_started=True,
+    # task_always_eager=True  # Bypasses Redis completely for local hackathon demo!
 )

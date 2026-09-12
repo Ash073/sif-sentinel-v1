@@ -134,7 +134,7 @@ const QuickAuthModal = ({ onClose }: { onClose: () => void }) => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 backdrop-blur-sm px-4"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-background/80 backdrop-blur-sm px-4"
     >
       {/* Background click to close */}
       <div className="absolute inset-0" onClick={onClose} />
@@ -143,7 +143,7 @@ const QuickAuthModal = ({ onClose }: { onClose: () => void }) => {
         initial={{ scale: 0.95, opacity: 0, y: 20 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.95, opacity: 0, y: 20 }}
-        className="relative w-full max-w-xl bg-slate-950/60 backdrop-blur-2xl border border-emerald-500/20 rounded-3xl p-8 shadow-[0_0_50px_rgba(16,185,129,0.15)] overflow-hidden"
+        className="relative w-full max-w-xl bg-background/60 backdrop-blur-2xl border border-primary/20 rounded-3xl p-8 shadow-[0_0_50px_rgba(16,185,129,0.15)] overflow-hidden"
       >
         {/* 3D Background */}
         <div className="absolute inset-0 z-0 pointer-events-none">
@@ -155,38 +155,45 @@ const QuickAuthModal = ({ onClose }: { onClose: () => void }) => {
         </div>
 
         <div className="relative z-10 text-center mb-8">
-          <h3 className="text-2xl font-light tracking-tight text-white mb-2">Select Role to Enter</h3>
-          <p className="text-emerald-400/80 text-sm font-mono tracking-widest uppercase">
+          <h3 className="text-2xl font-light tracking-tight text-foreground mb-2">Select Role to Enter</h3>
+          <p className="text-primary/80 text-sm font-mono tracking-widest uppercase">
             Enterprise Single Sign-On
           </p>
         </div>
 
-        <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="relative z-10 flex flex-col gap-3">
           {ROLES.map((role, idx) => (
             <button
               key={role.id}
               onClick={() => handleRoleLogin(role.id, role.email)}
               disabled={loadingRole !== null}
               className={`
-                group relative flex items-center gap-4 p-4 rounded-2xl text-left transition-all duration-500
-                bg-black/40 border border-white/5 backdrop-blur-md overflow-hidden
-                hover:bg-emerald-950/40 hover:border-emerald-500/40 hover:shadow-[0_0_30px_rgba(16,185,129,0.2)] hover:-translate-y-1
-                ${idx === ROLES.length - 1 && ROLES.length % 2 !== 0 ? 'md:col-span-2' : ''}
+                group relative flex items-center justify-between p-4 rounded-2xl text-left transition-all duration-300
+                bg-background/40 border border-border/50 backdrop-blur-md overflow-hidden
+                hover:bg-primary/10 hover:border-primary/40 hover:shadow-[0_0_30px_rgba(16,185,129,0.15)] hover:scale-[1.02]
                 ${loadingRole === role.id ? 'opacity-50 scale-95 cursor-not-allowed' : ''}
               `}
             >
               {loadingRole === role.id && (
-                <div className="absolute inset-0 bg-emerald-500/20 animate-pulse" />
+                <div className="absolute inset-0 bg-primary/20 animate-pulse" />
               )}
               {/* Animated hover gradient */}
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-r from-emerald-500/10 to-transparent pointer-events-none" />
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-r from-primary/10 to-transparent pointer-events-none" />
               
-              <div className="w-12 h-12 rounded-xl bg-black/50 border border-white/10 flex items-center justify-center group-hover:border-emerald-500/50 group-hover:bg-emerald-950/50 transition-all duration-500 z-10 shadow-inner">
-                <role.icon className={`w-5 h-5 transition-colors duration-500 ${loadingRole === role.id ? 'text-emerald-400 animate-spin' : 'text-slate-400 group-hover:text-emerald-400'}`} />
+              <div className="flex items-center gap-4 z-10">
+                <div className="w-10 h-10 rounded-full bg-background/50 border border-border/50 flex items-center justify-center group-hover:border-primary/50 group-hover:bg-primary/20 transition-all duration-300 shadow-inner">
+                  <role.icon className={`w-4 h-4 transition-colors duration-300 ${loadingRole === role.id ? 'text-primary animate-spin' : 'text-muted-foreground group-hover:text-primary'}`} />
+                </div>
+                <div>
+                  <p className="text-foreground font-medium tracking-wide group-hover:text-primary transition-colors">{role.name}</p>
+                  <p className="text-[10px] text-primary/60 uppercase tracking-widest font-mono group-hover:text-primary/80 transition-colors">{role.id}</p>
+                </div>
               </div>
-              <div className="z-10">
-                <p className="text-white font-medium tracking-wide group-hover:text-emerald-50 transition-colors">{role.name}</p>
-                <p className="text-[10px] text-emerald-500/60 uppercase tracking-widest font-mono group-hover:text-emerald-400/80 transition-colors">{role.id}</p>
+              
+              <div className="z-10 pr-2 opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 text-primary">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
               </div>
             </button>
           ))}
@@ -202,18 +209,18 @@ export default function LandingPage() {
   const [showAuthModal, setShowAuthModal] = useState(false);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-50 font-sans selection:bg-emerald-500/30 selection:text-emerald-200 relative overflow-x-hidden flex flex-col">
+    <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/30 selection:text-primary/70 relative overflow-x-hidden flex flex-col">
       <AnimatedBackgroundChart />
       
       {/* Top Bar */}
       <div className="absolute top-0 w-full p-8 flex justify-between items-center z-50 pointer-events-none">
         <div className="flex items-center gap-3">
           <Image src="/logo.png" alt="SIF Sentinel Logo" width={40} height={40} className="w-10 h-10 object-contain" />
-          <span className="text-[13px] font-semibold tracking-widest text-white uppercase">
+          <span className="text-[13px] font-semibold tracking-widest text-foreground uppercase">
             SIF Sentinel
           </span>
         </div>
-        <div className="text-[11px] font-semibold tracking-widest text-slate-500 uppercase">
+        <div className="text-[11px] font-semibold tracking-widest text-muted-foreground uppercase">
           Global Safety Command // Enterprise Edition
         </div>
       </div>
@@ -225,19 +232,19 @@ export default function LandingPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="text-5xl md:text-7xl font-light tracking-tighter text-white mb-10 leading-[1.1]"
+            className="text-5xl md:text-7xl font-light tracking-tighter text-foreground mb-10 leading-[1.1]"
           >
             Predictive intelligence <br />
-            for <span className="font-semibold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-600">human life.</span>
+            for <span className="font-semibold text-transparent bg-clip-text bg-gradient-to-r from-primary to-teal-500">human life.</span>
           </motion.h1>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.1, ease: "easeOut" }}
-            className="max-w-2xl border-l-2 border-emerald-500/30 pl-6 mb-16"
+            className="max-w-2xl border-l-2 border-primary/30 pl-6 mb-16"
           >
-            <p className="text-xl md:text-2xl text-slate-300 font-light leading-relaxed">
+            <p className="text-xl md:text-2xl text-muted-foreground font-light leading-relaxed">
               A Serious Injury or Fatality (SIF) is not a statistic. By isolating "Near Miss" precursors hidden within thousands of daily safety reports, this engine shifts safety protocols from reactive to predictive.
             </p>
           </motion.div>
@@ -249,11 +256,11 @@ export default function LandingPage() {
           >
             <button
               onClick={() => setShowAuthModal(true)}
-              className="group relative h-16 px-10 rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-lg font-semibold flex items-center justify-center transition-all duration-300 shadow-[0_0_40px_rgba(16,185,129,0.2)] hover:shadow-[0_0_60px_rgba(16,185,129,0.4)]"
+              className="group relative h-16 px-10 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground text-lg font-semibold flex items-center justify-center transition-all duration-300 shadow-[0_0_40px_rgba(16,185,129,0.2)] hover:shadow-[0_0_60px_rgba(16,185,129,0.4)]"
             >
               Enter Command Center
               <motion.span
-                className="ml-3 block w-2 h-2 rounded-full bg-slate-950"
+                className="ml-3 block w-2 h-2 rounded-full bg-primary-foreground"
                 animate={{ opacity: [1, 0.5, 1] }}
                 transition={{ repeat: Infinity, duration: 1.5 }}
               />
@@ -265,8 +272,8 @@ export default function LandingPage() {
       <AboutProject />
 
       {/* Footer */}
-      <footer className="w-full bg-slate-950 py-12 border-t border-white/5 text-center px-6 z-10 relative">
-        <p className="text-slate-500 text-xs md:text-sm max-w-4xl mx-auto font-mono uppercase tracking-[0.2em] leading-relaxed">
+      <footer className="w-full bg-card/50 py-12 border-t border-border text-center px-6 z-10 relative">
+        <p className="text-muted-foreground text-xs md:text-sm max-w-4xl mx-auto font-mono uppercase tracking-[0.2em] leading-relaxed">
           Organizations generate warning signals before major events, but the signals are valuable only if they are identified, classified and acted upon.
         </p>
       </footer>

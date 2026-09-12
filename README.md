@@ -37,6 +37,14 @@ cd frontend
 pnpm install
 pnpm dev
 ```
+### ML Service
+To run the ML service manually on port 8001:
+```bash
+cd ml_service
+uv sync
+uv run uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload
+```
+
 ### Backend
 If you want to run the FastAPI backend manually (without Docker):
 ```bash
@@ -44,6 +52,13 @@ cd backend
 uv sync
 uv run uvicorn app.main:app --reload
 ```
+
+To run the Celery background worker manually:
+```bash
+cd backend
+uv run celery -A app.core.celery_app worker --pool=solo --loglevel=info
+```
+
 For more backend setup, testing, and execution details, see [backend/README.md](backend/README.md).
 
 ### Testing

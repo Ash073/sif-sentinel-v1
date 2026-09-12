@@ -28,8 +28,8 @@ const WINDOWS: { label: string; value: Window }[] = [
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-slate-900 border border-white/10 rounded-xl p-3 shadow-2xl text-xs space-y-1.5">
-      <p className="font-semibold text-slate-300 mb-2">
+    <div className="bg-card border border-border rounded-xl p-3 shadow-2xl text-xs space-y-1.5">
+      <p className="font-semibold text-foreground mb-2">
         {(() => { try { return format(parseISO(label), 'dd MMM yyyy'); } catch { return label; } })()}
       </p>
       {payload.map((p: any) => (
@@ -38,7 +38,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
             <span className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }} />
             {p.name}
           </span>
-          <span className="font-bold text-white">{p.value}</span>
+          <span className="font-bold text-foreground">{p.value}</span>
         </div>
       ))}
     </div>
@@ -59,28 +59,28 @@ export function SifTrendChart() {
   }));
 
   return (
-    <div className="bg-slate-900/60 border border-white/10 rounded-2xl p-5 flex flex-col gap-4">
+    <div className="bg-card/50 backdrop-blur-sm border border-border rounded-2xl p-5 flex flex-col gap-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-            <TrendingUp className="w-4 h-4 text-emerald-400" />
+          <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
+            <TrendingUp className="w-4 h-4 text-primary" />
           </div>
           <div>
-            <h3 className="text-[14px] font-semibold text-white">SIF Trend</h3>
-            <p className="text-[11px] text-slate-500">Reports over time</p>
+            <h3 className="text-[14px] font-semibold text-foreground">SIF Trend</h3>
+            <p className="text-[11px] text-muted-foreground">Reports over time</p>
           </div>
         </div>
         {/* Window selector */}
-        <div className="flex items-center gap-1 p-1 bg-slate-800 rounded-lg border border-white/5">
+        <div className="flex items-center gap-1 p-1 bg-muted rounded-lg border border-border">
           {WINDOWS.map((w) => (
             <button
               key={w.value}
               onClick={() => setWindow(w.value)}
               className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all ${
                 window === w.value
-                  ? 'bg-emerald-500 text-slate-950 shadow-sm'
-                  : 'text-slate-400 hover:text-slate-200'
+                  ? 'bg-background text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               {w.label}
@@ -93,13 +93,13 @@ export function SifTrendChart() {
       {isLoading ? (
         <div className="h-[220px] flex items-center justify-center">
           <div className="flex flex-col items-center gap-3">
-            <div className="w-8 h-8 border-2 border-emerald-500/30 border-t-emerald-400 rounded-full animate-spin" />
-            <span className="text-xs text-slate-500">Loading trend data...</span>
+            <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+            <span className="text-xs text-muted-foreground">Loading trend data...</span>
           </div>
         </div>
       ) : !formatted.length ? (
         <div className="h-[220px] flex items-center justify-center">
-          <span className="text-sm text-slate-500">No data for this period.</span>
+          <span className="text-sm text-muted-foreground">No data for this period.</span>
         </div>
       ) : (
         <div className="h-[220px]">
@@ -107,24 +107,24 @@ export function SifTrendChart() {
             <AreaChart data={formatted} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="sifGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#f97316" stopOpacity={0.25} />
-                  <stop offset="95%" stopColor="#f97316" stopOpacity={0} />
+                  <stop offset="5%" stopColor="var(--color-warning)" stopOpacity={0.25} />
+                  <stop offset="95%" stopColor="var(--color-warning)" stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="totalGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#6366f1" stopOpacity={0.15} />
-                  <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                  <stop offset="5%" stopColor="var(--color-chart-1)" stopOpacity={0.15} />
+                  <stop offset="95%" stopColor="var(--color-chart-1)" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
               <XAxis
                 dataKey="dateLabel"
-                tick={{ fill: '#64748b', fontSize: 10 }}
+                tick={{ fill: 'var(--color-muted-foreground)', fontSize: 10 }}
                 axisLine={false}
                 tickLine={false}
                 interval="preserveStartEnd"
               />
               <YAxis
-                tick={{ fill: '#64748b', fontSize: 10 }}
+                tick={{ fill: 'var(--color-muted-foreground)', fontSize: 10 }}
                 axisLine={false}
                 tickLine={false}
                 allowDecimals={false}
@@ -133,27 +133,27 @@ export function SifTrendChart() {
               <Legend
                 iconType="circle"
                 iconSize={7}
-                wrapperStyle={{ fontSize: 11, color: '#94a3b8', paddingTop: 8 }}
+                wrapperStyle={{ fontSize: 11, color: 'var(--color-muted-foreground)', paddingTop: 8 }}
               />
               <Area
                 type="monotone"
                 dataKey="total_reports"
                 name="Total Reports"
-                stroke="#6366f1"
+                stroke="var(--color-chart-1)"
                 strokeWidth={2}
                 fill="url(#totalGrad)"
                 dot={false}
-                activeDot={{ r: 4, fill: '#6366f1', strokeWidth: 0 }}
+                activeDot={{ r: 4, fill: 'var(--color-chart-1)', strokeWidth: 0 }}
               />
               <Area
                 type="monotone"
                 dataKey="sif_reports"
                 name="SIF Reports"
-                stroke="#f97316"
+                stroke="var(--color-warning)"
                 strokeWidth={2.5}
                 fill="url(#sifGrad)"
                 dot={false}
-                activeDot={{ r: 4, fill: '#f97316', strokeWidth: 0 }}
+                activeDot={{ r: 4, fill: 'var(--color-warning)', strokeWidth: 0 }}
               />
             </AreaChart>
           </ResponsiveContainer>

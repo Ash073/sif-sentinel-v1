@@ -16,28 +16,27 @@ import {
 import { Flame } from 'lucide-react';
 
 const HAZARD_COLORS = [
-  '#ef4444', '#f97316', '#f59e0b', '#eab308', '#84cc16',
-  '#22c55e', '#14b8a6', '#06b6d4', '#6366f1', '#a855f7',
+  'var(--color-chart-1)', 'var(--color-chart-2)', 'var(--color-chart-3)', 'var(--color-chart-4)', 'var(--color-chart-5)'
 ];
 
 const CustomTooltip = ({ active, payload }: any) => {
   if (!active || !payload?.length) return null;
   const d = payload[0].payload;
   return (
-    <div className="bg-slate-900 border border-white/10 rounded-xl p-3 shadow-2xl text-xs">
-      <p className="font-semibold text-white mb-1.5">{d.name}</p>
+    <div className="bg-card border border-border rounded-xl p-3 shadow-2xl text-xs">
+      <p className="font-semibold text-foreground mb-1.5">{d.name}</p>
       <div className="space-y-1">
         <div className="flex justify-between gap-4">
-          <span className="text-slate-400">Total Reports</span>
-          <span className="text-white font-bold">{d.count}</span>
+          <span className="text-muted-foreground">Total Reports</span>
+          <span className="text-foreground font-bold">{d.count}</span>
         </div>
         <div className="flex justify-between gap-4">
-          <span className="text-slate-400">SIF Reports</span>
-          <span className="text-orange-400 font-bold">{d.sif_count}</span>
+          <span className="text-muted-foreground">SIF Reports</span>
+          <span className="text-warning font-bold">{d.sif_count}</span>
         </div>
         <div className="flex justify-between gap-4">
-          <span className="text-slate-400">SIF Density</span>
-          <span className="text-red-400 font-bold">{(d.sif_density * 100).toFixed(1)}%</span>
+          <span className="text-muted-foreground">SIF Density</span>
+          <span className="text-destructive font-bold">{(d.sif_density * 100).toFixed(1)}%</span>
         </div>
       </div>
     </div>
@@ -58,24 +57,24 @@ export function HazardBarChart() {
     .map((d) => ({ ...d, name: d.name.length > 28 ? d.name.slice(0, 26) + '…' : d.name }));
 
   return (
-    <div className="bg-slate-900/60 border border-white/10 rounded-2xl p-5 flex flex-col gap-4">
+    <div className="bg-card/50 backdrop-blur-sm border border-border rounded-2xl p-5 flex flex-col gap-4">
       <div className="flex items-center gap-2">
-        <div className="w-8 h-8 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center justify-center">
-          <Flame className="w-4 h-4 text-red-400" />
+        <div className="w-8 h-8 rounded-lg bg-destructive/10 border border-destructive/20 flex items-center justify-center">
+          <Flame className="w-4 h-4 text-destructive" />
         </div>
         <div>
-          <h3 className="text-[14px] font-semibold text-white">Top Hazards</h3>
-          <p className="text-[11px] text-slate-500">By report frequency</p>
+          <h3 className="text-[14px] font-semibold text-foreground">Top Hazards</h3>
+          <p className="text-[11px] text-muted-foreground">By report frequency</p>
         </div>
       </div>
 
       {isLoading ? (
         <div className="h-[220px] flex items-center justify-center">
-          <div className="w-8 h-8 border-2 border-red-500/30 border-t-red-400 rounded-full animate-spin" />
+          <div className="w-8 h-8 border-2 border-destructive/30 border-t-destructive rounded-full animate-spin" />
         </div>
       ) : !chartData.length ? (
         <div className="h-[220px] flex items-center justify-center">
-          <span className="text-sm text-slate-500">No hazard data available.</span>
+          <span className="text-sm text-muted-foreground">No hazard data available.</span>
         </div>
       ) : (
         <div className="h-[220px]">
@@ -87,12 +86,12 @@ export function HazardBarChart() {
             >
               <CartesianGrid
                 strokeDasharray="3 3"
-                stroke="rgba(255,255,255,0.04)"
+                stroke="var(--color-border)"
                 horizontal={false}
               />
               <XAxis
                 type="number"
-                tick={{ fill: '#64748b', fontSize: 10 }}
+                tick={{ fill: 'var(--color-muted-foreground)', fontSize: 10 }}
                 axisLine={false}
                 tickLine={false}
                 allowDecimals={false}
@@ -101,11 +100,11 @@ export function HazardBarChart() {
                 type="category"
                 dataKey="name"
                 width={130}
-                tick={{ fill: '#94a3b8', fontSize: 10 }}
+                tick={{ fill: 'var(--color-muted-foreground)', fontSize: 10 }}
                 axisLine={false}
                 tickLine={false}
               />
-              <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.03)' }} />
+              <Tooltip content={<CustomTooltip />} cursor={{ fill: 'var(--color-muted)' }} />
               <Bar dataKey="count" radius={[0, 4, 4, 0]} barSize={16}>
                 {chartData.map((_, idx) => (
                   <Cell

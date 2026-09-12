@@ -68,7 +68,7 @@ export function ExplainabilityChart({ factors }: ExplainabilityChartProps) {
                     type="category"
                     dataKey="name"
                     width={150}
-                    tick={{ fill: "#64748b", fontSize: 12 }}
+                    tick={{ fill: "var(--color-muted-foreground)", fontSize: 12 }}
                     axisLine={false}
                     tickLine={false}
                   />
@@ -77,9 +77,9 @@ export function ExplainabilityChart({ factors }: ExplainabilityChartProps) {
                       if (active && payload && payload.length) {
                         const data = payload[0].payload;
                         return (
-                          <div className="bg-white p-3 border border-slate-200 shadow-md rounded-md">
-                            <p className="font-semibold text-sm mb-1">{data.name}</p>
-                            <p className="text-sm text-slate-600 mb-2">{data.evidence}</p>
+                          <div className="bg-card p-3 border border-border shadow-md rounded-md">
+                            <p className="font-semibold text-foreground text-sm mb-1">{data.name}</p>
+                            <p className="text-sm text-muted-foreground mb-2">{data.evidence}</p>
                             <div className="flex items-center gap-2">
                               <span className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ${data.value > 0 ? "bg-destructive text-destructive-foreground" : "bg-secondary text-secondary-foreground"}`}>
                                 {data.value > 0 ? "+" : ""}{data.value} Risk Score
@@ -93,7 +93,7 @@ export function ExplainabilityChart({ factors }: ExplainabilityChartProps) {
                   />
                   <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={24}>
                     {riskFactors.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.value > 0 ? "#ef4444" : "#10b981"} />
+                      <Cell key={`cell-${index}`} fill={entry.value > 0 ? "var(--color-destructive)" : "var(--color-success)"} />
                     ))}
                   </Bar>
                 </BarChart>
@@ -125,18 +125,18 @@ export function ExplainabilityChart({ factors }: ExplainabilityChartProps) {
                     type="category"
                     dataKey="name"
                     width={150}
-                    tick={{ fill: "#64748b", fontSize: 12 }}
+                    tick={{ fill: "var(--color-muted-foreground)", fontSize: 12 }}
                     axisLine={false}
                     tickLine={false}
                   />
-                  <ReferenceLine x={0} stroke="#cbd5e1" />
+                  <ReferenceLine x={0} stroke="var(--color-border)" />
                   <Tooltip
                     content={({ active, payload }) => {
                       if (active && payload && payload.length) {
                         const data = payload[0].payload;
                         return (
-                          <div className="bg-white p-3 border border-slate-200 shadow-md rounded-md">
-                            <p className="font-semibold text-sm mb-1">{data.name}</p>
+                          <div className="bg-card p-3 border border-border shadow-md rounded-md">
+                            <p className="font-semibold text-foreground text-sm mb-1">{data.name}</p>
                             <div className="flex items-center gap-2">
                               <span className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ${data.value > 0 ? "bg-destructive text-destructive-foreground" : "bg-secondary text-secondary-foreground"}`}>
                                 Weight: {data.value > 0 ? "+" : ""}{data.value}
@@ -150,7 +150,7 @@ export function ExplainabilityChart({ factors }: ExplainabilityChartProps) {
                   />
                   <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={24}>
                     {modelFactors.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.value > 0 ? "#f97316" : "#3b82f6"} />
+                      <Cell key={`cell-${index}`} fill={entry.value > 0 ? "var(--color-warning)" : "var(--color-chart-1)"} />
                     ))}
                   </Bar>
                 </BarChart>
