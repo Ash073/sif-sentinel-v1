@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -14,6 +15,10 @@ import {
 import { AreaChart, Area, ResponsiveContainer } from 'recharts';
 import { authService } from '@/services/auth.service';
 import { useAuth } from '@/components/providers/AuthProvider';
+import { AboutProject } from '@/components/landing/AboutProject';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { Sphere, MeshDistortMaterial } from '@react-three/drei';
+import * as THREE from 'three';
 
 // ─── Dummy Data Generator for Background Chart ───────────────────────────────
 
@@ -69,6 +74,34 @@ const AnimatedBackgroundChart = () => {
   );
 };
 
+// ─── 3D Modal Background ─────────────────────────────────────────────────────
+
+const AuthModal3DBackground = () => {
+  const meshRef = useRef<THREE.Mesh>(null);
+  
+  useFrame((state) => {
+    if (meshRef.current) {
+      meshRef.current.rotation.x = state.clock.getElapsedTime() * 0.1;
+      meshRef.current.rotation.y = state.clock.getElapsedTime() * 0.15;
+    }
+  });
+
+  return (
+    <Sphere ref={meshRef} args={[1, 32, 32]} scale={2.5}>
+      <MeshDistortMaterial
+        color="#10b981"
+        attach="material"
+        distort={0.4}
+        speed={1.5}
+        roughness={0.2}
+        transparent
+        opacity={0.15}
+        wireframe
+      />
+    </Sphere>
+  );
+};
+
 // ─── Quick Auth Roles ────────────────────────────────────────────────────────
 
 const ROLES = [
@@ -110,25 +143,34 @@ const QuickAuthModal = ({ onClose }: { onClose: () => void }) => {
         initial={{ scale: 0.95, opacity: 0, y: 20 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.95, opacity: 0, y: 20 }}
-        className="relative w-full max-w-xl bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl"
+        className="relative w-full max-w-xl bg-slate-950/60 backdrop-blur-2xl border border-emerald-500/20 rounded-3xl p-8 shadow-[0_0_50px_rgba(16,185,129,0.15)] overflow-hidden"
       >
-        <div className="text-center mb-8">
+        {/* 3D Background */}
+        <div className="absolute inset-0 z-0 pointer-events-none">
+           <Canvas camera={{ position: [0, 0, 3] }}>
+             <ambientLight intensity={0.5} />
+             <directionalLight position={[2, 5, 2]} intensity={1} />
+             <AuthModal3DBackground />
+           </Canvas>
+        </div>
+
+        <div className="relative z-10 text-center mb-8">
           <h3 className="text-2xl font-light tracking-tight text-white mb-2">Select Role to Enter</h3>
-          <p className="text-slate-400 text-sm font-light">
+          <p className="text-emerald-400/80 text-sm font-mono tracking-widest uppercase">
             Enterprise Single Sign-On
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-4">
           {ROLES.map((role, idx) => (
             <button
               key={role.id}
               onClick={() => handleRoleLogin(role.id, role.email)}
               disabled={loadingRole !== null}
               className={`
-                group relative flex items-center gap-4 p-4 rounded-2xl text-left transition-all duration-300
-                bg-white/5 border border-white/5 backdrop-blur-md overflow-hidden
-                hover:bg-white/10 hover:border-emerald-500/50 hover:shadow-[0_0_20px_rgba(16,185,129,0.2)]
+                group relative flex items-center gap-4 p-4 rounded-2xl text-left transition-all duration-500
+                bg-black/40 border border-white/5 backdrop-blur-md overflow-hidden
+                hover:bg-emerald-950/40 hover:border-emerald-500/40 hover:shadow-[0_0_30px_rgba(16,185,129,0.2)] hover:-translate-y-1
                 ${idx === ROLES.length - 1 && ROLES.length % 2 !== 0 ? 'md:col-span-2' : ''}
                 ${loadingRole === role.id ? 'opacity-50 scale-95 cursor-not-allowed' : ''}
               `}
@@ -136,12 +178,15 @@ const QuickAuthModal = ({ onClose }: { onClose: () => void }) => {
               {loadingRole === role.id && (
                 <div className="absolute inset-0 bg-emerald-500/20 animate-pulse" />
               )}
-              <div className="w-12 h-12 rounded-xl bg-slate-950/50 border border-white/10 flex items-center justify-center group-hover:border-emerald-500/30 transition-colors z-10">
-                <role.icon className={`w-5 h-5 ${loadingRole === role.id ? 'text-emerald-400 animate-spin' : 'text-slate-300 group-hover:text-emerald-400'}`} />
+              {/* Animated hover gradient */}
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-r from-emerald-500/10 to-transparent pointer-events-none" />
+              
+              <div className="w-12 h-12 rounded-xl bg-black/50 border border-white/10 flex items-center justify-center group-hover:border-emerald-500/50 group-hover:bg-emerald-950/50 transition-all duration-500 z-10 shadow-inner">
+                <role.icon className={`w-5 h-5 transition-colors duration-500 ${loadingRole === role.id ? 'text-emerald-400 animate-spin' : 'text-slate-400 group-hover:text-emerald-400'}`} />
               </div>
               <div className="z-10">
-                <p className="text-white font-medium tracking-wide">{role.name}</p>
-                <p className="text-[11px] text-slate-500 uppercase tracking-widest">{role.id}</p>
+                <p className="text-white font-medium tracking-wide group-hover:text-emerald-50 transition-colors">{role.name}</p>
+                <p className="text-[10px] text-emerald-500/60 uppercase tracking-widest font-mono group-hover:text-emerald-400/80 transition-colors">{role.id}</p>
               </div>
             </button>
           ))}
@@ -157,15 +202,13 @@ export default function LandingPage() {
   const [showAuthModal, setShowAuthModal] = useState(false);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-50 font-sans selection:bg-emerald-500/30 selection:text-emerald-200 relative overflow-hidden flex flex-col">
+    <div className="min-h-screen bg-slate-950 text-slate-50 font-sans selection:bg-emerald-500/30 selection:text-emerald-200 relative overflow-x-hidden flex flex-col">
       <AnimatedBackgroundChart />
       
       {/* Top Bar */}
       <div className="absolute top-0 w-full p-8 flex justify-between items-center z-50 pointer-events-none">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
-            <ShieldAlert className="w-5 h-5 text-emerald-400" />
-          </div>
+          <Image src="/logo.png" alt="SIF Sentinel Logo" width={40} height={40} className="w-10 h-10 object-contain" />
           <span className="text-[13px] font-semibold tracking-widest text-white uppercase">
             SIF Sentinel
           </span>
@@ -176,7 +219,7 @@ export default function LandingPage() {
       </div>
 
       {/* Main Content Centered */}
-      <main className="flex-1 flex items-center justify-center relative z-10 px-6">
+      <main className="min-h-screen flex items-center justify-center relative z-10 px-6 py-20">
         <div className="max-w-4xl mx-auto flex flex-col">
           <motion.h1 
             initial={{ opacity: 0, y: 20 }}
@@ -218,6 +261,15 @@ export default function LandingPage() {
           </motion.div>
         </div>
       </main>
+
+      <AboutProject />
+
+      {/* Footer */}
+      <footer className="w-full bg-slate-950 py-12 border-t border-white/5 text-center px-6 z-10 relative">
+        <p className="text-slate-500 text-xs md:text-sm max-w-4xl mx-auto font-mono uppercase tracking-[0.2em] leading-relaxed">
+          Organizations generate warning signals before major events, but the signals are valuable only if they are identified, classified and acted upon.
+        </p>
+      </footer>
 
       {/* Auth Modal */}
       <AnimatePresence>

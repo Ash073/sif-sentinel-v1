@@ -154,3 +154,11 @@
   0%   { transform: translateX(-150%); }
   100% { transform: translateX(300%); }
 }
+/* Hide scrollbar */
+::-webkit-scrollbar {
+  display: none;
+}
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}

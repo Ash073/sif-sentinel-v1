@@ -12,10 +12,12 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { useState, useRef, useEffect } from 'react';
 
+import { LucideIcon } from 'lucide-react';
+
 export interface NavItem {
   name: string;
   href?: string;
-  icon: React.ElementType;
+  icon: LucideIcon;
   roles: string[];
   children?: { name: string; href: string }[];
 }

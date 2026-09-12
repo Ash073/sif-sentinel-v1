@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import { Bell, Search, ShieldAlert, HelpCircle, Sun, Moon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/components/providers/AuthProvider';
-import { useRef } from 'react';
 
 export function Header() {
   const { user, logout } = useAuth();
@@ -47,12 +48,9 @@ export function Header() {
   return (
     <header className="h-[64px] flex items-center justify-between px-6 bg-card/60 backdrop-blur-2xl border border-border shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] rounded-full w-full">
       
-      {/* Left: Logo */}
       <div className="flex items-center w-[200px]">
         <Link href="/dashboard" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-[10px] bg-primary flex items-center justify-center shrink-0">
-            <ShieldAlert className="w-4 h-4 text-primary-foreground" />
-          </div>
+          <Image src="/logo.png" alt="SIF Sentinel Logo" width={32} height={32} className="w-8 h-8 object-contain shrink-0" />
           <span className="font-bold text-[16px] tracking-tight text-foreground hidden sm:inline-block">SIF SENTINEL</span>
         </Link>
       </div>

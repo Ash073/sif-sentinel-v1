@@ -6,7 +6,7 @@ import { ErrorState, Skeleton } from '@/components/ui/states';
 import { toast } from '@/components/ui/toast';
 import { AxiosError } from 'axios';
 import type { ApiErrorBody, InterventionRead, InterventionReviewStatus } from '@/types/api';
-import { ShieldCheck, CheckCircle2, XCircle, Clock, AlertTriangle, ArrowRight, PlayCircle } from 'lucide-react';
+import { ShieldCheck, CheckCircle2, XCircle, Clock, AlertTriangle, ArrowRight, PlayCircle, LucideIcon } from 'lucide-react';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -73,7 +73,7 @@ export default function InterventionsKanbanPage() {
     colorClass: string; 
     borderGlow: string;
     emptyText: string;
-    icon: React.ElementType;
+    icon: LucideIcon;
   }) => (
     <div className={`flex flex-col h-full bg-slate-900/50 rounded-2xl border border-white/5 overflow-hidden shadow-lg ${borderGlow}`}>
       <div className={`p-4 border-b border-white/5 flex items-center justify-between bg-slate-950/20`}>
